@@ -1,0 +1,28 @@
+"use strict";
+
+const memberExpressionSplitter = /\./g;
+
+// Helper to transform a JSX identifier into a normal reference.
+module.exports = function toReference(t, node, identifier) {
+	identifier = identifier == null ? false : identifier;
+	if (typeof node === "string") {
+		if (memberExpressionSplitter.test(node)) {
+			return node.
+				split(memberExpressionSplitter).
+				map((s) => t.identifier(s)).
+				reduce((obj, prop) => t.memberExpression(obj, prop));
+		}
+
+		return t.identifier(node);
+	}
+	if (t.isJSXIdentifier(node)) {
+		return identifier ? t.identifier(node.name) : t.literal(node.name);
+	}
+	if (t.isJSXMemberExpression(node)) {
+		return t.memberExpression(
+			toReference(t, node.object, true),
+			toReference(t, node.property, true)
+		);
+	}
+	return node;
+}
