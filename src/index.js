@@ -1,9 +1,9 @@
 "use strict";
 
-var namespace = "inferno-dom-helpers";
-var toReference = require('./to-reference');
-var flattenExpressions = require('./flatten-expressions');
+var toReference = require('./helpers/to-reference');
+var flattenExpressions = require('./helpers/flatten-expressions');
 var createTemplateKey = require('./createTemplateKey');
+var addTemplatesToModule = require('./addTemplatesToModule');
 
 function nullObject() {
   return Object.create(null);
@@ -14,7 +14,7 @@ function setupInjector(program, parent, scope, file) {
 }
 
 function processElement(element, root, parentTemplateElem) {
-	if(element.type === "JSXElement") {
+	if (element.type === "JSXElement") {
 		if (element.openingElement) {
 			var tagName = element.openingElement.name.name;
 			var templateElem = {
@@ -27,71 +27,31 @@ function processElement(element, root, parentTemplateElem) {
 			}
 			if (!element.selfClosing) {
 				templateElem.children = [];
-				prcoessChildren(element.children, root, templateElem);
+				processChildren(element.children, root, templateElem);
 			}
-			if(parentTemplateElem) {
+			if (parentTemplateElem) {
 				parentTemplateElem.children.push(templateElem);
 			}
 		}
 	} else if (element.type === "JSXExpressionContainer") {
+		var index = root.templateValues.length;
+
 		root.templateString += "$$|";
+		root.expressionMap[element.expression] = index;
 		root.templateValues.push(element.expression);
+		parentTemplateElem.children.push({
+			index: index
+		});
 	}
 }
 
-function prcoessChildren(children, root, parentTemplateElem) {
+function processChildren(children, root, parentTemplateElem) {
 	if(children) {
 		for(var i = 0; i < children.length; i++) {
 			var child = children[i];
 			processElement(child, root, parentTemplateElem);
 		}
 	}
-}
-
-function constructTemplate(t, templateElem, parentElem, templateFunc, level, index, parentElemName) {
-	var elemName;
-	if(parentElem === null) {
-		elemName = "root";
-		//create the root: e.g. var root = Inferno.template.createElement("foo");
-		templateFunc.push(t.variableDeclaration("var", [
-				t.variableDeclarator(
-					t.identifier(elemName),
-					t.callExpression(t.identifier("Inferno.template.createElement"), [t.literal(templateElem.tag)])
-				)
-		]));
-		//assign the root to the fragment.dom
-		templateFunc.push(t.AssignmentExpression("=", t.identifier("fragment.dom"), t.identifier("root")));
-		level = 0;
-	} else {
-		elemName = "child_" + level + "_" + index;
-		templateFunc.push(t.variableDeclaration("var", [
-			t.variableDeclarator(
-				t.identifier(elemName),
-				t.callExpression(t.identifier("Inferno.template.createElement"), [t.literal(templateElem.tag)])
-			)
-		]));
-		templateFunc.push(
-			t.toStatement(t.callExpression(t.identifier(parentElemName + ".appendChild"), [t.identifier(elemName)]))
-		);
-		level++;
-	}
-
-	if(templateElem.children) {
-		for(var i = 0; i < templateElem.children.length; i++) {
-			constructTemplate(t, templateElem.children[i], templateElem, templateFunc, level, i, elemName);
-		}
-	}
-}
-
-function addTemplatesToModule(t, node, templateKey, root) {
-	var templateFunc = [];
-	constructTemplate(t, root.templateElem, null, templateFunc);
-	node.body.push(
-		t.functionExpression(t.identifier(templateKey), [toReference(t, "fragment")], t.blockStatement(templateFunc))
-	);
-	node.body.push(
-		t.toStatement(t.AssignmentExpression("=", t.identifier(templateKey + ".key"), t.literal(templateKey)))
-	);
 }
 
 module.exports = function(options) {
@@ -110,7 +70,7 @@ module.exports = function(options) {
 
 		JSXElement: {
       		enter(node, parent, scope, opts) {
-				if(node.root !== undefined) {
+				if (node.root !== undefined) {
 					return;
 				}
 
@@ -118,7 +78,8 @@ module.exports = function(options) {
 					templateValues: [],
 					templateElem: null,
 					templateString: "",
-					templateKey: null
+					templateKey: null,
+					expressionMap: {}
 				};
 
 				processElement(node, root, null);
@@ -128,13 +89,13 @@ module.exports = function(options) {
 				var values = t.literal(null);
 				var expressions = flattenExpressions(t, root.templateValues);
 
-				if(root.templateValues.length === 1) {
+				if (root.templateValues.length === 1) {
 					values = t.toExpression(expressions[0]);
 				} else if(root.templateValues.length > 1) {
 					values = t.arrayExpression(expressions);
 				}
 
-				if(!opts.roots) {
+				if (!opts.roots) {
 					opts.roots = {};
 				}
 				opts.roots[root.templateKey] = root;
@@ -144,3 +105,4 @@ module.exports = function(options) {
       	}
 	}});
 };
+
