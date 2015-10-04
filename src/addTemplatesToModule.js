@@ -67,7 +67,11 @@ function constructTemplate(t, templateElem, parentElem, templateFunc, root, leve
 			for (var i = 0; i < templateElem.children.length; i++) {
 				constructTemplate(t, templateElem.children[i], templateElem, templateFunc, level, i, elemName);
 			}
-		} else if ((child = templateElem.children[0]).index !== undefined) {
+		} else if (typeof (child = templateElem.children[0]) !== "object") {
+			templateFunc.push(
+				t.ExpressionStatement(t.AssignmentExpression("=", t.identifier(elemName + ".textContent"), t.literal(templateElem.children[0])))
+			);
+		} else if (child.index !== undefined) {
 			constructTemplateValue(t, child, elemName, root, templateFunc, true);
 		} else if (typeof child !== "object") {
 			debugger;

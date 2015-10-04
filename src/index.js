@@ -43,10 +43,9 @@ function processElement(element, root, parentTemplateElem) {
 			index: index
 		});
 	} else if (element.type === "Literal") {
-		debugger;
-		var text = element.value;
-		root.templateValues.push(text);
-		root.templateString += text + "|";
+		parentTemplateElem.children.push(element.value);
+		root.templateValues.push(element);
+		root.templateString += element.value + "|";
 	}
 }
 
