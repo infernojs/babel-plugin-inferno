@@ -8,7 +8,7 @@ var code = `
 
     var someObj = {
         render() {
-            return <div><div><span>{ test || foo }</span></div></div>
+            return <div><div><span>{ test || foo }</span></div><h1>Hello world!</h1></div>
         }
     }
 `;

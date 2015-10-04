@@ -42,6 +42,11 @@ function processElement(element, root, parentTemplateElem) {
 		parentTemplateElem.children.push({
 			index: index
 		});
+	} else if (element.type === "Literal") {
+		debugger;
+		var text = element.value;
+		root.templateValues.push(text);
+		root.templateString += text + "|";
 	}
 }
 

@@ -69,6 +69,8 @@ function constructTemplate(t, templateElem, parentElem, templateFunc, root, leve
 			}
 		} else if ((child = templateElem.children[0]).index !== undefined) {
 			constructTemplateValue(t, child, elemName, root, templateFunc, true);
+		} else if (typeof child !== "object") {
+			debugger;
 		} else {
 			constructTemplate(t, child, templateElem, templateFunc, root, level, 0, elemName);
 		}
