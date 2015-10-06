@@ -1,9 +1,11 @@
 var toReference = require('./helpers/to-reference');
 
 var createElementExpression = "Inferno.template.createElement";
+var createTextNodeExpression = "Inferno.template.createTextNode";
+var createEmptyTextNodeExpression = "Inferno.template.createEmptyTextNode()";
 var appendChildExpression = ".appendChild";
 
-function constructTemplateValue(t, templateElem, elemName, root, templateFunc, singleChild) {
+function constructTemplateValue(t, templateElem, elemName, root, templateFunc, singleChild, level, index) {
 	var valueName = "fragment.templateValues[" + templateElem.index + "]";
 	var elementName = "fragment.templateElements[" + templateElem.index + "]";
 	var typeName = "fragment.templateTypes[" + templateElem.index + "]";
@@ -12,18 +14,38 @@ function constructTemplateValue(t, templateElem, elemName, root, templateFunc, s
 		templateFunc.push(
 			t.IfStatement(
 				t.binaryExpression("!==", t.identifier("typeof " + valueName), t.literal("object")),
-				t.BlockStatement(
-					[
-						t.ExpressionStatement(t.AssignmentExpression("=", t.identifier(elemName + ".textContent"), t.identifier(valueName))),
-						t.ExpressionStatement(t.AssignmentExpression("=", t.identifier(typeName), t.identifier("Inferno.FragmentValueTypes.TEXT")))
-					]
-				),
+				t.BlockStatement([
+					t.ExpressionStatement(t.AssignmentExpression("=", t.identifier(elemName + ".textContent"), t.identifier(valueName))),
+					t.ExpressionStatement(t.AssignmentExpression("=", t.identifier(typeName), t.identifier("Inferno.FragmentValueTypes.TEXT")))
+				]),
 				t.BlockStatement([
 					t.ExpressionStatement(
 						t.AssignmentExpression("=", t.identifier(typeName), t.identifier(
 							"(" + valueName + ".constructor === Array ? Inferno.FragmentValueTypes.LIST : Inferno.FragmentValueTypes.FRAGMENT)")
 						)
 					)
+				])
+			)
+		);
+	} else {
+		var elemName = "child_" + level + "_" + index;
+		templateFunc.push(
+			t.variableDeclaration("var", [
+				t.identifier(elemName)
+			])
+		);
+		templateFunc.push(
+			t.IfStatement(
+				t.binaryExpression("!==", t.identifier("typeof " + valueName), t.literal("object")),
+				t.BlockStatement([
+					t.ExpressionStatement(t.AssignmentExpression("=", t.identifier(elemName), t.identifier(createTextNodeExpression + `(${ valueName })`))),
+					t.ExpressionStatement(t.AssignmentExpression("=", t.identifier(typeName), t.identifier("Inferno.FragmentValueTypes.TEXT_DIRECT")))
+				]),
+				t.BlockStatement([
+					t.ExpressionStatement(t.AssignmentExpression("=", t.identifier(elemName), t.identifier(createEmptyTextNodeExpression))),
+					t.ExpressionStatement(t.AssignmentExpression("=", t.identifier(typeName), t.identifier(
+							"(" + valueName + ".constructor === Array ? Inferno.FragmentValueTypes.LIST_REPLACE : Inferno.FragmentValueTypes.FRAGMENT_REPLACE)")
+					))
 				])
 			)
 		);
@@ -65,7 +87,16 @@ function constructTemplate(t, templateElem, parentElem, templateFunc, root, leve
 		var child;
 		if (templateElem.children.length > 1) {
 			for (var i = 0; i < templateElem.children.length; i++) {
-				constructTemplate(t, templateElem.children[i], templateElem, templateFunc, level, i, elemName);
+				var child = templateElem.children[i];
+				if(typeof child === "string") {
+					templateFunc.push(
+						t.ExpressionStatement(t.callExpression(t.identifier(elemName + appendChildExpression), [t.identifier(createTextNodeExpression + `("${ child }")`)]))
+					);
+				} else if (child.index !== undefined) {
+					constructTemplateValue(t, child, elemName, root, templateFunc, false, level, i);
+				} else {
+					constructTemplate(t, templateElem.children[i], templateElem, templateFunc, level, i, elemName);
+				}
 			}
 		} else if (typeof (child = templateElem.children[0]) !== "object") {
 			templateFunc.push(
