@@ -19,13 +19,28 @@ var plugin = require("./src/index");
 //}).code
 //
 //console.log(output);
+//
+//var code = `
+//    var foo = require("test");
+//
+//    var someObj = {
+//        render() {
+//            <div><span>{ test || foo }</span>{ bar } { foo }</div>
+//        }
+//    }
+//`;
+//
+//var output = babel.transform(code, {
+//    blacklist: ['strict', 'react'],
+//    plugins: [plugin]
+//}).code
 
 var code = `
     var foo = require("test");
 
     var someObj = {
         render() {
-            <div><span>{ test || foo }</span>{ bar } { foo }</div>
+            <div><Foo></Foo></div>
         }
     }
 `;

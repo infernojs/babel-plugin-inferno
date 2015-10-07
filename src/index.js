@@ -13,21 +13,41 @@ function setupInjector(program, parent, scope, file) {
 	file.setDynamic(namespace, nullObject);
 }
 
-function processElement(element, root, parentTemplateElem) {
+function isComponent(name) {
+	return name.charAt(0).toUpperCase() === name.charAt(0);
+}
+
+function processElement(t, element, root, parentTemplateElem) {
 	if (element.type === "JSXElement") {
 		if (element.openingElement) {
 			var tagName = element.openingElement.name.name;
-			var templateElem = {
-				tag: tagName,
-				children: null
+			var templateElem;
+
+			if(!isComponent(tagName)) {
+				templateElem = {
+					tag: tagName,
+					children: null
+				}
+
+			} else {
+				var index = root.templateValues.length;
+				root.expressionMap[tagName] = index;
+				root.templateValues.push(t.identifier(tagName));
+				templateElem = {
+					component: {
+						index: index
+					},
+					children: null
+				}
 			}
+
 			root.templateString += tagName + "|";
 			if (!root.templateElem) {
 				root.templateElem = templateElem;
 			}
 			if (!element.selfClosing) {
 				templateElem.children = [];
-				processChildren(element.children, root, templateElem);
+				processChildren(t, element.children, root, templateElem);
 			}
 			if (parentTemplateElem) {
 				parentTemplateElem.children.push(templateElem);
@@ -49,11 +69,11 @@ function processElement(element, root, parentTemplateElem) {
 	}
 }
 
-function processChildren(children, root, parentTemplateElem) {
+function processChildren(t, children, root, parentTemplateElem) {
 	if(children) {
 		for(var i = 0; i < children.length; i++) {
 			var child = children[i];
-			processElement(child, root, parentTemplateElem);
+			processElement(t, child, root, parentTemplateElem);
 		}
 	}
 }
@@ -86,7 +106,7 @@ module.exports = function(options) {
 					expressionMap: {}
 				};
 
-				processElement(node, root, null);
+				processElement(t, node, root, null);
 				//create the templateKey
 				root.templateKey =  "tpl" + createTemplateKey(root.templateString);
 
