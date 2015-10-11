@@ -6,9 +6,18 @@ var createEmptyTextNodeExpression = "Inferno.template.createEmptyTextNode()";
 var appendChildExpression = ".appendChild";
 
 function constructTemplateValue(t, templateElem, elemName, root, templateFunc, singleChild, level, index) {
-	var valueName = "fragment.templateValues[" + templateElem.index + "]";
-	var elementName = "fragment.templateElements[" + templateElem.index + "]";
-	var typeName = "fragment.templateTypes[" + templateElem.index + "]";
+	var valueName;
+	var elementName;
+	var typeName;
+	if(root.templateValues.length > 1) {
+		valueName = "fragment.templateValues[" + templateElem.index + "]";
+		elementName = "fragment.templateElements[" + templateElem.index + "]";
+		typeName = "fragment.templateTypes[" + templateElem.index + "]";
+	} else {
+		valueName = "fragment.templateValue";
+		elementName = "fragment.templateElement";
+		typeName = "fragment.templateType";
+	}
 
 	if(singleChild) {
 		templateFunc.push(
@@ -55,28 +64,63 @@ function constructTemplateValue(t, templateElem, elemName, root, templateFunc, s
 	);
 }
 
+function constructTemplateComponentValue(t, templateElem, elemName, templateFunc, root) {
+	templateFunc.push(t.variableDeclaration("var", [
+		t.variableDeclarator(
+			t.identifier(elemName),
+			t.identifier(createEmptyTextNodeExpression)
+		)
+	]));
+	var typeName;
+	var elementName;
+	if(root.templateValues.length > 1) {
+		typeName = "fragment.templateTypes[" + templateElem.component.index + "]";
+		elementName = "fragment.templateElements[" + templateElem.component.index + "]";
+	} else {
+		typeName = "fragment.templateType";
+		elementName = "fragment.templateElement";
+	}
+
+	templateFunc.push(
+		t.ExpressionStatement(t.AssignmentExpression("=", t.identifier(typeName),
+			t.identifier("Inferno.FragmentValueTypes.COMPONENT")
+		))
+	);
+	templateFunc.push(
+		t.ExpressionStatement(t.AssignmentExpression("=", t.identifier(elementName), t.identifier(elemName)))
+	);
+}
+
 function constructTemplate(t, templateElem, parentElem, templateFunc, root, level, index, parentElemName) {
 	var elemName;
 	if (parentElem === null) {
 		elemName = "root";
 		//create the root: e.g. var root = Inferno.template.createElement("foo");
-		templateFunc.push(t.variableDeclaration("var", [
-			t.variableDeclarator(
-				t.identifier(elemName),
-				t.callExpression(t.identifier(createElementExpression), [t.literal(templateElem.tag)])
-			)
-		]));
+		if(templateElem.component) {
+			debugger;
+		} else {
+			templateFunc.push(t.variableDeclaration("var", [
+				t.variableDeclarator(
+					t.identifier(elemName),
+					t.callExpression(t.identifier(createElementExpression), [t.literal(templateElem.tag)])
+				)
+			]));
+		}
 		//assign the root to the fragment.dom
 		templateFunc.push(t.AssignmentExpression("=", t.identifier("fragment.dom"), t.identifier("root")));
 		level = 0;
 	} else {
 		elemName = "child_" + level + "_" + index;
-		templateFunc.push(t.variableDeclaration("var", [
-			t.variableDeclarator(
-				t.identifier(elemName),
-				t.callExpression(t.identifier(createElementExpression), [t.literal(templateElem.tag)])
-			)
-		]));
+		if(templateElem.component) {
+			constructTemplateComponentValue(t, templateElem, elemName, templateFunc, root);
+		} else {
+			templateFunc.push(t.variableDeclaration("var", [
+				t.variableDeclarator(
+					t.identifier(elemName),
+					t.callExpression(t.identifier(createElementExpression), [t.literal(templateElem.tag)])
+				)
+			]));
+		}
 		templateFunc.push(
 			t.ExpressionStatement(t.callExpression(t.identifier(parentElemName + appendChildExpression), [t.identifier(elemName)]))
 		);
@@ -99,9 +143,11 @@ function constructTemplate(t, templateElem, parentElem, templateFunc, root, leve
 				}
 			}
 		} else if (typeof (child = templateElem.children[0]) !== "object") {
-			templateFunc.push(
-				t.ExpressionStatement(t.AssignmentExpression("=", t.identifier(elemName + ".textContent"), t.literal(templateElem.children[0])))
-			);
+			if(child !== undefined) {
+				templateFunc.push(
+					t.ExpressionStatement(t.AssignmentExpression("=", t.identifier(elemName + ".textContent"), t.literal(templateElem.children[0])))
+				);
+			}
 		} else if (child.index !== undefined) {
 			constructTemplateValue(t, child, elemName, root, templateFunc, true);
 		} else if (typeof child !== "object") {
