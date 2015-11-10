@@ -17,16 +17,44 @@ function isComponent(name) {
 	return name.charAt(0).toUpperCase() === name.charAt(0);
 }
 
+function processAttributes(t, attributes, root, templateElem) {
+	for(var i = 0; i < attributes.length; i++) {
+		var attribute = attributes[i];
+
+		if(attribute.type === 'JSXAttribute') {
+			var attrName = attribute.name.name;
+			var expression = attribute.value.expression;
+
+			if(expression !== undefined) {
+				if (expression.type === 'Identifier' || expression.type === 'ObjectExpression') {
+					var index = root.templateValues.length;
+
+					root.templateString += "$$|";
+					root.expressionMap[expression] = index;
+					root.templateValues.push(expression);
+					templateElem.attrs[attrName] = {
+						index: index
+					};
+				}
+			} else if (attribute.value.type === 'Literal') {
+				templateElem.attrs[attrName] = attribute.value.value;
+				root.templateString += attribute.value.value + "|-|";
+			}
+		}
+	}
+}
+
 function processElement(t, element, root, parentTemplateElem) {
 	if (element.type === "JSXElement") {
 		if (element.openingElement) {
 			var tagName = element.openingElement.name.name;
 			var templateElem;
 
-			if(!isComponent(tagName)) {
+			if (!isComponent(tagName)) {
 				templateElem = {
 					tag: tagName,
-					children: null
+					children: null,
+					attrs: {}
 				}
 
 			} else {
@@ -37,8 +65,13 @@ function processElement(t, element, root, parentTemplateElem) {
 					component: {
 						index: index
 					},
-					children: null
+					children: null,
+					attrs: {}
 				}
+			}
+
+			if(element.openingElement.attributes && element.openingElement.attributes.length > 0) {
+				processAttributes(t, element.openingElement.attributes, root, templateElem);
 			}
 
 			root.templateString += tagName + "|";

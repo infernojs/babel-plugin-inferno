@@ -3,6 +3,7 @@ var toReference = require('./helpers/to-reference');
 var createElementExpression = "Inferno.template.createElement";
 var createTextNodeExpression = "Inferno.template.createTextNode";
 var createEmptyTextNodeExpression = "Inferno.template.createEmptyTextNode()";
+var addAttributesExpression = "Inferno.template.addAttributes";
 var appendChildExpression = ".appendChild";
 
 function constructTemplateValue(t, templateElem, elemName, root, templateFunc, singleChild, level, index) {
@@ -155,6 +156,25 @@ function constructTemplate(t, templateElem, parentElem, templateFunc, root, leve
 		} else {
 			constructTemplate(t, child, templateElem, templateFunc, root, level, 0, elemName);
 		}
+	}
+
+	if (templateElem.attrs) {
+		//valueNam/e
+		//t.identifier(templateElem.attrs)
+		var attrs = t.ObjectExpression(Object.keys(templateElem.attrs).map(function(attrName) {
+			var attrVal = templateElem.attrs[attrName];
+			var val;
+			if(attrVal.index !== undefined) {
+				val =  "fragment.templateValues[" + attrVal.index + "]";
+				return t.property("attrs", t.identifier(attrName), t.identifier(val));
+			}
+			return t.property("attrs", t.identifier(attrName), t.literal(attrVal));
+		}));
+
+		templateFunc.push(
+			t.ExpressionStatement(t.callExpression(t.identifier(addAttributesExpression), [t.identifier(elemName), attrs, t.identifier("fragment")]))
+		);
+		//addAttributes
 	}
 }
 

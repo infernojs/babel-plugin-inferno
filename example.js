@@ -40,7 +40,7 @@ var code = `
 
     var someObj = {
         render() {
-            <div><Foo></Foo></div>
+            <div className={ foo1 } test="123"><Foo data={ {"bar": foo2} }></Foo></div>
         }
     }
 `;
@@ -48,6 +48,6 @@ var code = `
 var output = babel.transform(code, {
     blacklist: ['strict', 'react'],
     plugins: [plugin]
-}).code
+}).code;
 
 console.log(output);
