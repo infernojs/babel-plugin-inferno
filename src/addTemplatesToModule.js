@@ -10,7 +10,8 @@ function constructTemplateValue(t, templateElem, elemName, root, templateFunc, s
 	var valueName;
 	var elementName;
 	var typeName;
-	if(root.templateValues.length > 1) {
+
+	if(root.templateValues && root.templateValues.length > 1) {
 		valueName = "fragment.templateValues[" + templateElem.index + "]";
 		elementName = "fragment.templateElements[" + templateElem.index + "]";
 		typeName = "fragment.templateTypes[" + templateElem.index + "]";

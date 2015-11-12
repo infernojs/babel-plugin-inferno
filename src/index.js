@@ -26,7 +26,10 @@ function processAttributes(t, attributes, root, templateElem) {
 			var expression = attribute.value.expression;
 
 			if(expression !== undefined) {
-				if (expression.type === 'Identifier' || expression.type === 'ObjectExpression') {
+				if (expression.type === 'Literal') {
+					templateElem.attrs[attrName] = expression.value;
+					root.templateString += expression.value + "|-|";
+				} else {
 					var index = root.templateValues.length;
 
 					root.templateString += "$$|";
