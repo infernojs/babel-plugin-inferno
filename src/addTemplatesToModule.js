@@ -4,6 +4,7 @@ var createElementExpression = "Inferno.template.createElement";
 var createTextNodeExpression = "Inferno.template.createTextNode";
 var createEmptyTextNodeExpression = "Inferno.template.createEmptyTextNode()";
 var addAttributesExpression = "Inferno.template.addAttributes";
+var addPropsExpression = "Inferno.template.addProps";
 var appendChildExpression = ".appendChild";
 
 function constructTemplateValue(t, templateElem, elemName, root, templateFunc, singleChild, level, index) {
@@ -124,7 +125,9 @@ function constructTemplate(t, templateElem, parentElem, templateFunc, root, leve
 			]));
 		}
 		templateFunc.push(
-			t.ExpressionStatement(t.callExpression(t.identifier(parentElemName + appendChildExpression), [t.identifier(elemName)]))
+			t.ExpressionStatement(
+				t.callExpression(t.identifier(parentElemName + appendChildExpression), [t.identifier(elemName)])
+			)
 		);
 		level++;
 	}
@@ -136,7 +139,12 @@ function constructTemplate(t, templateElem, parentElem, templateFunc, root, leve
 				var child = templateElem.children[i];
 				if(typeof child === "string") {
 					templateFunc.push(
-						t.ExpressionStatement(t.callExpression(t.identifier(elemName + appendChildExpression), [t.identifier(createTextNodeExpression + `("${ child }")`)]))
+						t.ExpressionStatement(
+							t.callExpression(
+								t.identifier(elemName + appendChildExpression),
+								[t.identifier(createTextNodeExpression + `("${ child }")`)]
+							)
+						)
 					);
 				} else if (child.index !== undefined) {
 					constructTemplateValue(t, child, elemName, root, templateFunc, false, level, i);
@@ -147,7 +155,9 @@ function constructTemplate(t, templateElem, parentElem, templateFunc, root, leve
 		} else if (typeof (child = templateElem.children[0]) !== "object") {
 			if(child !== undefined) {
 				templateFunc.push(
-					t.ExpressionStatement(t.AssignmentExpression("=", t.identifier(elemName + ".textContent"), t.literal(templateElem.children[0])))
+					t.ExpressionStatement(
+						t.AssignmentExpression("=", t.identifier(elemName + ".textContent"), t.literal(templateElem.children[0]))
+					)
 				);
 			}
 		} else if (child.index !== undefined) {
@@ -173,7 +183,12 @@ function constructTemplate(t, templateElem, parentElem, templateFunc, root, leve
 		}));
 
 		templateFunc.push(
-			t.ExpressionStatement(t.callExpression(t.identifier(addAttributesExpression), [t.identifier(elemName), attrs, t.identifier("fragment")]))
+			t.ExpressionStatement(
+				t.callExpression(
+					t.identifier(templateElem.component ? addPropsExpression : addAttributesExpression),
+					[t.identifier(elemName), attrs, t.identifier("fragment")]
+				)
+			)
 		);
 		//addAttributes
 	}
