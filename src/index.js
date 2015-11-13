@@ -115,12 +115,14 @@ function processChildren(t, children, root, parentTemplateElem) {
 }
 
 module.exports = function(options) {
-	var Plugin = options.Plugin;
 	var t = options.types;
 
-	return new Plugin("inferno", { visitor : {
+	return { visitor : {
 		Program: {
-			exit(node, parent, scope, opts) {
+			exit(path, scope) {
+				var opts = scope.opts;
+				var node = path.node;
+
 				for(var templateKey in opts.roots) {
 					var root = opts.roots[templateKey];
 					addTemplatesToModule(t, node, templateKey, root);
@@ -129,7 +131,10 @@ module.exports = function(options) {
 		},
 
 		JSXElement: {
-      		enter(node, parent, scope, opts) {
+      		enter(path, scope) {
+				var opts = scope.opts;
+				var node = path.node;
+
 				if (node.root !== undefined) {
 					return;
 				}
@@ -146,7 +151,7 @@ module.exports = function(options) {
 				//create the templateKey
 				root.templateKey =  "tpl" + createTemplateKey(root.templateString);
 
-				var values = t.literal(null);
+				var values = t.NullLiteral;
 				var expressions = flattenExpressions(t, root.templateValues);
 
 				if (root.templateValues.length === 1) {
@@ -160,9 +165,9 @@ module.exports = function(options) {
 				}
 				opts.roots[root.templateKey] = root;
 
-				return t.callExpression(t.identifier("Inferno.createFragment"), [values, t.identifier(root.templateKey)]);
+				path.replaceWith(t.ExpressionStatement(t.callExpression(t.identifier("Inferno.createFragment"), [values, t.identifier(root.templateKey)])));
       		}
       	}
-	}});
+	}}
 };
 

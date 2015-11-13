@@ -1,6 +1,6 @@
 "use strict";
 
-var babel  = require("babel");
+var babel  = require("babel-core");
 var plugin = require("./src/index");
 
 var code = `
@@ -16,8 +16,8 @@ var code = `
 `;
 
 var output = babel.transform(code, {
-    blacklist: ['strict', 'react'],
-    plugins: [plugin]
+    plugins: [plugin, 'syntax-jsx'],
+    presets: ['es2015']
 }).code;
 
 console.log(output);
@@ -31,8 +31,8 @@ var code = `
 `;
 
 var output = babel.transform(code, {
-    blacklist: ['strict', 'react'],
-    plugins: [plugin]
+    plugins: [plugin, 'syntax-jsx'],
+    presets: ['es2015']
 }).code;
 
 var code = `
@@ -61,8 +61,8 @@ var code = `
 `;
 
 var output = babel.transform(code, {
-    blacklist: ['strict', 'react'],
-    plugins: [plugin]
+    plugins: [plugin, 'syntax-jsx'],
+    presets: ['es2015']
 }).code;
 
 console.log(output);

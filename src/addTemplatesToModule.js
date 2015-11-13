@@ -25,7 +25,7 @@ function constructTemplateValue(t, templateElem, elemName, root, templateFunc, s
 	if(singleChild) {
 		templateFunc.push(
 			t.IfStatement(
-				t.binaryExpression("!==", t.identifier("typeof " + valueName), t.literal("object")),
+				t.binaryExpression("!==", t.identifier("typeof " + valueName), t.StringLiteral("object")),
 				t.BlockStatement([
 					t.ExpressionStatement(t.AssignmentExpression("=", t.identifier(elemName + ".textContent"), t.identifier(valueName))),
 					t.ExpressionStatement(t.AssignmentExpression("=", t.identifier(typeName), t.identifier("Inferno.FragmentValueTypes.TEXT")))
@@ -43,12 +43,14 @@ function constructTemplateValue(t, templateElem, elemName, root, templateFunc, s
 		var elemName = "child_" + level + "_" + index;
 		templateFunc.push(
 			t.variableDeclaration("var", [
-				t.identifier(elemName)
+				t.variableDeclarator(
+					t.identifier(elemName)
+				)
 			])
 		);
 		templateFunc.push(
 			t.IfStatement(
-				t.binaryExpression("!==", t.identifier("typeof " + valueName), t.literal("object")),
+				t.binaryExpression("!==", t.identifier("typeof " + valueName), t.StringLiteral("object")),
 				t.BlockStatement([
 					t.ExpressionStatement(t.AssignmentExpression("=", t.identifier(elemName), t.identifier(createTextNodeExpression + `(${ valueName })`))),
 					t.ExpressionStatement(t.AssignmentExpression("=", t.identifier(typeName), t.identifier("Inferno.FragmentValueTypes.TEXT_DIRECT")))
@@ -100,17 +102,17 @@ function constructTemplate(t, templateElem, parentElem, templateFunc, root, leve
 		elemName = "root";
 		//create the root: e.g. var root = Inferno.template.createElement("foo");
 		if(templateElem.component) {
-			debugger;
+			//debugger;
 		} else {
 			templateFunc.push(t.variableDeclaration("var", [
 				t.variableDeclarator(
 					t.identifier(elemName),
-					t.callExpression(t.identifier(createElementExpression), [t.literal(templateElem.tag)])
+					t.callExpression(t.identifier(createElementExpression), [t.StringLiteral(templateElem.tag)])
 				)
 			]));
 		}
 		//assign the root to the fragment.dom
-		templateFunc.push(t.AssignmentExpression("=", t.identifier("fragment.dom"), t.identifier("root")));
+		templateFunc.push(t.ExpressionStatement(t.AssignmentExpression("=", t.identifier("fragment.dom"), t.identifier("root"))));
 		level = 0;
 	} else {
 		elemName = "child_" + level + "_" + index;
@@ -120,7 +122,7 @@ function constructTemplate(t, templateElem, parentElem, templateFunc, root, leve
 			templateFunc.push(t.variableDeclaration("var", [
 				t.variableDeclarator(
 					t.identifier(elemName),
-					t.callExpression(t.identifier(createElementExpression), [t.literal(templateElem.tag)])
+					t.callExpression(t.identifier(createElementExpression), [t.StringLiteral(templateElem.tag)])
 				)
 			]));
 		}
@@ -156,7 +158,7 @@ function constructTemplate(t, templateElem, parentElem, templateFunc, root, leve
 			if(child !== undefined) {
 				templateFunc.push(
 					t.ExpressionStatement(
-						t.AssignmentExpression("=", t.identifier(elemName + ".textContent"), t.literal(templateElem.children[0]))
+						t.AssignmentExpression("=", t.identifier(elemName + ".textContent"), t.StringLiteral(templateElem.children[0]))
 					)
 				);
 			}
@@ -177,9 +179,9 @@ function constructTemplate(t, templateElem, parentElem, templateFunc, root, leve
 			var val;
 			if(attrVal.index !== undefined) {
 				val =  "fragment.templateValues[" + attrVal.index + "]";
-				return t.property("attrs", t.identifier(attrName), t.identifier(val));
+				return t.ObjectProperty(t.identifier(attrName), t.identifier(val));
 			}
-			return t.property("attrs", t.identifier(attrName), t.literal(attrVal));
+			return t.ObjectProperty(t.identifier(attrName), t.StringLiteral(attrVal));
 		}));
 
 		templateFunc.push(
@@ -190,7 +192,6 @@ function constructTemplate(t, templateElem, parentElem, templateFunc, root, leve
 				)
 			)
 		);
-		//addAttributes
 	}
 }
 
@@ -198,10 +199,10 @@ module.exports = function addTemplatesToModule(t, node, templateKey, root) {
 	var templateFunc = [];
 	constructTemplate(t, root.templateElem, null, templateFunc, root);
 	node.body.push(
-		t.functionExpression(t.identifier(templateKey), [toReference(t, "fragment")], t.blockStatement(templateFunc))
+		t.ExpressionStatement(t.FunctionExpression(t.identifier(templateKey), [toReference(t, "fragment")], t.BlockStatement(templateFunc)))
 	);
 	node.body.push(
-		t.ExpressionStatement(t.AssignmentExpression("=", t.identifier(templateKey + ".key"), t.literal(templateKey)))
+		t.ExpressionStatement(t.AssignmentExpression("=", t.identifier(templateKey + ".key"), t.StringLiteral(templateKey)))
 	);
 	node.body.push(
 		t.ExpressionStatement(t.AssignmentExpression("=", t.identifier(templateKey + ".type"), t.identifier("Inferno.TemplateTypes.TEMPLATE_API")))
