@@ -1,7 +1,7 @@
 {
   "name": "babel-plugin-inferno",
-  "version": "2.1.0",
-  "description": "Turn jsx into inferno",
+  "version": "0.1.0",
+  "description": "Turn JSX into Inferno",
   "repository": "https://github.com/trueadm/babel-plugin-inferno",
   "license": "MIT",
   "main": "lib/index.js",
@@ -16,8 +16,6 @@
     "mocha": "^2.2.5"
   },
   "scripts": {
-    "build": "babel-plugin build",
-    "push": "babel-plugin publish",
     "test": "mocha --compilers js:babel/register",
     "lint": "eslint src"
   },

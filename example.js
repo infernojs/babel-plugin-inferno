@@ -1,7 +1,7 @@
 "use strict";
 
 var babel  = require("babel-core");
-var plugin = require("./src/index");
+var plugin = require("./lib/index");
 
 var code = `
     var foo = require("test");
