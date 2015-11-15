@@ -32,7 +32,7 @@ var code = `
     var someObj = {
         render() {
             return (
-                <div autoFocus='true' />
+                <div autofocus={ false }></div>
             );
         }
     }
