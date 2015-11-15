@@ -9,6 +9,25 @@ var code = `
     var someObj = {
         render() {
             return (
+                <div>Hey world!</div>
+            );
+        }
+    }
+`;
+
+var output = babel.transform(code, {
+    plugins: [plugin, 'syntax-jsx'],
+    presets: ['es2015']
+}).code;
+
+console.log(output);
+
+var code = `
+    var foo = require("test");
+
+    var someObj = {
+        render() {
+            return (
                 <div><div><span>{ test || foo }</span></div><h1>Hello world!</h1></div>
             );
         }
