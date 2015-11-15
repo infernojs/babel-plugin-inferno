@@ -32,7 +32,10 @@ var code = `
     var someObj = {
         render() {
             return (
-                <div autofocus={ false }></div>
+                <select multiple={ true } value='foo'>
+					<option value='foo'>I'm a li-tag</option>
+					<option value='bar'>I'm a li-tag</option>
+				</select>
             );
         }
     }
