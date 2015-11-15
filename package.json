@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Turn JSX into Inferno",
   "repository": "https://github.com/trueadm/babel-plugin-inferno",
-  "license": "MIT",
+  "license": "MPL-2.0",
   "main": "lib/index.js",
   "devDependencies": {
     "babel": "^5.6.0",
@@ -23,8 +23,5 @@
     "babel-plugin",
     "inferno",
     "jsx"
-  ],
-  "babel": {
-    "loose": true
-  }
+  ]
 }

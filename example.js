@@ -23,17 +23,15 @@ var output = babel.transform(code, {
 console.log(output);
 
 var code = `
-    var someObj = {
-        render() {
-            return <div><span>{ test || foo }</span>{ bar } { foo }</div>
-        }
-    }
+    Inferno.render(<div><span>{ test || foo }</span>{ bar } { foo }</div>, foo);
 `;
 
 var output = babel.transform(code, {
     plugins: [plugin, 'syntax-jsx'],
     presets: ['es2015']
 }).code;
+
+console.log(output);
 
 var code = `
     var foo = require("test");
