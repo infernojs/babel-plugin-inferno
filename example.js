@@ -3,8 +3,6 @@
 var babel  = require("babel-core");
 var plugin = require("./lib/index");
 
-
-
 //
 //var code = `
 //    var foo = require("test");
@@ -29,11 +27,11 @@ var plugin = require("./lib/index");
 
 var code = `
 	Inferno.render(
-		<div className="foo">
-            <span className="bar">{ values[0] }</span>
+        <div className="foo">
+			<span className="bar">{ values[0] }</span>
             <span className="yar">{ values[1] }</span>
-		</div>,
-		container
+        </div>,
+        container
     );
 `;
 
