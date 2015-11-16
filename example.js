@@ -26,13 +26,7 @@ var plugin = require("./lib/index");
 
 
 var code = `
-	Inferno.render(
-        <div className="foo">
-			<span className="bar">{ values[0] }</span>
-            <span className="yar">{ values[1] }</span>
-        </div>,
-        container
-    );
+	Inferno.render(<div>Hello world - { values[0] } { values[1] }</div>, container);
 `;
 
 var output = babel.transform(code, {
