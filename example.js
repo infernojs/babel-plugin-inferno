@@ -26,25 +26,37 @@ var plugin = require("./lib/index");
 //console.log(output);
 
 
-var code = `
-    var foo = require("test");
 
-    var someObj = {
-        render() {
-            return (
-                <select multiple={ true } value='foo'>
-					<option value='foo'>I'm a li-tag</option>
-					<option value='bar'>I'm a li-tag</option>
-				</select>
-            );
-        }
-    }
+var code = `
+    Inferno.render(<div>Hello world - { values[0] } { values[1] }</div>, container);
 `;
 
 var output = babel.transform(code, {
     plugins: [plugin, 'syntax-jsx'],
     presets: ['es2015']
 }).code;
+
+console.log(output);
+
+//var code = `
+//    var foo = require("test");
+//
+//    var someObj = {
+//        render() {
+//            return (
+//                <select multiple={ true } value='foo'>
+//					<option value='foo'>I'm a li-tag</option>
+//					<option value='bar'>I'm a li-tag</option>
+//				</select>
+//            );
+//        }
+//    }
+//`;
+//
+//var output = babel.transform(code, {
+//    plugins: [plugin, 'syntax-jsx'],
+//    presets: ['es2015']
+//}).code;
 
 console.log(output);
 
