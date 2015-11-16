@@ -26,7 +26,13 @@ var plugin = require("./lib/index");
 
 
 var code = `
-	Inferno.render(<div>Hello world - { values[0] } { values[1] }</div>, container);
+	Inferno.render((
+		<select multiple={ true } value='foo'>
+			<option value='foo'>I'm a li-tag</option>
+			<option value='bar'>I'm a li-tag</option>
+		</select>),
+		container
+	);
 `;
 
 var output = babel.transform(code, {
