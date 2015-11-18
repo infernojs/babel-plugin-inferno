@@ -39,6 +39,39 @@ var output = babel.transform(code, {
 
 console.log(output);
 
+var code = `
+	Inferno.render(
+		<div><Foo val={ val1 } val2="123" /></div>,
+		container
+	);
+`;
+
+var output = babel.transform(code, {
+	plugins: [plugin, 'syntax-jsx'],
+	presets: ['es2015']
+}).code;
+
+console.log(output);
+
+
+var code = `
+	Inferno.render(
+		<div>
+			<Foo val={ val1 } val2="123" />
+			<span>test</span>
+		</div>,
+		container
+	);
+`;
+
+var output = babel.transform(code, {
+	plugins: [plugin, 'syntax-jsx'],
+	presets: ['es2015']
+}).code;
+
+console.log(output);
+
+
 //var code = `
 //    Inferno.render(<div>Hello world - { values[0] } { values[1] }</div>, container);
 //`;
