@@ -26,11 +26,8 @@ var plugin = require("./lib/index");
 
 
 var code = `
-	Inferno.render((
-		<select multiple={ true } value='foo'>
-			<option value='foo'>I'm a li-tag</option>
-			<option value='bar'>I'm a li-tag</option>
-		</select>),
+	Inferno.render(
+		<Foo val={ val1 } val2="123" />,
 		container
 	);
 `;
