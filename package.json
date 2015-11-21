@@ -1,22 +1,19 @@
 {
   "name": "babel-plugin-inferno",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Turn JSX into Inferno",
   "repository": "https://github.com/trueadm/babel-plugin-inferno",
   "license": "MPL-2.0",
   "main": "lib/index.js",
   "devDependencies": {
-    "babel-cli": "^6.1.18",
-    "babel-eslint": "^4.0.0",
+    "babel-cli": "^6.2.0",
+    "babel-core": "^6.2.1",
+    "babel-plugin-syntax-jsx": "^6.1.18",
     "babel-preset-es2015": "^6.1.18",
-    "eslint": "^0.24.1",
-    "mocha": "^2.2.5",
-    "babel-core": "^6.1.21",
-    "babel-plugin-syntax-jsx": "^6.1.18"
+    "mocha": "^2.3.4"
   },
   "scripts": {
-    "test": "mocha --compilers js:babel/register",
-    "lint": "eslint src"
+    "test": "mocha --compilers js:babel/register"
   },
   "keywords": [
     "babel-plugin",

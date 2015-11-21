@@ -27,12 +27,7 @@ var plugin = require("./lib/index");
 
 var code = `
 	Inferno.render(
-		<div className='basic'>
-			<label>
-				<input checked={ this.props.isChecked } />
-				The title is { this.props.title }
-			</label>
-		</div>,
+		<BasicComponent1 title='abc' name='basic-render' />,
 		container
 	);
 `;
