@@ -27,7 +27,9 @@ var plugin = require("./lib/index");
 
 var code = `
 	Inferno.render(
-		<div><BasicComponent1 title="abc" name="basic-render" /></div>,
+		<div className="basic">
+			<span className={ this.props.name }>The title is { this.props.title }</span>
+		</div>,
 		container
 	);
 `;
