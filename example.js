@@ -27,7 +27,7 @@ var plugin = require("./lib/index");
 
 var code = `
 	Inferno.render(
-		<BasicComponent1 title='abc' name='basic-render' />,
+		<BasicComponent1 title='abc' name='basic-render'>{ foo }</BasicComponent1>,
 		container
 	);
 `;
