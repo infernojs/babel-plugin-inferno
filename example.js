@@ -27,8 +27,11 @@ var plugin = require("./lib/index");
 
 var code = `
 	Inferno.render(
-		<div className="basic">
-			<span className={ this.props.name }>The title is { this.props.title }</span>
+		<div className='basic'>
+			<label>
+				<input checked={ this.props.isChecked } />
+				The title is { this.props.title }
+			</label>
 		</div>,
 		container
 	);

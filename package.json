@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-inferno",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Turn JSX into Inferno",
   "repository": "https://github.com/trueadm/babel-plugin-inferno",
   "license": "MPL-2.0",
