@@ -26,6 +26,8 @@ var plugin = require("./lib/index");
 
 
 var code = `
+	var Inferno = require("inferno");
+
 	Inferno.render(
 		<div {...props}>
 			<BasicComponent1 title='abc' name='basic-render' bar={ yar }>{ foo } test</BasicComponent1>
