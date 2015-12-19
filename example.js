@@ -27,7 +27,11 @@ var plugin = require("./lib/index");
 
 var code = `
 	Inferno.render(
-		<BasicComponent1 title='abc' name='basic-render'>{ foo }</BasicComponent1>,
+		<div {...props}>
+			<BasicComponent1 title='abc' name='basic-render' bar={ yar }>{ foo } test</BasicComponent1>
+			<span lol={ false } other={ [1,2,3] } thing={ 1 + 1 } />
+			<div>{ '123' }</div>
+		</div>,
 		container
 	);
 `;
