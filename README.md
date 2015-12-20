@@ -1,6 +1,7 @@
 # InfernoJS Babel Plugin
 
-> Plugin for babel to enable JSX for Inferno
+> Plugin for babel 6.x to enable JSX for Inferno
+
 
 This plugin transforms JSX code in your projects to [Inferno](https://github.com/trueadm/inferno) fragments and templates. 
 
