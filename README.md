@@ -12,12 +12,14 @@ It's important that you also include the `babel-plugin-syntax-jsx`plugin.
 
 Example on a `.babelrc` file that will work with Inferno:
 
+
 ```js
-    {   
+{   
      "presets": [ "es2015", "stage-0" ]
      "plugins": ["babel-plugin-syntax-jsx", "babel-plugin-inferno"]
     }
+```
 
-    ```
+
 ## Examples    
     
