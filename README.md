@@ -16,7 +16,7 @@ npm i --save-dev babel-plugin-inferno
 
 ## How to use
 
-Add the plugin to your `package.json` and update the plugin section in your `.babelrc` file. Or if your Babel settings are located inside the package.json` - update the plugin section there.
+Add the plugin to your `package.json` and update the plugin section in your `.babelrc` file. Or if your Babel settings are located inside the `package.json` - update the plugin section there.
 
 It's important that you also include the `babel-plugin-syntax-jsx`plugin.
 
