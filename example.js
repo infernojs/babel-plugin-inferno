@@ -26,16 +26,19 @@ var plugin = require("./lib/index");
 
 
 var code = `
-	var Inferno = require("inferno");
-
-	Inferno.render(
-		<div {...props}>
-			<BasicComponent1 title='abc' name='basic-render' bar={ yar }>{ foo } test</BasicComponent1>
-			<span lol={ false } other={ [1,2,3] } thing={ 1 + 1 } />
-			<div>{ '123' }</div>
-		</div>,
-		container
-	);
+		class Component extends Inferno.Component {
+			constructor(props) {
+				super(props);
+			}
+			render() {
+				return (
+					<svg class="alert-icon">
+						123
+						<use xlink="#error"></use>
+					</svg>
+				)
+			}
+		}
 `;
 
 var output = babel.transform(code, {
