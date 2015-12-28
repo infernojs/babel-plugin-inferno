@@ -35,6 +35,8 @@ var code = `
 					<svg class="alert-icon">
 						123
 						<use xlink="#error"></use>
+                         <foo></foo>
+                         123 123
 					</svg>
 				)
 			}
