@@ -26,20 +26,15 @@ var plugin = require("./lib/index");
 
 
 var code = `
-		class Component extends Inferno.Component {
-			constructor(props) {
-				super(props);
-			}
-			render() {
-				return (
-					<svg class="alert-icon">
-						123
-						<use xlink="#error"></use>
-                         <foo></foo>
-                         123 123
-					</svg>
-				)
-			}
+		function foo() {
+			return (
+				<div id="123" />
+			)
+		}
+		function foo2() {
+			return (
+				<div class="123" />
+			)
 		}
 `;
 
