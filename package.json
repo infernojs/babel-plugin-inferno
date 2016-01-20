@@ -6,7 +6,7 @@
   "license": "MPL-2.0",
   "main": "lib/index.js",
   "dependencies": {
-    "babel-plugin-syntax-jsx": "^6.3.13",
+    "babel-plugin-syntax-jsx": "^6.3.13"
   },
   "devDependencies": {
     "babel-cli": "^6.3.17",
