@@ -32,8 +32,15 @@ var code = `
 			)
 		}
 		function foo2() {
+			var foo = 'bar';
+
 			return (
-				<div class="123" />
+				<div className="123" id={ foo } onClick={ clickEvent } />
+			)
+		}
+		function foo3() {
+			return (
+				<Component foo={ bar } bar="foo" onClick={ clickEvent } onComponentDidMount={ foo } />
 			)
 		}
 `;
