@@ -27,9 +27,10 @@ var plugin = require("./lib/index");
 
 var code = `
 		function foo() {
-			return (
-				<div id="123" />
-			)
+			return ([
+				<div id="123" />,
+				<div className={ null } />
+			])
 		}
 		function foo2() {
 			var foo = 'bar';
