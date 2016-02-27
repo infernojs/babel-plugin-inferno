@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var babel  = require("babel-core");
 var plugin = require("./lib/index");
