@@ -30,7 +30,7 @@ var code = `
 			var foo = 'bar';
 
 			return (
-				<div disabled />
+				<div onComponentDidMount onClick={ clickEvent } />
 			)
 		}
 		function foo3() {
