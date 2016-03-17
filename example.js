@@ -30,7 +30,7 @@ var code = `
 			var foo = 'bar';
 
 			return (
-				<div onComponentDidMount onClick={ clickEvent } />
+				<div xlink:href onCreated onClick={ clickEvent } />
 			)
 		}
 		function foo3() {
