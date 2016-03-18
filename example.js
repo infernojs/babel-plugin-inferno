@@ -30,7 +30,7 @@ var code = `
 			var foo = 'bar';
 
 			return (
-				<div xlink:href onCreated onClick={ clickEvent } />
+				<div foo onClick={ clickEvent } />
 			)
 		}
 		function foo3() {
@@ -41,7 +41,7 @@ var code = `
 `;
 
 var output = babel.transform(code, {
-    plugins: [plugin, 'syntax-jsx'],
+    plugins: [plugin, 'syntax-jsx', 'transform-object-rest-spread'],
     presets: ['es2015']
 }).code;
 
