@@ -25,29 +25,10 @@ var plugin = require("./lib/index");
 
 
 
-var code = `
-		function foo() {
-			return ([
-				<div id="123" />,
-				<div className={ null } />
-			])
-		}
-		function foo2() {
-			var foo = 'bar';
-
-			return (
-				<div className="123" id={ foo } onClick={ clickEvent } />
-			)
-		}
-		function foo3() {
-			return (
-				<Component foo={ bar } bar="foo" onClick={ clickEvent } onComponentDidMount={ foo } />
-			)
-		}
-`;
+var code = `<div></div>`;
 
 var output = babel.transform(code, {
-    plugins: [plugin, 'syntax-jsx'],
+    plugins: [plugin, 'syntax-jsx', 'transform-object-rest-spread'],
     presets: ['es2015']
 }).code;
 
