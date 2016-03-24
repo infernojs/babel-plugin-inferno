@@ -25,7 +25,9 @@ var plugin = require("./lib/index");
 
 
 
-var code = `<div></div>`;
+var code = `
+<div foo {...bar} bar2></div>
+`;
 
 var output = babel.transform(code, {
     plugins: [plugin, 'syntax-jsx', 'transform-object-rest-spread'],
