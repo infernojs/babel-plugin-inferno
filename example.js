@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var babel  = require("babel-core");
 var plugin = require("./lib/index");
@@ -26,20 +26,11 @@ var plugin = require("./lib/index");
 
 
 var code = `
-		function foo() {
-			return (
-				<div id="123" />
-			)
-		}
-		function foo2() {
-			return (
-				<div class="123" />
-			)
-		}
+<div foo fooBar="123" contentStyleType="foo" {...bar} bar2></div>
 `;
 
 var output = babel.transform(code, {
-    plugins: [plugin, 'syntax-jsx'],
+    plugins: [plugin, 'syntax-jsx', 'transform-object-rest-spread'],
     presets: ['es2015']
 }).code;
 
