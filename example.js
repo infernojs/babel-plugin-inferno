@@ -26,7 +26,7 @@ var plugin = require("./lib/index");
 
 
 var code = `
-<div className={"okei"} ></div>
+<svg class={"okei"} ></svg>
 `;
 
 var output = babel.transform(code, {
