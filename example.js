@@ -26,7 +26,7 @@ var plugin = require("./lib/index");
 
 
 var code = `
-<div foo fooBar="123" contentStyleType="foo" {...bar} bar2></div>
+<div className={"okei"} ></div>
 `;
 
 var output = babel.transform(code, {
