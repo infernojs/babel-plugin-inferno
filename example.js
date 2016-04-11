@@ -26,7 +26,9 @@ var plugin = require("./lib/index");
 
 
 var code = `
-<div foo fooBar="123" contentStyleType="foo" {...bar} bar2></div>
+function render() {
+	return <Foo foo={ v123 } onComponentWillMount={ foo } xml:lang="en"><div className={ foo } key={ 1 + 1 }></div></Foo>
+}
 `;
 
 var output = babel.transform(code, {
