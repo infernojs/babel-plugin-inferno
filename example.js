@@ -27,7 +27,7 @@ var plugin = require("./lib/index");
 
 var code = `
 function render() {
-	return <Foo foo={ v123 } onComponentWillMount={ foo } xml:lang="en"><div className={ foo } key={ 1 + 1 }></div></Foo>
+	return <button onClick={this.onClick}><Label text={text} /></button>
 }
 `;
 
