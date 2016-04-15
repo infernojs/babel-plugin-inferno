@@ -27,7 +27,7 @@ var plugin = require("./lib/index");
 
 var code = `
 function render() {
-	return <button onClick={this.onClick}><Label text={text} /></button>
+	return <button onClick={this.onClick}><Label text={text} /><svg></svg></button>
 }
 `;
 
