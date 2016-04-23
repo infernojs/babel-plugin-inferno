@@ -26,9 +26,13 @@ var plugin = require("./lib/index");
 
 
 var code = `
+<<<<<<< HEAD
+<svg class={"okei"} ></svg>
+=======
 function render() {
 	return <div className="foo" style="color: red"><button onClick={this.onClick}><Label text={text} /><svg class="foo"></svg></button></div>
 }
+>>>>>>> trueadm/master
 `;
 
 var output = babel.transform(code, {
