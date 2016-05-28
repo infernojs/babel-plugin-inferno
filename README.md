@@ -2,7 +2,7 @@
 
 > Plugin for babel 6.x to enable JSX for Inferno
 
-This plugin transforms JSX code in your projects to [Inferno](https://github.com/trueadm/inferno) fragments and templates. 
+This plugin transforms JSX code in your projects to [Inferno](https://github.com/trueadm/inferno) compatible virtual DOM. 
 
 **Note!* This plugin has been built for use in Babel 6.x environments, and will not work with Babel 5.x ( *deprecated*) or older versions.
 
@@ -24,7 +24,7 @@ Example on a `.babelrc` file that will work with Inferno:
 
 ```js
 {   
-    "presets": [ "es2015", "stage-0" ],
+    "presets": [ "es2015" ],
     "plugins": ["babel-plugin-inferno"]
 }
 ```
