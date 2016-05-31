@@ -25,7 +25,7 @@ Example on a `.babelrc` file that will work with Inferno:
 ```js
 {   
     "presets": [ "es2015" ],
-    "plugins": ["babel-plugin-inferno"]
+    "plugins": ["inferno"]
 }
 ```
 
