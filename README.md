@@ -34,12 +34,12 @@ Example on a `.babelrc` file that will work with Inferno:
 ```js
 
 // Render a simple div
-Inferno.render(<div></div>, container); 
+InfernoDOM.render(<div></div>, container); 
 
 // Render a div with text
-Inferno.render(<div>Hello world</div>, container); 
+InfernoDOM.render(<div>Hello world</div>, container); 
 
 // Render a div with a boolean attribute
-Inferno.render(<div autoFocus='true' />, container);
+InfernoDOM.render(<div autoFocus='true' />, container);
 
 ```
