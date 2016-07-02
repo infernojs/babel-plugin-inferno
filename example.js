@@ -27,7 +27,12 @@ var plugin = require("./lib/index");
 
 var code = `
 function render() {
-	return <div className="je" style="color: red"><button onClick={this.onClick}><Label text={text} /><svg class="foo"></svg></button></div>
+	const props = {};
+	return 
+		<div className="je" style="color: red">
+			<Foo key="foo" />
+			<div { ...props } />
+		</div>
 }
 `;
 
