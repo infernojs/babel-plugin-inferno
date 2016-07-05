@@ -26,14 +26,13 @@ var plugin = require("./lib/index");
 
 
 var code = `
-function render() {
-	const props = {};
-	return 
-		<div className="je" style="color: red">
-			<Foo key="foo" />
-			<div { ...props } />
-		</div>
-}
+		// TODO: Fails to creation of node fix needed
+		render(<input type="text" onAttached={obj.fn} spellcheck="false"
+					readOnly={bool ? 'readonly' : false} disabled={bool}
+					ondragenter={test} ondragover={test} value={newValue} oninput={test}
+					onfocus={obj.focus} class="edit-field" onkeydown={test} onkeyup={test}
+					onblur={test} {...spread} />, container);
+
 `;
 
 var output = babel.transform(code, {
