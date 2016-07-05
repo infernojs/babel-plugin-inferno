@@ -31,7 +31,7 @@ var code = `
 					readOnly={bool ? 'readonly' : false} disabled={bool}
 					ondragenter={test} ondragover={test} value={newValue} oninput={test}
 					onfocus={obj.focus} class="edit-field" onkeydown={test} onkeyup={test}
-					onblur={test} {...spread} />, container);
+					onblur={test} {...spread}>foo</input>, container);
 
 `;
 
