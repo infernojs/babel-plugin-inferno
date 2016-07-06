@@ -34,7 +34,8 @@ var code = `
 					ondragenter={test} ondragover={test} value={newValue} oninput={test}
 					onfocus={obj.focus} class="edit-field" onkeydown={test} onkeyup={test}
 					key={ foo }
-					onblur={test} {...spread}>foo</input>, container);
+					lazy
+					onblur={test}>foo</input>, container);
 
 `;
 
