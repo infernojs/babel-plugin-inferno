@@ -26,16 +26,7 @@ var plugin = require("./lib/index");
 
 
 var code = `
-    <div class="tab-group">{ ['foo'] }</div>
-		// TODO: Fails to creation of node fix needed
-		render(<input type="text" onAttached={obj.fn} spellcheck="false"
-		            className='foo'
-					readOnly={bool ? 'readonly' : false} disabled={bool}
-					ondragenter={test} ondragover={test} value={newValue} oninput={test}
-					onfocus={obj.focus} class="edit-field" onkeydown={test} onkeyup={test}
-					key={ foo }
-					lazy
-					onblur={test}>foo</input>, container);
+    <Foo.Bar />
 
 `;
 
