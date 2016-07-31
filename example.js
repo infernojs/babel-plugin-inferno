@@ -27,10 +27,14 @@ var plugin = require("./lib/index");
 
 var code = `
     <div childrenType={ Inferno.ChildrenTypes.NON_KEYED_LIST }>
-        <div className={ foo } id="123">Hello world!</div>
+        <div test={ test } className={ foo } id="123">Hello world!</div>
         <div data-id="123" src:name="foo" />
         <div disabled><span key={ bar }>{ someText }</span></div>
-        <Foo />
+        <Foo bar={ 123 } />
+        <Yar>
+            <div test={ test } />
+            <Lol />
+        </Yar>
         <lol.data />
     </div>
 
