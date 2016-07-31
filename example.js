@@ -26,16 +26,13 @@ var plugin = require("./lib/index");
 
 
 var code = `
-    <div class="tab-group">{ ['foo'] }</div>
-		// TODO: Fails to creation of node fix needed
-		render(<input type="text" onAttached={obj.fn} spellcheck="false"
-		            className='foo'
-					readOnly={bool ? 'readonly' : false} disabled={bool}
-					ondragenter={test} ondragover={test} value={newValue} oninput={test}
-					onfocus={obj.focus} class="edit-field" onkeydown={test} onkeyup={test}
-					key={ foo }
-					lazy
-					onblur={test}>foo</input>, container);
+    <div childrenType={ Inferno.ChildrenTypes.NON_KEYED_LIST }>
+        <div className={ foo } id="123">Hello world!</div>
+        <div data-id="123" src:name="foo" />
+        <div disabled><span key={ bar }>{ someText }</span></div>
+        <Foo />
+        <lol.data />
+    </div>
 
 `;
 
