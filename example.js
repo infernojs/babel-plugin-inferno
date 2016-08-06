@@ -25,15 +25,10 @@ var plugin = require("./lib/index");
 
 
 var code = `
-	class BasicComponent1 extends Component {
-		render() {
-			return (
-				<div className="basic">
-					<span className={ this.props.name }>The title is { this.props.title }</span>
-				</div>
-			);
-		}
-	}
+	<div className="basic">
+		<span className={ this.props.name }>The title is { this.props.title }</span>
+		<Foo bar={ yar } />
+	</div>
 `;
 
 // var code = `
