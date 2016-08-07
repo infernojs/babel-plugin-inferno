@@ -26,8 +26,8 @@ var plugin = require("./lib/index");
 
 var code = `
 	<div className="basic">
-		<span className={ this.props.name }>The title is { this.props.title }</span>
-		<Foo bar={ yar } />
+		<Foo { ...bar } />
+		<div { ...bar } foo="bar" key="1" />
 	</div>
 `;
 
