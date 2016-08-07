@@ -26,7 +26,7 @@ var plugin = require("./lib/index");
 
 var code = `
 	<div className="basic">
-		<Foo { ...bar } />
+		<foo { ...bar } ref={ foo } />
 		<div { ...bar } foo="bar" key="1" />
 	</div>
 `;
