@@ -24,15 +24,31 @@ var plugin = require("./lib/index");
 //console.log(output);
 
 
-
 var code = `
-    <Foo.Bar />
-
+	<div className="basic">
+		<foo { ...bar } ref={ foo } />
+		<div { ...bar } foo="bar" key="1" />
+	</div>
 `;
 
+// var code = `
+//     <div childrenType={ Inferno.ChildrenTypes.NON_KEYED_LIST }>
+//         <div test={ test } className={ foo } id="123">Hello world!</div>
+//         <div data-id="123" src:name="foo" />
+//         <div disabled><span key={ bar }>{ someText }</span></div>
+//         <foo bar={ 123 } key="foo" />
+//         <div name={ 1 }>{ 234 }</div>
+//         <Yar key="mew">
+//             <div test={ test } />
+//             <Lol />
+//         </Yar>
+//         <lol.data />
+//     </div>
+// `;
+
 var output = babel.transform(code, {
-    plugins: [plugin, 'syntax-jsx'],
-    presets: ['es2015']
+	plugins: [plugin, 'syntax-jsx'],
+	presets: ['es2015']
 }).code;
 
 console.log(output);
