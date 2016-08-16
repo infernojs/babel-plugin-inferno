@@ -26,8 +26,10 @@ var plugin = require("./lib/index");
 
 var code = `
 	<div className="basic">
-		<foo { ...bar } ref={ foo } />
-		<div { ...bar } foo="bar" key="1" />
+		<div ref={ lol } />
+		<Foo onComponentShouldUpdate={ something } />
+		<Foo hooks={ something } />
+		<Bar ref={ lol } />
 	</div>
 `;
 
