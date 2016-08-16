@@ -6,13 +6,13 @@
   "license": "MPL-2.0",
   "main": "lib/index.js",
   "devDependencies": {
-    "babel-cli": "^6.10.1",
-    "babel-core": "^6.10.4",
-    "babel-eslint": "^6.1.0",
+    "babel-cli": "^6.11.4",
+    "babel-core": "^6.13.2",
+    "babel-eslint": "^6.1.2",
     "babel-plugin-transform-object-rest-spread": "^6.8.0",
-    "babel-preset-es2015": "^6.9.0",
-    "eslint": "^3.0.0",
-    "mocha": "^2.5.3"
+    "babel-preset-es2015": "^6.13.2",
+    "eslint": "^3.3.0",
+    "mocha": "^3.0.2"
   },
   "scripts": {
     "test": "mocha --compilers js:babel/register",
@@ -27,6 +27,6 @@
     "jsx"
   ],
   "dependencies": {
-    "babel-plugin-syntax-jsx": "^6.8.0"
+    "babel-plugin-syntax-jsx": "^6.13.0"
   }
 }
