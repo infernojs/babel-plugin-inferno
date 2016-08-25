@@ -25,13 +25,11 @@ var plugin = require("./lib/index");
 
 
 var code = `
-	<div className="basic">
-		<div ref={ lol } />
-		<Foo onComponentShouldUpdate={ something } />
-		<Foo hooks={ something } />
-		<Bar ref={ lol } />
-	</div>
-`;
+var foo = [
+	<div className="basic2" foo={ lol } key='1'>123</div>,
+	<div className="basic2" foo={ () => 1 } childrenType={ Inferno.ChildrenTypes.NON_KEYED_LIST }></div>,
+	<Foo.Bar />
+]`;
 
 // var code = `
 //     <div childrenType={ Inferno.ChildrenTypes.NON_KEYED_LIST }>
