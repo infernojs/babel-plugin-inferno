@@ -28,6 +28,12 @@ var code = `
 var foo = [
 	<div className="basic2" foo={ lol } key='1'>123</div>,
 	<div className="basic2" foo={ () => 1 } childrenType={ Inferno.ChildrenTypes.NON_KEYED_LIST }></div>,
+	<Yo>
+		<Yo>
+			<Yo>
+			</Yo>
+		</Yo>
+	</Yo>,
 	<Foo.Bar />
 ]`;
 
