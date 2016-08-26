@@ -31,6 +31,7 @@ var foo = [
 			<Yo>
 				{ foo }
 			</Yo>
+			<div>{ foo }</div>
 		</Yo>
 	</Yo>,
 ]`;
