@@ -26,7 +26,7 @@ var plugin = require("./lib/index");
 
 var code = `
 var foo = [
-	<Div><div onclick={ foo }></div></Div>
+	<Div><div onclick={ this.callback }>B</div></Div>
 ]`;
 
 // var code = `
