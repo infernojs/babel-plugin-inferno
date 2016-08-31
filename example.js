@@ -26,8 +26,7 @@ var plugin = require("./lib/index");
 
 var code = `
 var foo = [
-	<div>Hello world, { '1' }2{ '3' }</div>,
-	<div>Hello world, { '3' }2{ '1' }</div>
+	<Div><div onclick={ foo }></div></Div>
 ]`;
 
 // var code = `
