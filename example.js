@@ -24,9 +24,21 @@ var plugin = require("./lib/index");
 //console.log(output);
 
 
+// var code = `
+// var foo = [
+// 	<div className={ foo } id="foo" data-name="123" data-id={ name } foo={ bar } lol={ lol } lol2={ lol2 }>
+// 		123
+// 		{ '123' }
+// 		123
+// 	</div>,
+// 	<div>{ 123 }</div>,
+// 	<div>{ 123 }</div>
+// ]`;
+
 var code = `
 var foo = [
-	<div className={ foo } id="foo" data-name="123" data-id={ name }>123</div>
+	<div><Foo /></div>,
+	<div><Foo /></div>
 ]`;
 
 // var code = `
