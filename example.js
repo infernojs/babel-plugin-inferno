@@ -37,7 +37,7 @@ var plugin = require("./lib/index");
 
 var code = `
 var foo = [
-<div className={"_4jq5"}>{"Image Library"}{ null }</div>,
+<div className={"_4jq5"}>{"Image Library"}{ undefined }</div>,
 <div className={"_4jq5"}>{"Image Library"}</div>
 ]`;
 
