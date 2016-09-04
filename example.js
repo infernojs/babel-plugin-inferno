@@ -37,10 +37,8 @@ var plugin = require("./lib/index");
 
 var code = `
 var foo = [
-	<a aria-selected={false} onKeyDown={function () { } }>
-		<div className={"_4jq5"}>{"Image Library"}</div>
-		<span className={"_13xf"}></span>
-	</a>
+<div className={"_4jq5"}>{"Image Library"}{ null }</div>,
+<div className={"_4jq5"}>{"Image Library"}</div>
 ]`;
 
 // var code = `
