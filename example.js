@@ -7,7 +7,7 @@ const code = `
 	function render() {
 		return (
 			<div className="basic">
-				<span className={ this.props.name }>The title is { this.props.title }</span>
+				<span checked={ true } className={ this.props.name }>The title is { this.props.title }</span>
 			</div>
 		);
 	}
