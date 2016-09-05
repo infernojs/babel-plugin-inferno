@@ -36,10 +36,10 @@ var plugin = require("./lib/index");
 // ]`;
 
 var code = `
-var foo = [
-<div className={"_4jq5"}>{"Image Library"}{ undefined }</div>,
-<div className={"_4jq5"}>{"Image Library"}</div>
-]`;
+		<Router url={ url } history={ browserHistory }>
+			<Route path={ path } component={ component } />
+		</Router>
+`;
 
 // var code = `
 //     <div childrenType={ Inferno.ChildrenTypes.NON_KEYED_LIST }>
