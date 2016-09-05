@@ -6,9 +6,7 @@ const plugin = require('./lib/index');
 const code = `
 	function render() {
 			return (
-				<ul class="login-organizationlist">
-					{ () => {} }
-				</ul>
+				<div ref={obj.fn}>Hello world2</div>
 			);
 	}
 `;
