@@ -1,18 +1,10 @@
 'use strict';
 
-const babel  = require('babel-core');
+const babel = require('babel-core');
 const plugin = require('./lib/index');
 
 const code = `
-	function render() {
-		const props = {
-			onBlur : this.handleBlur,
-			className: 'foo',
-			id: 'test'
-		};
-
-		return (<input { ...props } ></input>);
-	}
+	<div><div><div></div></div></div>
 `;
 
 const output = babel.transform(code, {
