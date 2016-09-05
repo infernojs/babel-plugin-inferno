@@ -36,9 +36,10 @@ var plugin = require("./lib/index");
 // ]`;
 
 var code = `
-		<Router url={ url } history={ browserHistory }>
-			<Route path={ path } component={ component } />
-		</Router>
+		<Text
+			data={data}
+			{...other}
+		/>;
 `;
 
 // var code = `
