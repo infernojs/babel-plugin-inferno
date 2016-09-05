@@ -5,9 +5,13 @@ const plugin = require('./lib/index');
 
 const code = `
 	function render() {
-			return (
-				<div ref={obj.fn}>Hello world2</div>
-			);
+		const props = {
+			onBlur : this.handleBlur,
+			className: 'foo',
+			id: 'test'
+		};
+
+		return (<input { ...props } ></input>);
 	}
 `;
 
