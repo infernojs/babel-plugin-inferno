@@ -4,9 +4,13 @@ const babel  = require('babel-core');
 const plugin = require('./lib/index');
 
 const code = `
-		<Router url={ url } history={ browserHistory }>
-			<Route path={ path } component={ component } />
-		</Router>
+	function render() {
+		return (
+			<div className="basic">
+				<span className={ this.props.name }>The title is { this.props.title }</span>
+			</div>
+		);
+	}
 `;
 
 const output = babel.transform(code, {
