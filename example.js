@@ -5,11 +5,11 @@ const plugin = require('./lib/index');
 
 const code = `
 	function render() {
-		return (
-			<div className="basic">
-				<span checked={ true } className={ this.props.name }>The title is { this.props.title }</span>
-			</div>
-		);
+			return (
+				<ul class="login-organizationlist">
+					{ () => {} }
+				</ul>
+			);
 	}
 `;
 
