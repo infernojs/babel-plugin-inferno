@@ -11,17 +11,7 @@ const code = `
 				</div>
 			);
 		}
-		render((
-			<BasicComponent3 title="styled!" styles={ { color: 'red', paddingLeft: '10px' } } />
-		), container);
-
-		render((
-			<BasicComponent3 />
-		), container);
-
-		render((
-			<BasicComponent3 title="styled (again)!" styles={ { color: 'blue', marginBottom: '20px' } } />
-		), container);
+		render(<div class="Hello, World!"><span><div id={ attrs }>{ n }</div></span></div>, container);
 `;
 
 const output = babel.transform(code, {
