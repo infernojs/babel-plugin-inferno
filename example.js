@@ -4,7 +4,13 @@ const babel = require('babel-core');
 const plugin = require('./lib/index');
 
 const code = `
-	var a = <div className={ abc } data-ticket-index={ lol }>foo</div>
+	var a = <div>
+		<div>
+			<div>
+				{ foo }
+			</div>
+		</div>
+	</div>
 `;
 
 const output = babel.transform(code, {
