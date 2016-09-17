@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-inferno",
-  "version": "1.0.0-alpha8",
+  "version": "1.0.0-alpha9",
   "description": "Turn JSX into Inferno VTemplates",
   "repository": "https://github.com/trueadm/babel-plugin-inferno",
   "license": "MPL-2.0",
