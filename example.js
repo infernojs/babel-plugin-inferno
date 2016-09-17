@@ -10,7 +10,7 @@ const code = `
 `;
 
 const output = babel.transform(code, {
-	plugins: [[ plugin, { inline: true }], 'syntax-jsx' ],
+	plugins: [[ plugin, { inline: true, preclone: true }], 'syntax-jsx' ],
 	presets: ['es2015']
 }).code;
 
