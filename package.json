@@ -20,7 +20,7 @@
     "lint": "eslint lib"
   },
   "keywords": [
-    "babel-plugin",
+    "babel-plugin",s
     "babel",
     "es2015",
     "es2016",
