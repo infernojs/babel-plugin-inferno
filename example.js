@@ -4,8 +4,9 @@ const babel = require('babel-core');
 const plugin = require('./lib/index');
 
 const code = `
-	const foo = <div>Test</div>
-	const foo2 = <Component>Test<div /></Component>
+	// const foo = <div ref={ () => foo }>Test</div>
+	const foo2 = <Component ref={ () => foo }><div /></Component>
+	const foo3 = <Component2 {...foo} {...bar} />
 `;
 
 const output = babel.transform(code, {
