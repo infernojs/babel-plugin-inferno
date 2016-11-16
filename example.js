@@ -4,6 +4,7 @@ const babel = require('babel-core');
 const plugin = require('./lib/index');
 
 const code = `
+function foo() {
   return (
     <div className='MessagesPost'>
       {/*
@@ -12,6 +13,7 @@ const code = `
       */}
     </div>
   );
+  }
 `;
 
 const output = babel.transform(code, {
