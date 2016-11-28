@@ -29,5 +29,8 @@
   ],
   "dependencies": {
     "babel-plugin-syntax-jsx": "^6.18.0"
+  },
+  "engines": {
+    "node": ">= 4.6.0"
   }
 }
