@@ -4,25 +4,7 @@ const babel = require('babel-core');
 const plugin = require('./lib');
 
 const code = `
-      const foo = <div>
-        <p>
-          This should have
-          no new lines in it
-          or spaces at start
-          and end
-        </p>
-        <div>{ ['1 space after this '] }</div>
-      </div>
-
-      const foo2 = <div>
-        <p>
-          This should have
-          no new lines in it
-          or spaces at start
-          and end
-        </p>
-        <div>{ ['1 space after this '] }</div>
-      </div>
+<div>Hello world, { ['Foo!', 'Bar!'] }</div>
 `;
 
 console.log(
