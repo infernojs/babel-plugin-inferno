@@ -6,7 +6,7 @@ This plugin transforms JSX code in your projects to [Inferno](https://github.com
 
 ## How to install
 
-If using Inferno with version `beta35`:
+If using Inferno with version `1.0.0-beta35`:
 ```bash
 npm i --save-dev babel-plugin-inferno@beta14
 ```
