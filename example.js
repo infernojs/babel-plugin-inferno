@@ -4,7 +4,7 @@ const babel = require('babel-core');
 const plugin = require('./lib');
 
 const code = `
-<div>Hello world, { ['Foo!', 'Bar!'] }</div>
+<div>Hello world, { ['Foo! ', 'Bar!'] }</div>
 `;
 
 console.log(
