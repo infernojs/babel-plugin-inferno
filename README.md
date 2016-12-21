@@ -8,7 +8,7 @@ This plugin transforms JSX code in your projects to [Inferno](https://github.com
 
 If using Inferno with version `1.0.0-beta37`:
 ```bash
-npm i --save-dev babel-plugin-inferno@beta16
+npm i --save-dev babel-plugin-inferno@beta17
 ```
 
 If using Inferno with version `0.7`:
