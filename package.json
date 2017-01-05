@@ -28,7 +28,8 @@
     "jsx"
   ],
   "dependencies": {
-    "babel-plugin-syntax-jsx": "^6.18.0"
+    "babel-plugin-syntax-jsx": "^6.18.0",
+    "inferno-vnode-flags": "^1.0.7"
   },
   "engines": {
     "node": ">= 4.6.0"
