@@ -1,10 +1,10 @@
 'use strict';
 
-const babel = require('babel-core');
+var babel = require('babel-core');
 
-const plugin = require('./lib');
+var plugin = require('./lib');
 
-const code = `
+var code = `
 <div>
     <span>Hello</span>
     <div>Another</div>

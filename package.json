@@ -17,7 +17,8 @@
   },
   "scripts": {
     "test": "mocha --compilers js:babel/register",
-    "lint": "eslint lib"
+    "lint": "eslint lib",
+    "lintfix": "eslint lib --fix"
   },
   "keywords": [
     "babel-plugin",
