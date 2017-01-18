@@ -12,7 +12,7 @@
     "babel-helper-replace-supers": "^6.18.0",
     "babel-plugin-transform-object-rest-spread": "^6.20.2",
     "babel-preset-es2015": "^6.18.0",
-    "eslint": "^3.12.2",
+    "eslint": "^3.13.1",
     "mocha": "^3.2.0"
   },
   "scripts": {
@@ -29,7 +29,7 @@
   ],
   "dependencies": {
     "babel-plugin-syntax-jsx": "^6.18.0",
-    "inferno-vnode-flags": "^1.0.7"
+    "inferno-vnode-flags": "^1"
   },
   "engines": {
     "node": ">= 4.6.0"
