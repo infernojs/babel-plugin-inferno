@@ -40,3 +40,18 @@ InfernoDOM.render(<div>Hello world</div>, container);
 InfernoDOM.render(<div autoFocus='true' />, container);
 
 ```
+
+## Options
+
+By default babel-plugin-inferno ships imports false. This is same behavior with ReactJS. You need to have Inferno declared in every JSX file. Even if not used by the code. Compiled code will have reference to global Inferno object.
+
+If the environment supports modules (Webpack / Rollup) you can enable "imports" option which will import createVNode from Inferno. This allows tree-shaking to happen and Inferno does not need to be imported if not needed by the user land code.
+
+Setting imports true can be done following way inside babelrc file
+
+```js
+{
+    "presets": [ "es2015" ],
+    "plugins": [["inferno", {"imports": true}]]
+}
+```
