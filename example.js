@@ -6,8 +6,11 @@ var plugin = require('./lib');
 
 var code = `
 <div>
-    <span>Hello</span>
-    <div>Another</div>
+    <span key="1">Hello</span>
+    <div>
+        Another
+        <div>foo</div>    
+    </div>
 </div>
 `;
 
