@@ -5,13 +5,12 @@ var babel = require('babel-core');
 var plugin = require('./lib');
 
 var code = `
-<div>
-    <span key="1">Hello</span>
     <div>
-        Another
-        <div>foo</div>    
+        <button onClick={() => { i++; this.setStateSync({}); }}>Replace</button>
+        <div>
+        <B key={i} />
+        </div>
     </div>
-</div>
 `;
 
 console.log(
