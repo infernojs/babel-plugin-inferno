@@ -2,7 +2,7 @@
 
 > Plugin for babel 6.x to enable JSX for Inferno
 
-This plugin transforms JSX code in your projects to [Inferno](https://github.com/trueadm/inferno) compatible virtual DOM. 
+This plugin transforms JSX code in your projects to [Inferno](https://github.com/trueadm/inferno) compatible virtual DOM.
 
 ## How to install
 
@@ -31,13 +31,13 @@ Example on a `.babelrc` file that will work with Inferno:
 ```js
 
 // Render a simple div
-InfernoDOM.render(<div></div>, container); 
+Inferno.render(<div></div>, container);
 
 // Render a div with text
-InfernoDOM.render(<div>Hello world</div>, container); 
+Inferno.render(<div>Hello world</div>, container);
 
 // Render a div with a boolean attribute
-InfernoDOM.render(<div autoFocus='true' />, container);
+Inferno.render(<div autoFocus='true' />, container);
 
 ```
 
