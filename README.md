@@ -47,7 +47,7 @@ By default babel-plugin-inferno ships imports false. This is same behavior with 
 
 If the environment supports modules (Webpack / Rollup) you can enable "imports" option which will import createVNode from Inferno. This allows tree-shaking to happen and Inferno does not need to be imported if not needed by the user land code.
 
-Setting imports true can be done following way inside babelrc file
+Setting imports to `true` will result in imports from `'inferno'` module, or you may provide a string value to specify a different module form which to import. This setting can be applied the following way inside babelrc file
 
 ```js
 {
