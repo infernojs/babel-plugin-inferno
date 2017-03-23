@@ -32,5 +32,24 @@ describe('Array', function() {
 			expect(transform('<div>1</div>')).to.equal('createVNode(2, "div", null, "1");');
 		});
 	});
+
+	/**
+	 * In Inferno all SVG attributes are written as in DOM standard
+	 * however for compatibility reasons we want to support React like syntax
+	 *
+	 */
+	describe('SVG attributes React syntax support', function() {
+		it('Should transform xlinkHref to xlink:href', function () {
+			expect(transform('<svg><use xlinkHref="#tester"></use></svg>')).to.equal('createVNode(128, "svg", null, createVNode(2, "use", {\n  "xlink:href": "#tester"\n}));');
+		});
+
+		it('Should transform strokeWidth to stroke-width', function () {
+			expect(transform('<svg><rect strokeWidth="1px"></rect></svg>')).to.equal('createVNode(128, "svg", null, createVNode(2, "rect", {\n  "stroke-width": "1px"\n}));');
+		});
+
+		it('Should transform strokeWidth to stroke-width', function () {
+			expect(transform('<svg><rect fillOpacity="1"></rect></svg>')).to.equal('createVNode(128, "svg", null, createVNode(2, "rect", {\n  "fill-opacity": "1"\n}));');
+		});
+	});
 });
 
