@@ -24,12 +24,28 @@ describe('Array', function() {
 	}
 
 	describe('Basic scenarios', function() {
+		it('Should transform div', function () {
+			expect(pluginTransform('<div></div>')).to.equal('import { createVNode } from "inferno";\ncreateVNode(2, "div");');
+		});
+
 		it('Should transform single div', function () {
 			expect(pluginTransform('<div>1</div>')).to.equal('import { createVNode } from "inferno";\ncreateVNode(2, "div", null, "1");');
 		});
 
 		it('#Test to verify stripping imports work#', function () {
 			expect(transform('<div>1</div>')).to.equal('createVNode(2, "div", null, "1");');
+		});
+
+		it('className should be in third parameter as string', function () {
+			expect(transform('<div className="first second">1</div>')).to.equal('createVNode(2, "div", "first second", "1");');
+		});
+
+		it('class should be in third parameter as variable', function () {
+			expect(transform('<div class={variable}>1</div>')).to.equal('createVNode(2, "div", variable, "1");');
+		});
+
+		it('Events should be in props', function () {
+			expect(transform('<div id="test" onClick={func} class={variable}>1</div>')).to.equal('createVNode(2, "div", variable, "1", {\n  "id": "test",\n  "onClick": func\n});');
 		});
 	});
 
@@ -40,15 +56,15 @@ describe('Array', function() {
 	 */
 	describe('SVG attributes React syntax support', function() {
 		it('Should transform xlinkHref to xlink:href', function () {
-			expect(transform('<svg><use xlinkHref="#tester"></use></svg>')).to.equal('createVNode(128, "svg", null, createVNode(2, "use", {\n  "xlink:href": "#tester"\n}));');
+			expect(transform('<svg><use xlinkHref="#tester"></use></svg>')).to.equal('createVNode(128, "svg", null, createVNode(2, "use", null, null, {\n  "xlink:href": "#tester"\n}));');
 		});
 
 		it('Should transform strokeWidth to stroke-width', function () {
-			expect(transform('<svg><rect strokeWidth="1px"></rect></svg>')).to.equal('createVNode(128, "svg", null, createVNode(2, "rect", {\n  "stroke-width": "1px"\n}));');
+			expect(transform('<svg><rect strokeWidth="1px"></rect></svg>')).to.equal('createVNode(128, "svg", null, createVNode(2, "rect", null, null, {\n  "stroke-width": "1px"\n}));');
 		});
 
 		it('Should transform strokeWidth to stroke-width', function () {
-			expect(transform('<svg><rect fillOpacity="1"></rect></svg>')).to.equal('createVNode(128, "svg", null, createVNode(2, "rect", {\n  "fill-opacity": "1"\n}));');
+			expect(transform('<svg><rect fillOpacity="1"></rect></svg>')).to.equal('createVNode(128, "svg", null, createVNode(2, "rect", null, null, {\n  "fill-opacity": "1"\n}));');
 		});
 	});
 });
