@@ -36,8 +36,12 @@ describe('Array', function() {
 			expect(transform('<div>1</div>')).to.equal('createVNode(2, "div", null, "1");');
 		});
 
-		it('className should be in third parameter as string', function () {
+		it('className should be in third parameter as string when its element', function () {
 			expect(transform('<div className="first second">1</div>')).to.equal('createVNode(2, "div", "first second", "1");');
+		});
+
+		it('className should be in fifth parameter as string when its component', function () {
+			expect(transform('<UnkownClass className="first second">1</UnkownClass>')).to.equal('createVNode(16, UnkownClass, null, null, {\n  "className": "first second",\n  children: "1"\n});');
 		});
 
 		it('class should be in third parameter as variable', function () {
