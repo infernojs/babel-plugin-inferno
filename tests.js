@@ -51,6 +51,12 @@ describe('Array', function() {
 		it('Events should be in props', function () {
 			expect(transform('<div id="test" onClick={func} class={variable}>1</div>')).to.equal('createVNode(2, "div", variable, "1", {\n  "id": "test",\n  "onClick": func\n});');
 		});
+
+		it('Should transform input and htmlFor correctly', function () {
+			var result = transform('<label htmlFor={id}><input id={id} name={name} value={value} onChange={onChange} onInput={onInput} onKeyup={onKeyup} onFocus={onFocus} onClick={onClick} type="number" pattern="[0-9]+([,\.][0-9]+)?" inputMode="numeric" min={minimum}/></label>');
+			var expected = 'createVNode(2, "label", null, createVNode(512, "input", null, null, {\n  "id": id,\n  "name": name,\n  "value": value,\n  "onChange": onChange,\n  "onInput": onInput,\n  "onKeyup": onKeyup,\n  "onFocus": onFocus,\n  "onClick": onClick,\n  "type": "number",\n  "pattern": "[0-9]+([,.][0-9]+)?",\n  "inputMode": "numeric",\n  "min": minimum\n}), {\n  "for": id\n});';
+            expect(result).to.equal(expected);
+		});
 	});
 
 	/**
