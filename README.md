@@ -49,9 +49,14 @@ If the environment supports modules (Webpack / Rollup) you can enable "imports" 
 
 Setting imports to `true` will result in imports from `'inferno'` module, or you may provide a string value to specify a different module form which to import. This setting can be applied the following way inside babelrc file
 
+``` pragma ``` - string, replace the function used when compiling JSX expressions, defaults to createVNode. With defined pragma - global Inferno object will be disabled.
+
 ```js
 {
     "presets": [ "es2015" ],
-    "plugins": [["inferno", {"imports": true}]]
+    "plugins": [["inferno", {
+        "imports": true,
+        "pragma": ""
+    }]]
 }
 ```

@@ -59,6 +59,23 @@ describe('Array', function() {
 		});
 	});
 
+	describe('Pragma option', function () {
+		var babelSettingsPragma = {
+			presets: [['es2015', {modules: false}]],
+			plugins: [
+				[plugin, {pragma: "t.some"}],
+				'syntax-jsx'
+			]
+		};
+		function pluginTransformPragma(input) {
+			return babel.transform(input, babelSettingsPragma).code;
+		};
+
+		it('Should replace createVNode to pragma option value', function () {
+			expect(pluginTransformPragma('<div></div>')).to.equal('t.some(2, "div");');
+		});
+	});
+
 	/**
 	 * In Inferno all SVG attributes are written as in DOM standard
 	 * however for compatibility reasons we want to support React like syntax
