@@ -20,16 +20,26 @@ describe('Array', function() {
 	}
 
 	function transform(input) {
-		return pluginTransform(input).replace('import { createVNode } from "inferno";\n', '');
+		return pluginTransform(input).replace('import { normalize, createVNode } from "inferno";\n', '');
 	}
+
+	describe('Dynamic children', function() {
+		it('Should add normalize call when there is dynamic children', function () {
+			expect(pluginTransform('<div>{a}</div>')).to.equal('import { normalize, createVNode } from "inferno";\ncreateVNode(2, "div", null, normalize(a));');
+		});
+
+		it('Should not add normalize call when all children are known', function () {
+			expect(pluginTransform('<div><FooBar/><div>1</div></div>')).to.equal('import { normalize, createVNode } from "inferno";\ncreateVNode(2, "div", null, [createVNode(16, FooBar), createVNode(2, "div", null, "1")]);');
+		});
+	});
 
 	describe('Basic scenarios', function() {
 		it('Should transform div', function () {
-			expect(pluginTransform('<div></div>')).to.equal('import { createVNode } from "inferno";\ncreateVNode(2, "div");');
+			expect(pluginTransform('<div></div>')).to.equal('import { normalize, createVNode } from "inferno";\ncreateVNode(2, "div");');
 		});
 
 		it('Should transform single div', function () {
-			expect(pluginTransform('<div>1</div>')).to.equal('import { createVNode } from "inferno";\ncreateVNode(2, "div", null, "1");');
+			expect(pluginTransform('<div>1</div>')).to.equal('import { normalize, createVNode } from "inferno";\ncreateVNode(2, "div", null, "1");');
 		});
 
 		it('#Test to verify stripping imports work#', function () {
@@ -55,7 +65,7 @@ describe('Array', function() {
 		it('Should transform input and htmlFor correctly', function () {
 			var result = transform('<label htmlFor={id}><input id={id} name={name} value={value} onChange={onChange} onInput={onInput} onKeyup={onKeyup} onFocus={onFocus} onClick={onClick} type="number" pattern="[0-9]+([,\.][0-9]+)?" inputMode="numeric" min={minimum}/></label>');
 			var expected = 'createVNode(2, "label", null, createVNode(512, "input", null, null, {\n  "id": id,\n  "name": name,\n  "value": value,\n  "onChange": onChange,\n  "onInput": onInput,\n  "onKeyup": onKeyup,\n  "onFocus": onFocus,\n  "onClick": onClick,\n  "type": "number",\n  "pattern": "[0-9]+([,.][0-9]+)?",\n  "inputMode": "numeric",\n  "min": minimum\n}), {\n  "for": id\n});';
-            expect(result).to.equal(expected);
+			expect(result).to.equal(expected);
 		});
 	});
 
@@ -63,13 +73,13 @@ describe('Array', function() {
 		var babelSettingsPragma = {
 			presets: [['es2015', {modules: false}]],
 			plugins: [
-				[plugin, {pragma: "t.some"}],
+				[plugin, {pragma: 't.some', imports: false}],
 				'syntax-jsx'
 			]
 		};
 		function pluginTransformPragma(input) {
 			return babel.transform(input, babelSettingsPragma).code;
-		};
+		}
 
 		it('Should replace createVNode to pragma option value', function () {
 			expect(pluginTransformPragma('<div></div>')).to.equal('t.some(2, "div");');
