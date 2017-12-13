@@ -20,26 +20,34 @@ describe('Array', function() {
 	}
 
 	function transform(input) {
-		return pluginTransform(input).replace('import { normalize, createVNode } from "inferno";\n', '');
+		return pluginTransform(input).replace('import { createTextVNode, normalize, createVNode } from "inferno";\n', '');
 	}
 
 	describe('Dynamic children', function() {
 		it('Should add normalize call when there is dynamic children', function () {
-			expect(pluginTransform('<div>{a}</div>')).to.equal('import { normalize, createVNode } from "inferno";\ncreateVNode(2, "div", null, normalize(a));');
+			expect(pluginTransform('<div>{a}</div>')).to.equal('import { createTextVNode, normalize, createVNode } from "inferno";\ncreateVNode(2, "div", null, normalize(a));');
 		});
 
 		it('Should not add normalize call when all children are known', function () {
-			expect(pluginTransform('<div><FooBar/><div>1</div></div>')).to.equal('import { normalize, createVNode } from "inferno";\ncreateVNode(2, "div", null, [createVNode(16, FooBar), createVNode(2, "div", null, "1")]);');
+			expect(pluginTransform('<div><FooBar/><div>1</div></div>')).to.equal('import { createTextVNode, normalize, createVNode } from "inferno";\ncreateVNode(2, "div", null, [createVNode(16, FooBar), createVNode(2, "div", null, "1")]);');
+		});
+
+		it('Should create textVNodes when there is no normalization needed and its not single children', function () {
+			expect(pluginTransform('<div><FooBar/>foobar</div>')).to.equal('import { createTextVNode, normalize, createVNode } from "inferno";\ncreateVNode(2, "div", null, [createVNode(16, FooBar), createTextVNode("foobar")]);');
+		});
+
+		it('Should not create textVNodes when there is single children', function () {
+			expect(pluginTransform('<div>foobar</div>')).to.equal('import { createTextVNode, normalize, createVNode } from "inferno";\ncreateVNode(2, "div", null, "foobar");');
 		});
 	});
 
 	describe('Basic scenarios', function() {
 		it('Should transform div', function () {
-			expect(pluginTransform('<div></div>')).to.equal('import { normalize, createVNode } from "inferno";\ncreateVNode(2, "div");');
+			expect(pluginTransform('<div></div>')).to.equal('import { createTextVNode, normalize, createVNode } from "inferno";\ncreateVNode(2, "div");');
 		});
 
 		it('Should transform single div', function () {
-			expect(pluginTransform('<div>1</div>')).to.equal('import { normalize, createVNode } from "inferno";\ncreateVNode(2, "div", null, "1");');
+			expect(pluginTransform('<div>1</div>')).to.equal('import { createTextVNode, normalize, createVNode } from "inferno";\ncreateVNode(2, "div", null, "1");');
 		});
 
 		it('#Test to verify stripping imports work#', function () {
