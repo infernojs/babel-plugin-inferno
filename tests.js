@@ -47,6 +47,10 @@ describe('Array', function() {
 		it('Should not create textVNodes when there is single children', function () {
 			expect(pluginTransform('<div>1</div>')).to.equal('import { normalizeProps, createTextVNode, normalize, createVNode } from "inferno";\ncreateVNode(2, "div", null, "1");');
 		});
+
+		it('Should normalize only Component prop children', function () {
+            expect(pluginTransform('<Com>{a}</Com>')).to.equal('import { normalizeProps, createTextVNode, normalize, createVNode } from "inferno";\ncreateVNode(16, Com, null, null, {\n  children: normalize(a)\n});');
+		});
 	});
 
 	describe('spreadOperator', function () {
