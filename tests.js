@@ -57,6 +57,28 @@ describe('Array', function() {
 		});
 	});
 
+	describe('Special flags', function () {
+		it('Should add keyed children flag', function () {
+			expect(transform('<div $HasKeyedChildren/>')).to.equal('createVNode(34, "div");');
+		});
+
+		it('Should not normalize if noNormalize set', function () {
+			expect(transform('<div $NoNormalize>{magic}</div>')).to.equal('createVNode(2, "div", null, magic);');
+		});
+
+		it('Should add non keyed children flag', function () {
+			expect(transform('<div $HasNonKeyedChildren/>')).to.equal('createVNode(66, "div");');
+		});
+
+		it('Should add ignore flag', function () {
+			expect(transform('<div $Ignore/>')).to.equal('createVNode(32770, "div");');
+		});
+
+		it('Should add re create flag', function () {
+			expect(transform('<div $ReCreate/>')).to.equal('createVNode(16386, "div");');
+		});
+	});
+
 	describe('spreadOperator', function () {
 		it('Should add call to normalizeProps when spread operator is used', function () {
 			expect(pluginTransform('<div {...props}>1</div>')).to.equal('import { normalizeProps, createTextVNode, normalize, createVNode } from "inferno";\nnormalizeProps(createVNode(2, "div", null, "1", {\n  ...props\n}));');
