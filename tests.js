@@ -29,7 +29,7 @@ describe('Array', function() {
 		});
 
 		it('Should add normalize call when there is dynamic and static children mixed', function () {
-			expect(pluginTransform('<div>{a}<div>1</div></div>')).to.equal('import { normalizeProps, createTextVNode, normalize, createVNode } from "inferno";\ncreateVNode(2, "div", null, normalize(a, createVNode(2, "div", null, "1")));');
+			expect(pluginTransform('<div>{a}<div>1</div></div>')).to.equal('import { normalizeProps, createTextVNode, normalize, createVNode } from "inferno";\ncreateVNode(2, "div", null, normalize([a, createVNode(2, "div", null, "1")]));');
 		});
 
 		it('Should not add normalize call when all children are known', function () {
@@ -53,7 +53,7 @@ describe('Array', function() {
 		});
 
 		it('Should not add children into array when specified in positions', function () {
-			expect(pluginTransform('<Com>{a}{b}{c}</Com>')).to.equal('import { normalizeProps, createTextVNode, normalize, createVNode } from "inferno";\ncreateVNode(16, Com, null, null, {\n  children: normalize(a, b, c)\n});');
+			expect(pluginTransform('<Com>{a}{b}{c}</Com>')).to.equal('import { normalizeProps, createTextVNode, normalize, createVNode } from "inferno";\ncreateVNode(16, Com, null, null, {\n  children: normalize([a, b, c])\n});');
 		});
 	});
 
