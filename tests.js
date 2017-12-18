@@ -25,35 +25,43 @@ describe('Array', function() {
 
 	describe('Dynamic children', function() {
 		it('Should add normalize call when there is dynamic children', function () {
-			expect(pluginTransform('<div>{a}</div>')).to.equal('import { normalizeProps, createTextVNode, normalize, createVNode } from "inferno";\ncreateVNode(2, "div", null, normalize(a));');
+			expect(transform('<div>{a}</div>')).to.equal('createVNode(2, "div", null, normalize(a));');
 		});
 
 		it('Should add normalize call when there is dynamic and static children mixed', function () {
-			expect(pluginTransform('<div>{a}<div>1</div></div>')).to.equal('import { normalizeProps, createTextVNode, normalize, createVNode } from "inferno";\ncreateVNode(2, "div", null, normalize([a, createVNode(2, "div", null, "1")]));');
+			expect(transform('<div>{a}<div>1</div></div>')).to.equal('createVNode(2, "div", null, normalize([a, createVNode(2, "div", null, "1")]));');
 		});
 
 		it('Should not add normalize call when all children are known', function () {
-			expect(pluginTransform('<div><FooBar/><div>1</div></div>')).to.equal('import { normalizeProps, createTextVNode, normalize, createVNode } from "inferno";\ncreateVNode(2, "div", null, [createVNode(16, FooBar), createVNode(2, "div", null, "1")]);');
+			expect(transform('<div><FooBar/><div>1</div></div>')).to.equal('createVNode(66, "div", null, [createVNode(16, FooBar), createVNode(2, "div", null, "1")]);');
 		});
 
-		it('Should create textVNodes when there is no normalization needed and its not single children', function () {
-			expect(pluginTransform('<div><FooBar/>foobar</div>')).to.equal('import { normalizeProps, createTextVNode, normalize, createVNode } from "inferno";\ncreateVNode(2, "div", null, [createVNode(16, FooBar), createTextVNode("foobar")]);');
-		});
-
-		it('Should not create textVNodes when there is single children', function () {
-			expect(pluginTransform('<div>foobar</div>')).to.equal('import { normalizeProps, createTextVNode, normalize, createVNode } from "inferno";\ncreateVNode(2, "div", null, "foobar");');
+		it('Should create textVNodes when there is no normalization needed and its multiple children', function () {
+			expect(transform('<div><FooBar/>foobar</div>')).to.equal('createVNode(66, "div", null, [createVNode(16, FooBar), createTextVNode("foobar")]);');
 		});
 
 		it('Should not create textVNodes when there is single children', function () {
-			expect(pluginTransform('<div>1</div>')).to.equal('import { normalizeProps, createTextVNode, normalize, createVNode } from "inferno";\ncreateVNode(2, "div", null, "1");');
+			expect(transform('<div>foobar</div>')).to.equal('createVNode(2, "div", null, "foobar");');
+		});
+
+		it('Should not create textVNodes when there is single children', function () {
+			expect(transform('<div>1</div>')).to.equal('createVNode(2, "div", null, "1");');
 		});
 
 		it('Should normalize only Component prop children', function () {
-			expect(pluginTransform('<Com>{a}</Com>')).to.equal('import { normalizeProps, createTextVNode, normalize, createVNode } from "inferno";\ncreateVNode(16, Com, null, null, {\n  children: normalize(a)\n});');
+			expect(transform('<Com>{a}</Com>')).to.equal('createVNode(16, Com, null, null, {\n  children: normalize(a)\n});');
 		});
 
 		it('Should not add children into array when specified in positions', function () {
-			expect(pluginTransform('<Com>{a}{b}{c}</Com>')).to.equal('import { normalizeProps, createTextVNode, normalize, createVNode } from "inferno";\ncreateVNode(16, Com, null, null, {\n  children: normalize([a, b, c])\n});');
+			expect(transform('<Com>{a}{b}{c}</Com>')).to.equal('createVNode(16, Com, null, null, {\n  children: normalize([a, b, c])\n});');
+		});
+
+		it('Should mark parent vNode with $HasNonKeyedChildren if no normalize is needed and all children are non keyed', function () {
+			expect(transform('<div><FooBar/><div>1</div></div>')).to.equal('createVNode(66, "div", null, [createVNode(16, FooBar), createVNode(2, "div", null, "1")]);');
+		});
+
+		it('Should mark parent vNode with $HasKeyedChildren if no normalize is needed and all children are non keyed', function () {
+			expect(transform('<div><FooBar key="foo"/><div key="1">1</div></div>')).to.equal('createVNode(34, "div", null, [createVNode(16, FooBar, null, null, null, "foo"), createVNode(2, "div", null, "1", null, "1")]);');
 		});
 	});
 
@@ -89,7 +97,7 @@ describe('Array', function() {
 		});
 
 		it('Should add call to normalizeProps when spread operator is used inside children for Component', function () {
-			expect(pluginTransform('<FooBar><BarFoo {...props}/><NoNormalize/></FooBar>')).to.equal('import { normalizeProps, createTextVNode, normalize, createVNode } from "inferno";\ncreateVNode(16, FooBar, null, null, {\n  children: [normalizeProps(createVNode(16, BarFoo, null, null, {\n    ...props\n  })), createVNode(16, NoNormalize)]\n});');
+			expect(pluginTransform('<FooBar><BarFoo {...props}/><NoNormalize/></FooBar>')).to.equal('import { normalizeProps, createTextVNode, normalize, createVNode } from "inferno";\ncreateVNode(80, FooBar, null, null, {\n  children: [normalizeProps(createVNode(16, BarFoo, null, null, {\n    ...props\n  })), createVNode(16, NoNormalize)]\n});');
 		});
 	});
 
