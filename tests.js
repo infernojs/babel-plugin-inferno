@@ -126,6 +126,12 @@ describe('Transforms', function() {
 			expect(transform('<div class={variable}>1</div>')).to.equal('createVNode(1, "div", variable, createTextVNode("1"), 2);');
 		});
 
+		it('Should call createVNode twice and createTextVNode once', function () {
+			expect(transform(`<div>
+          <div>single</div>
+        </div>`)).to.equal('createVNode(1, "div", null, createVNode(1, "div", null, createTextVNode("single"), 2), 2);');
+		});
+
 		it('Events should be in props', function () {
 			expect(transform('<div id="test" onClick={func} class={variable}>1</div>')).to.equal('createVNode(1, "div", variable, createTextVNode("1"), 2, {\n  "id": "test",\n  "onClick": func\n});');
 		});
