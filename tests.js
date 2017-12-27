@@ -20,7 +20,7 @@ describe('Transforms', function() {
 	}
 
 	function transform(input) {
-		return pluginTransform(input).replace('import { normalizeProps, createTextVNode, normalizeChildren, createComponentVNode, createVNode } from "inferno";\n', '');
+		return pluginTransform(input).replace(new RegExp('import.*"inferno";\\n'), '');
 	}
 
 	describe('Dynamic children', function() {
@@ -89,25 +89,25 @@ describe('Transforms', function() {
 
 	describe('spreadOperator', function () {
 		it('Should add call to normalizeProps when spread operator is used', function () {
-			expect(pluginTransform('<div {...props}>1</div>')).to.equal('import { normalizeProps, createTextVNode, normalizeChildren, createComponentVNode, createVNode } from "inferno";\nnormalizeProps(createVNode(1, "div", null, createTextVNode("1"), 2, {\n  ...props\n}));');
+			expect(transform('<div {...props}>1</div>')).to.equal('normalizeProps(createVNode(1, "div", null, createTextVNode("1"), 2, {\n  ...props\n}));');
 		});
 
 		it('Should add call to normalizeProps when spread operator is used #2', function () {
-			expect(pluginTransform('<div foo="bar" className="test" {...props}/>')).to.equal('import { normalizeProps, createTextVNode, normalizeChildren, createComponentVNode, createVNode } from "inferno";\nnormalizeProps(createVNode(1, "div", "test", null, 1, {\n  "foo": "bar",\n  ...props\n}));');
+			expect(transform('<div foo="bar" className="test" {...props}/>')).to.equal('normalizeProps(createVNode(1, "div", "test", null, 1, {\n  "foo": "bar",\n  ...props\n}));');
 		});
 
 		it('Should add call to normalizeProps when spread operator is used inside children for Component', function () {
-			expect(pluginTransform('<FooBar><BarFoo {...props}/><NoNormalize/></FooBar>')).to.equal('import { normalizeProps, createTextVNode, normalizeChildren, createComponentVNode, createVNode } from "inferno";\ncreateComponentVNode(2, FooBar, {\n  children: [normalizeProps(createComponentVNode(2, BarFoo, {\n    ...props\n  })), createComponentVNode(2, NoNormalize)]\n});');
+			expect(transform('<FooBar><BarFoo {...props}/><NoNormalize/></FooBar>')).to.equal('createComponentVNode(2, FooBar, {\n  children: [normalizeProps(createComponentVNode(2, BarFoo, {\n    ...props\n  })), createComponentVNode(2, NoNormalize)]\n});');
 		});
 	});
 
 	describe('Basic scenarios', function() {
 		it('Should transform div', function () {
-			expect(pluginTransform('<div></div>')).to.equal('import { normalizeProps, createTextVNode, normalizeChildren, createComponentVNode, createVNode } from "inferno";\ncreateVNode(1, "div");');
+			expect(transform('<div></div>')).to.equal('createVNode(1, "div");');
 		});
 
 		it('Should transform single div', function () {
-			expect(pluginTransform('<div>1</div>')).to.equal('import { normalizeProps, createTextVNode, normalizeChildren, createComponentVNode, createVNode } from "inferno";\ncreateVNode(1, "div", null, createTextVNode("1"), 2);');
+			expect(transform('<div>1</div>')).to.equal('createVNode(1, "div", null, createTextVNode("1"), 2);');
 		});
 
 		it('#Test to verify stripping imports work#', function () {
@@ -178,5 +178,15 @@ describe('Transforms', function() {
 			expect(transform('<svg><rect fillOpacity="1"></rect></svg>')).to.equal('createVNode(32, "svg", null, createVNode(1, "rect", null, null, 1, {\n  "fill-opacity": "1"\n}), 2);');
 		});
 	});
+
+    describe('Imports', function () {
+        it('Should not fail if createVNode is already imported', function () {
+            expect(pluginTransform('import {createVNode} from "inferno"; var foo = <div/>;')).to.equal('import { createVNode } from "inferno";var foo = createVNode(1, "div");');
+        });
+
+        it('Should add import to createVNodeComponent but not to createVNode if createVNode is already delcared', function () {
+            expect(pluginTransform('import {createVNode} from "inferno"; var foo = <FooBar/>;')).to.equal('import { createComponentVNode } from "inferno";\nimport { createVNode } from "inferno";var foo = createComponentVNode(2, FooBar);');
+        });
+    });
 });
 
