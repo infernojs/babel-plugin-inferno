@@ -205,7 +205,7 @@ describe('Transforms', function() {
         it('Element Should use prop if no children exists', function () {
             expect(transform('<div children="ab"/>')).to.eql('createVNode(1, "div", null, createTextVNode("ab"), 2);');
         });
-        
+
 
         it('Component Should prefer child element over children props', function () {
             expect(transform('<Com children="ab">test</Com>')).to.eql('createComponentVNode(2, Com, {\n  children: "test"\n});');
@@ -226,6 +226,10 @@ describe('Transforms', function() {
         it('Component should create vNode for children', function () {
             expect(transform('<Com children={<div>1</div>}/>')).to.eql('createComponentVNode(2, Com, {\n  "children": createVNode(1, "div", null, createTextVNode("1"), 2)\n});');
 		});
+
+        it('Should prefer xml children over props', function () {
+			expect(transform('<foo children={<span>b</span>}></foo>')).to.eql('createVNode(1, "foo", null, createVNode(1, "span", null, createTextVNode("b"), 2));')
+		})
 	});
 });
 
