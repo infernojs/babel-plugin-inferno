@@ -228,8 +228,12 @@ describe('Transforms', function() {
 		});
 
         it('Should prefer xml children over props', function () {
-			expect(transform('<foo children={<span>b</span>}></foo>')).to.eql('createVNode(1, "foo", null, createVNode(1, "span", null, createTextVNode("b"), 2));')
-		})
+			expect(transform('<foo children={<span>b</span>}></foo>')).to.eql('createVNode(1, "foo", null, createVNode(1, "span", null, createTextVNode("b"), 2), 2);')
+		});
+
+        it('Should prefer xml children over props (null)', function () {
+            expect(transform('<foo children={null}></foo>')).to.eql('createVNode(1, "foo");')
+        });
 	});
 });
 
