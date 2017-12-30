@@ -15,7 +15,7 @@
     "chai": "^4.1.2",
     "eslint": "^4.14.0",
     "istanbul": "^0.4.5",
-    "mocha": "^4.0.1"
+    "mocha": "^4.1.0"
   },
   "scripts": {
     "coverage": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha tests.js",

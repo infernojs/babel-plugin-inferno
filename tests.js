@@ -74,6 +74,10 @@ describe('Transforms', function() {
 			expect(transform('<div $NoNormalize>{magic}</div>')).to.equal('createVNode(1, "div", null, magic, 2);');
 		});
 
+        it('Should createTextVNode (when string is hardcoded) regardless if noNormalize set', function () {
+            expect(transform('<div $NoNormalize>text</div>')).to.equal('createVNode(1, "div", null, createTextVNode("text"), 2);');
+        });
+
 		it('Should add non keyed children flag', function () {
 			expect(transform('<div $HasNonKeyedChildren>{test}</div>')).to.equal('normalizeChildren(createVNode(1, "div", null, null, 4), test);');
 		});
