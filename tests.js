@@ -192,5 +192,40 @@ describe('Transforms', function() {
             expect(pluginTransform('import {createVNode} from "inferno"; var foo = <FooBar/>;')).to.equal('import { createComponentVNode } from "inferno";\nimport { createVNode } from "inferno";var foo = createComponentVNode(2, FooBar);');
         });
     });
+
+    describe('Children', function () {
+    	it('Element Should prefer child element over children props', function () {
+    		expect(transform('<div children="ab">test</div>')).to.eql('createVNode(1, "div", null, createTextVNode("test"), 2);');
+		});
+
+        it('Element Should prefer prop over empty children', function () {
+            expect(transform('<div children="ab"></div>')).to.eql('createVNode(1, "div", null, createTextVNode("ab"), 2);');
+        });
+
+        it('Element Should use prop if no children exists', function () {
+            expect(transform('<div children="ab"/>')).to.eql('createVNode(1, "div", null, createTextVNode("ab"), 2);');
+        });
+        
+
+        it('Component Should prefer child element over children props', function () {
+            expect(transform('<Com children="ab">test</Com>')).to.eql('createComponentVNode(2, Com, {\n  children: "test"\n});');
+        });
+
+        it('Component Should prefer prop over empty children', function () {
+            expect(transform('<Com children="ab"></Com>')).to.eql('createComponentVNode(2, Com, {\n  "children": "ab"\n});');
+        });
+
+        it('Component Should use prop if no children exists', function () {
+            expect(transform('<Com children="ab"/>')).to.eql('createComponentVNode(2, Com, {\n  "children": "ab"\n});');
+        });
+
+        it('Component Array empty children', function () {
+            expect(transform('<Com>{[]}</Com>')).to.eql('createComponentVNode(2, Com);');
+		});
+
+        it('Component should create vNode for children', function () {
+            expect(transform('<Com children={<div>1</div>}/>')).to.eql('createComponentVNode(2, Com, {\n  "children": createVNode(1, "div", null, createTextVNode("1"), 2)\n});');
+		});
+	});
 });
 
