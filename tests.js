@@ -145,6 +145,10 @@ describe('Transforms', function() {
 			var expected = 'createVNode(1, "label", null, createVNode(128, "input", null, null, 1, {\n  "id": id,\n  "name": name,\n  "value": value,\n  "onChange": onChange,\n  "onInput": onInput,\n  "onKeyup": onKeyup,\n  "onFocus": onFocus,\n  "onClick": onClick,\n  "type": "number",\n  "pattern": "[0-9]+([,.][0-9]+)?",\n  "inputMode": "numeric",\n  "min": minimum\n}), 2, {\n  "for": id\n});';
 			expect(result).to.equal(expected);
 		});
+
+		it('Should transform onDoubleClick to native html event', function () {
+			expect(transform('<div onDoubleClick={foobar}></div>')).to.eql('createVNode(1, "div", null, null, 1, {\n  "onDblClick": foobar\n});');
+		});
 	});
 
 	describe('Pragma option', function () {
