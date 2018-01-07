@@ -65,6 +65,24 @@ describe('Transforms', function() {
 		});
 	});
 
+	describe('different types', function () {
+		it('Should transform img', function () {
+      expect(transform('<img>foobar</img>')).to.equal('createVNode(1, "img", null, createTextVNode("foobar"), 2);');
+		});
+
+    it('Should transform br', function () {
+      expect(transform('<br>foobar</br>')).to.equal('createVNode(1, "br", null, createTextVNode("foobar"), 2);');
+    });
+
+    it('Should transform media', function () {
+      expect(transform('<media>foobar</media>')).to.equal('createVNode(1, "media", null, createTextVNode("foobar"), 2);');
+    });
+
+    it('Should transform textarea', function () {
+      expect(transform('<textarea>foobar</textarea>')).to.equal('createVNode(128, "textarea", null, createTextVNode("foobar"), 2);');
+    });
+	});
+
 	describe('Special flags', function () {
 		it('Should add keyed children flag', function () {
 			expect(transform('<div $HasKeyedChildren>{magic}</div>')).to.equal('normalizeChildren(createVNode(1, "div", null, null, 8), magic);');
@@ -82,12 +100,12 @@ describe('Transforms', function() {
 			expect(transform('<div $HasNonKeyedChildren>{test}</div>')).to.equal('normalizeChildren(createVNode(1, "div", null, null, 4), test);');
 		});
 
-		it('Should add ignore flag', function () {
-			expect(transform('<div $Ignore/>')).to.equal('createVNode(8193, "div");');
-		});
+		// it('Should add ignore flag', function () {
+		// 	expect(transform('<div $Ignore/>')).to.equal('createVNode(8193, "div");');
+		// });
 
 		it('Should add re create flag', function () {
-			expect(transform('<div $ReCreate/>')).to.equal('createVNode(4097, "div");');
+			expect(transform('<div $ReCreate/>')).to.equal('createVNode(2049, "div");');
 		});
 	});
 
@@ -142,7 +160,7 @@ describe('Transforms', function() {
 
 		it('Should transform input and htmlFor correctly', function () {
 			var result = transform('<label htmlFor={id}><input id={id} name={name} value={value} onChange={onChange} onInput={onInput} onKeyup={onKeyup} onFocus={onFocus} onClick={onClick} type="number" pattern="[0-9]+([,\.][0-9]+)?" inputMode="numeric" min={minimum}/></label>');
-			var expected = 'createVNode(1, "label", null, createVNode(128, "input", null, null, 1, {\n  "id": id,\n  "name": name,\n  "value": value,\n  "onChange": onChange,\n  "onInput": onInput,\n  "onKeyup": onKeyup,\n  "onFocus": onFocus,\n  "onClick": onClick,\n  "type": "number",\n  "pattern": "[0-9]+([,.][0-9]+)?",\n  "inputMode": "numeric",\n  "min": minimum\n}), 2, {\n  "for": id\n});';
+			var expected = 'createVNode(1, "label", null, createVNode(64, "input", null, null, 1, {\n  "id": id,\n  "name": name,\n  "value": value,\n  "onChange": onChange,\n  "onInput": onInput,\n  "onKeyup": onKeyup,\n  "onFocus": onFocus,\n  "onClick": onClick,\n  "type": "number",\n  "pattern": "[0-9]+([,.][0-9]+)?",\n  "inputMode": "numeric",\n  "min": minimum\n}), 2, {\n  "for": id\n});';
 			expect(result).to.equal(expected);
 		});
 
