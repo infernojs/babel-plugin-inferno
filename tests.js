@@ -8,7 +8,7 @@ var babel = require('babel-core');
 var babelSettings = {
 	presets: [['es2015', {modules: false}]],
 	plugins: [
-		[plugin, {imports: true}],
+		[plugin, {imports: false}],
 		'syntax-jsx'
 	]
 };
