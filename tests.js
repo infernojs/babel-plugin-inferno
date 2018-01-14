@@ -65,6 +65,22 @@ describe('Transforms', function() {
 		});
 	});
 
+  describe('deprecations', function () {
+		it('Should warn if noNormalize/hasKeyedChildren/hasNonKeyedChildren is used', function () {
+			expect(function () {
+				transform('<span><div noNormalize/></span>')
+      }).to.throw('unknown: Inferno JSX plugin: noNormalize is deprecated use: $NoNormalize');
+
+      expect(function () {
+        transform('<span><div hasKeyedChildren/></span>')
+      }).to.throw('unknown: Inferno JSX plugin: hasKeyedChildren is deprecated use: $HasKeyedChildren');
+
+      expect(function () {
+        transform('<span><div hasNonKeyedChildren/></span>')
+      }).to.throw('unknown: Inferno JSX plugin: hasNonKeyedChildren is deprecated use: $HasNonKeyedChildren');
+		})
+  });
+
 	describe('different types', function () {
 		it('Should transform img', function () {
       expect(transform('<img>foobar</img>')).to.equal('createVNode(1, "img", null, createTextVNode("foobar"), 2);');
