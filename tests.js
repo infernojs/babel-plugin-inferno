@@ -8,7 +8,7 @@ var babel = require('babel-core');
 var babelSettings = {
 	presets: [['es2015', {modules: false}]],
 	plugins: [
-		[plugin, {imports: false}],
+		[plugin, {imports: true}],
 		'syntax-jsx'
 	]
 };
@@ -141,7 +141,11 @@ describe('Transforms', function() {
 		});
 
 		it('className should be in fifth parameter as string when its component', function () {
-			expect(transform('<UnkownClass className="first second">1</UnkownClass>')).to.equal('createComponentVNode(2, UnkownClass, {\n  "className": "first second",\n  children: "1"\n});');
+			expect(transform('<UnknownClass className="first second">1</UnknownClass>')).to.equal('createComponentVNode(2, UnknownClass, {\n  "className": "first second",\n  children: "1"\n});');
+		});
+
+		it('JSXMemberExpressions should work', function () {
+			expect(transform('<Components.Unknown>1</Components.Unknown>')).to.equal('createComponentVNode(2, Components.Unknown, {\n  children: "1"\n});');
 		});
 
 		it('class should be in third parameter as variable', function () {
