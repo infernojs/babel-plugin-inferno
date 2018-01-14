@@ -41,7 +41,11 @@ describe('Array', function() {
 		});
 
 		it('className should be in fifth parameter as string when its component', function () {
-			expect(transform('<UnkownClass className="first second">1</UnkownClass>')).to.equal('createVNode(16, UnkownClass, null, null, {\n  "className": "first second",\n  children: "1"\n});');
+			expect(transform('<UnknownClass className="first second">1</UnknownClass>')).to.equal('createVNode(16, UnknownClass, null, null, {\n  "className": "first second",\n  children: "1"\n});');
+		});
+
+		it('JSXMemberExpressions should work', function () {
+			expect(transform('<Components.Unknown>1</Components.Unknown>')).to.equal('createVNode(16, Components.Unknown, null, null, {\n  children: "1"\n});');
 		});
 
 		it('class should be in third parameter as variable', function () {
