@@ -21,11 +21,12 @@ It's important that you also include the `babel-plugin-syntax-jsx`plugin.
 
 Example on a `.babelrc` file that will work with Inferno:
 
+Make sure inferno plugin is added before babel module transformers
 
 ```js
 {   
     "presets": [ "es2015" ],
-    "plugins": ["inferno"]
+    "plugins": [["babel-plugin-inferno", {"imports": true}]]
 }
 ```
 
