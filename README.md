@@ -3,8 +3,11 @@
 > Plugin for babel 6.x to enable JSX for Inferno
 
 This plugin transforms JSX code in your projects to [Inferno](https://github.com/trueadm/inferno) compatible virtual DOM.
+It is recommended to use this plugin for compiling JSX for inferno. It is different to other JSX plugins, because it outputs highly optimized inferno specific `createVNode` calls. This plugin also checks children shape during compilation stage to reduce overhead from runtime application. 
 
 ## How to install
+
+**Note!** Make sure babel-plugin has same **major** version as the inferno you are using!
 
 ```bash
 npm i --save-dev babel-plugin-inferno
@@ -18,11 +21,12 @@ It's important that you also include the `babel-plugin-syntax-jsx`plugin.
 
 Example on a `.babelrc` file that will work with Inferno:
 
+Make sure inferno plugin is added before babel module transformers
 
 ```js
 {   
     "presets": [ "es2015" ],
-    "plugins": ["inferno"]
+    "plugins": [["babel-plugin-inferno", {"imports": true}]]
 }
 ```
 
@@ -41,22 +45,78 @@ Inferno.render(<div autoFocus='true' />, container);
 
 ```
 
+## Special flags
+
+This plugin provides few special compile time flags that can be used to optimize an inferno application.
+
+```js
+// ChildFlags:
+<div $HasVNodeChildren /> - Children is another vNode (Element or Component)
+<div $HasNonKeyedChildren /> - Children is always array without keys
+<div $HasKeyedChildren /> - Children is array of vNodes having unique keys
+<div $ChildFlag={expression} /> - This attribute is used for defining children shpae runtime. See inferno-vnode-flags (ChildFlags) for possibe values
+
+// Functional flags
+<div $ReCreate /> - This flag tells inferno to always remove and add the node. It can be used to replace key={Math.random()}
+```
+
+Flag called `noNormalize` has been removed in v4, and is replaced by `$HasVNodeChildren`
+
 ## Options
 
-By default babel-plugin-inferno ships imports false. This is same behavior with ReactJS. You need to have Inferno declared in every JSX file. Even if not used by the code. Compiled code will have reference to global Inferno object.
 
-If the environment supports modules (Webpack / Rollup) you can enable "imports" option which will import createVNode from Inferno. This allows tree-shaking to happen and Inferno does not need to be imported if not needed by the user land code.
+Change in v4:
 
-Setting imports to `true` will result in imports from `'inferno'` module, or you may provide a string value to specify a different module form which to import. This setting can be applied the following way inside babelrc file
 
-``` pragma ``` - string, replace the function used when compiling JSX expressions, defaults to createVNode. With defined pragma - global Inferno object will be disabled.
+#### Imports (boolean)
+By default babel-plugin-inferno uses imports. That means you no longer need to import inferno globally.
+Just import the inferno specific code YOUR code uses.
+
+example:
+```js
+import {render} from 'inferno'; // Just import what you need, (render in this case)
+
+// The plugin will automatically import, createVNode
+render(<div>1</div>, document.getElementById('root'));
+```
+
+You need to have support for ES6 modules for this to work. If you are using legacy build system or outdated version of webpack, you can revert this change by using `imports: false`
+
+```js
+{
+    "presets": [ "es2015" ],
+    "plugins": [["inferno", {
+        "imports": false
+    }]]
+}
+```
+
+
+#### Pragma
+
+Each method that is used from inferno can be replaced by custom name.
+
+``` pragma ``` (string) defaults to createVNode.
+
+``` pragmaCreateComponentVNode ``` (string) defaults to createComponentVNode.
+ 
+``` pragmaNormalizeProps ``` (string) defaults to normalizeProps.
+ 
+``` pragmaTextVNode ``` (string) defaults to createTextVNode.
+ 
+
+
+
 
 ```js
 {
     "presets": [ "es2015" ],
     "plugins": [["inferno", {
         "imports": true,
-        "pragma": ""
+        "pragma": "",
+        "pragmaCreateComponentVNode": "",
+        "pragmaNormalizeProps": "",
+        "pragmaTextVNode": ""
     }]]
 }
 ```
