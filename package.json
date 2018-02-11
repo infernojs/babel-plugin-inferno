@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-inferno",
-  "version": "4.0.0-30",
+  "version": "4.0.0",
   "description": "Turn JSX into Inferno virtual DOM",
   "repository": "https://github.com/trueadm/babel-plugin-inferno",
   "license": "MIT",
@@ -32,10 +32,13 @@
     "inferno",
     "jsx"
   ],
+  "peerDependencies": {
+    "inferno": ">=4"
+  },
   "dependencies": {
     "babel-plugin-syntax-jsx": "^6.18.0"
   },
   "engines": {
-    "node": ">= 4.6.0"
+    "node": ">=6"
   }
 }
