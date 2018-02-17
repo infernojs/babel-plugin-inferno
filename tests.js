@@ -155,6 +155,10 @@ describe('Transforms', function () {
         it('Should add call to normalizeProps when spread operator is used inside children for Component', function () {
             expect(transform('<FooBar><BarFoo {...props}/><NoNormalize/></FooBar>')).to.equal('createComponentVNode(2, FooBar, {\n  children: [normalizeProps(createComponentVNode(2, BarFoo, {\n    ...props\n  })), createComponentVNode(2, NoNormalize)]\n});');
         });
+
+        it('Should do single normalization when multiple spread operators are used', function () {
+            expect(transform('<FooBar><BarFoo {...magics} {...foobars} {...props}/><NoNormalize/></FooBar>')).to.equal('createComponentVNode(2, FooBar, {\n  children: [normalizeProps(createComponentVNode(2, BarFoo, {\n    ...magics,\n    ...foobars,\n    ...props\n  })), createComponentVNode(2, NoNormalize)]\n});');
+        });
     });
 
     describe('Basic scenarios', function () {
