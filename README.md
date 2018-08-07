@@ -113,9 +113,6 @@ Each method that is used from inferno can be replaced by custom name.
 ``` pragmaTextVNode ``` (string) defaults to createTextVNode.
  
 
-
-
-
 ```js
 {
     "presets": [ "es2015" ],

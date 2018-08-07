@@ -211,6 +211,16 @@ describe('Transforms', function () {
         });
     });
 
+    describe('contenteditbale', function () {
+      it('Should set additional byte on when contenteditbale attribute is found', function () {
+        expect(transform('<div contentEditable></div>')).to.eql('createVNode(4097, "div", null, null, 1, {\n  "contentEditable": true\n});');
+        expect(transform('<span contenteditable="false"></span>')).to.eql('createVNode(4097, "span", null, null, 1, {\n  "contenteditable": "false"\n});');
+        expect(transform('<div contenteditable></div>')).to.eql('createVNode(4097, "div", null, null, 1, {\n  "contenteditable": true\n});');
+        expect(transform('<div contentEditable={logic}></div>')).to.eql('createVNode(4097, "div", null, null, 1, {\n  "contentEditable": logic\n});');
+        expect(transform('<div contentEditable="true"></div>')).to.eql('createVNode(4097, "div", null, null, 1, {\n  "contentEditable": "true"\n});');
+      });
+    });
+
     describe('Pragma option', function () {
         var babelSettingsPragma = {
             presets: [['es2015', {modules: false}]],
