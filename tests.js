@@ -29,11 +29,11 @@ describe('Transforms', function () {
         });
 
         it('Should add normalize call when there is dynamic and static children mixed', function () {
-            expect(transform('<div>{a}<div>1</div></div>')).to.equal('createVNode(1, "div", null, [a, createVNode(1, "div", null, createTextVNode("1"), 2)], 0);');
+            expect(transform('<div>{a}<div>1</div></div>')).to.equal('createVNode(1, "div", null, [a, createVNode(1, "div", null, "1", 16)], 0);');
         });
 
         it('Should not add normalize call when all children are known', function () {
-            expect(transform('<div><FooBar/><div>1</div></div>')).to.equal('createVNode(1, "div", null, [createComponentVNode(2, FooBar), createVNode(1, "div", null, createTextVNode("1"), 2)], 4);');
+            expect(transform('<div><FooBar/><div>1</div></div>')).to.equal('createVNode(1, "div", null, [createComponentVNode(2, FooBar), createVNode(1, "div", null, "1", 16)], 4);');
         });
 
         it('Should create textVNodes when there is no normalization needed and its multiple children', function () {
@@ -41,11 +41,11 @@ describe('Transforms', function () {
         });
 
         it('Should create textVNodes when there is single children', function () {
-            expect(transform('<div>foobar</div>')).to.equal('createVNode(1, "div", null, createTextVNode("foobar"), 2);');
+            expect(transform('<div>foobar</div>')).to.equal('createVNode(1, "div", null, "foobar", 16);');
         });
 
         it('Should create textVNodes when there is single children', function () {
-            expect(transform('<div>1</div>')).to.equal('createVNode(1, "div", null, createTextVNode("1"), 2);');
+            expect(transform('<div>1</div>')).to.equal('createVNode(1, "div", null, "1", 16);');
         });
 
         it('Should not normalize Component prop children', function () {
@@ -57,11 +57,11 @@ describe('Transforms', function () {
         });
 
         it('Should mark parent vNode with $HasNonKeyedChildren if no normalize is needed and all children are non keyed', function () {
-            expect(transform('<div><FooBar/><div>1</div></div>')).to.equal('createVNode(1, "div", null, [createComponentVNode(2, FooBar), createVNode(1, "div", null, createTextVNode("1"), 2)], 4);');
+            expect(transform('<div><FooBar/><div>1</div></div>')).to.equal('createVNode(1, "div", null, [createComponentVNode(2, FooBar), createVNode(1, "div", null, "1", 16)], 4);');
         });
 
         it('Should mark parent vNode with $HasKeyedChildren if no normalize is needed and all children are keyed', function () {
-            expect(transform('<div><FooBar key="foo"/><div key="1">1</div></div>')).to.equal('createVNode(1, "div", null, [createComponentVNode(2, FooBar, null, "foo"), createVNode(1, "div", null, createTextVNode("1"), 2, null, "1")], 8);');
+            expect(transform('<div><FooBar key="foo"/><div key="1">1</div></div>')).to.equal('createVNode(1, "div", null, [createComponentVNode(2, FooBar, null, "foo"), createVNode(1, "div", null, "1", 16, null, "1")], 8);');
         });
     });
 
@@ -91,29 +91,29 @@ describe('Transforms', function () {
         });
 
         it('Should be possible to define override childFlags runtime', function () {
-            expect(transform('<img $ChildFlag={1}>foobar</img>')).to.equal('createVNode(1, "img", null, createTextVNode("foobar"), 1);');
+            expect(transform('<img $ChildFlag={1}>foobar</img>')).to.equal('createVNode(1, "img", null, "foobar", 1);');
         });
 
         it('Should be possible to use expression for childFlags', function () {
-            expect(transform('<img $ChildFlag={magic}>foobar</img>')).to.equal('createVNode(1, "img", null, createTextVNode("foobar"), magic);');
+            expect(transform('<img $ChildFlag={magic}>foobar</img>')).to.equal('createVNode(1, "img", null, "foobar", magic);');
         });
     });
 
     describe('different types', function () {
         it('Should transform img', function () {
-            expect(transform('<img>foobar</img>')).to.equal('createVNode(1, "img", null, createTextVNode("foobar"), 2);');
+            expect(transform('<img>foobar</img>')).to.equal('createVNode(1, "img", null, "foobar", 16);');
         });
 
         it('Should transform br', function () {
-            expect(transform('<br>foobar</br>')).to.equal('createVNode(1, "br", null, createTextVNode("foobar"), 2);');
+            expect(transform('<br>foobar</br>')).to.equal('createVNode(1, "br", null, "foobar", 16);');
         });
 
         it('Should transform media', function () {
-            expect(transform('<media>foobar</media>')).to.equal('createVNode(1, "media", null, createTextVNode("foobar"), 2);');
+            expect(transform('<media>foobar</media>')).to.equal('createVNode(1, "media", null, "foobar", 16);');
         });
 
         it('Should transform textarea', function () {
-            expect(transform('<textarea>foobar</textarea>')).to.equal('createVNode(128, "textarea", null, createTextVNode("foobar"), 2);');
+            expect(transform('<textarea>foobar</textarea>')).to.equal('createVNode(128, "textarea", null, "foobar", 16);');
         });
     });
 
@@ -126,17 +126,25 @@ describe('Transforms', function () {
             expect(transform('<div $HasVNodeChildren>{magic}</div>')).to.equal('createVNode(1, "div", null, magic, 2);');
         });
 
-        it('Should createTextVNode (when string is hardcoded) regardless if noNormalize set', function () {
-            expect(transform('<div $HasVNodeChildren>text</div>')).to.equal('createVNode(1, "div", null, createTextVNode("text"), 2);');
+        it('Should set hasTextChildren flag and not create textVNode when $HasTextChildren is used ( dynamic )', function () {
+            expect(transform('<div $HasTextChildren>{foobar}</div>')).to.equal('createVNode(1, "div", null, foobar, 16);');
+        });
+
+        it('Should set hasTextChildren flag and not create textVNode when $HasTextChildren is used ( hardcoded )', function () {
+            expect(transform('<div $HasTextChildren>text</div>')).to.equal('createVNode(1, "div", null, "text", 16);');
+        });
+
+        it('Should set hasTextChildren flag and not create textVNode when $HasTextChildren is used ( hardcoded ) #2', function () {
+            expect(transform('<div $HasTextChildren>{"testing"}</div>')).to.equal('createVNode(1, "div", null, "testing", 16);');
+        });
+
+        it('Should use optimized text children instead createTextVNode for element single child', function () {
+            expect(transform('<div>text</div>')).to.equal('createVNode(1, "div", null, "text", 16);');
         });
 
         it('Should add non keyed children flag', function () {
             expect(transform('<div $HasNonKeyedChildren>{test}</div>')).to.equal('createVNode(1, "div", null, test, 4);');
         });
-
-        // it('Should add ignore flag', function () {
-        // 	expect(transform('<div $Ignore/>')).to.equal('createVNode(8193, "div");');
-        // });
 
         it('Should add re create flag', function () {
             expect(transform('<div $ReCreate/>')).to.equal('createVNode(2049, "div");');
@@ -145,7 +153,7 @@ describe('Transforms', function () {
 
     describe('spreadOperator', function () {
         it('Should add call to normalizeProps when spread operator is used', function () {
-            expect(transform('<div {...props}>1</div>')).to.equal('normalizeProps(createVNode(1, "div", null, createTextVNode("1"), 2, {\n  ...props\n}));');
+            expect(transform('<div {...props}>1</div>')).to.equal('normalizeProps(createVNode(1, "div", null, "1", 16, {\n  ...props\n}));');
         });
 
         it('Should add call to normalizeProps when spread operator is used #2', function () {
@@ -167,15 +175,15 @@ describe('Transforms', function () {
         });
 
         it('Should transform single div', function () {
-            expect(transform('<div>1</div>')).to.equal('createVNode(1, "div", null, createTextVNode("1"), 2);');
+            expect(transform('<div>1</div>')).to.equal('createVNode(1, "div", null, "1", 16);');
         });
 
         it('#Test to verify stripping imports work#', function () {
-            expect(transform('<div>1</div>')).to.equal('createVNode(1, "div", null, createTextVNode("1"), 2);');
+            expect(transform('<div>1</div>')).to.equal('createVNode(1, "div", null, "1", 16);');
         });
 
         it('className should be in third parameter as string when its element', function () {
-            expect(transform('<div className="first second">1</div>')).to.equal('createVNode(1, "div", "first second", createTextVNode("1"), 2);');
+            expect(transform('<div className="first second">1</div>')).to.equal('createVNode(1, "div", "first second", "1", 16);');
         });
 
         it('className should be in fifth parameter as string when its component', function () {
@@ -187,17 +195,17 @@ describe('Transforms', function () {
         });
 
         it('class should be in third parameter as variable', function () {
-            expect(transform('<div class={variable}>1</div>')).to.equal('createVNode(1, "div", variable, createTextVNode("1"), 2);');
+            expect(transform('<div class={variable}>1</div>')).to.equal('createVNode(1, "div", variable, "1", 16);');
         });
 
-        it('Should call createVNode twice and createTextVNode once', function () {
+        it('Should call createVNode twice and text children', function () {
             expect(transform(`<div>
           <div>single</div>
-        </div>`)).to.equal('createVNode(1, "div", null, createVNode(1, "div", null, createTextVNode("single"), 2), 2);');
+        </div>`)).to.equal('createVNode(1, "div", null, createVNode(1, "div", null, "single", 16), 2);');
         });
 
         it('Events should be in props', function () {
-            expect(transform('<div id="test" onClick={func} class={variable}>1</div>')).to.equal('createVNode(1, "div", variable, createTextVNode("1"), 2, {\n  "id": "test",\n  "onClick": func\n});');
+            expect(transform('<div id="test" onClick={func} class={variable}>1</div>')).to.equal('createVNode(1, "div", variable, "1", 16, {\n  "id": "test",\n  "onClick": func\n});');
         });
 
         it('Should transform input and htmlFor correctly', function () {
@@ -270,15 +278,15 @@ describe('Transforms', function () {
 
     describe('Children', function () {
         it('Element Should prefer child element over children props', function () {
-            expect(transform('<div children="ab">test</div>')).to.eql('createVNode(1, "div", null, createTextVNode("test"), 2);');
+            expect(transform('<div children="ab">test</div>')).to.eql('createVNode(1, "div", null, "test", 16);');
         });
 
         it('Element Should prefer prop over empty children', function () {
-            expect(transform('<div children="ab"></div>')).to.eql('createVNode(1, "div", null, createTextVNode("ab"), 2);');
+            expect(transform('<div children="ab"></div>')).to.eql('createVNode(1, "div", null, "ab", 16);');
         });
 
         it('Element Should use prop if no children exists', function () {
-            expect(transform('<div children="ab"/>')).to.eql('createVNode(1, "div", null, createTextVNode("ab"), 2);');
+            expect(transform('<div children="ab"/>')).to.eql('createVNode(1, "div", null, "ab", 16);');
         });
 
 
@@ -299,11 +307,11 @@ describe('Transforms', function () {
         });
 
         it('Component should create vNode for children', function () {
-            expect(transform('<Com children={<div>1</div>}/>')).to.eql('createComponentVNode(2, Com, {\n  "children": createVNode(1, "div", null, createTextVNode("1"), 2)\n});');
+            expect(transform('<Com children={<div>1</div>}/>')).to.eql('createComponentVNode(2, Com, {\n  "children": createVNode(1, "div", null, "1", 16)\n});');
         });
 
         it('Should prefer xml children over props', function () {
-            expect(transform('<foo children={<span>b</span>}></foo>')).to.eql('createVNode(1, "foo", null, createVNode(1, "span", null, createTextVNode("b"), 2), 2);')
+            expect(transform('<foo children={<span>b</span>}></foo>')).to.eql('createVNode(1, "foo", null, createVNode(1, "span", null, "b", 16), 2);')
         });
 
         it('Should prefer xml children over props (null)', function () {
