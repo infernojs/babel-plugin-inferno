@@ -4,12 +4,12 @@ var it = mocha.it;
 var chai = require('chai');
 var plugin = require('./lib/index.js');
 var expect = chai.expect;
-var babel = require('babel-core');
+var babel = require('@babel/core');
 var babelSettings = {
-    presets: [['es2015', {modules: false}]],
+    presets: [['@babel/preset-env', {modules: false, loose: true, targets: {browsers:"last 1 Chrome versions"}}]],
     plugins: [
         [plugin, {imports: true}],
-        'syntax-jsx'
+        '@babel/plugin-syntax-jsx'
     ]
 };
 
@@ -63,26 +63,6 @@ describe('Transforms', function () {
         it('Should mark parent vNode with $HasKeyedChildren if no normalize is needed and all children are keyed', function () {
             expect(transform('<div><FooBar key="foo"/><div key="1">1</div></div>')).to.equal('createVNode(1, "div", null, [createComponentVNode(2, FooBar, null, "foo"), createVNode(1, "div", null, "1", 16, null, "1")], 8);');
         });
-    });
-
-    describe('deprecations', function () {
-        it('Should warn if noNormalize/hasKeyedChildren/hasNonKeyedChildren is used', function () {
-            expect(function () {
-                transform('<span><div noNormalize/></span>')
-            }).to.throw('unknown: Inferno JSX plugin:\nnoNormalize is deprecated use: $HasVNodeChildren, or if children shape is dynamic you can use: $ChildFlag={expression} see inferno package:inferno-vnode-flags (ChildFlags) for possible values');
-
-            expect(function () {
-                transform('<span><div $NoNormalize/></span>')
-            }).to.throw('unknown: Inferno JSX plugin:\n$NoNormalize is deprecated use: $HasVNodeChildren, or if children shape is dynamic you can use: $ChildFlag={expression} see inferno package:inferno-vnode-flags (ChildFlags) for possible values');
-
-            expect(function () {
-                transform('<span><div hasKeyedChildren/></span>')
-            }).to.throw('unknown: Inferno JSX plugin:\nhasKeyedChildren is deprecated use: $HasKeyedChildren');
-
-            expect(function () {
-                transform('<span><div hasNonKeyedChildren/></span>')
-            }).to.throw('unknown: Inferno JSX plugin:\nhasNonKeyedChildren is deprecated use: $HasNonKeyedChildren');
-        })
     });
 
     describe('Dynamic ChildFlags', function () {
@@ -153,7 +133,7 @@ describe('Transforms', function () {
 
     describe('spreadOperator', function () {
         it('Should add call to normalizeProps when spread operator is used', function () {
-            expect(transform('<div {...props}>1</div>')).to.equal('normalizeProps(createVNode(1, "div", null, "1", 16, {\n  ...props\n}));');
+            expect(transform('<div {...props}>1</div>')).to.equal('normalizeProps(createVNode(1, "div", null, "1", 16, { ...props\n}));');
         });
 
         it('Should add call to normalizeProps when spread operator is used #2', function () {
@@ -161,11 +141,11 @@ describe('Transforms', function () {
         });
 
         it('Should add call to normalizeProps when spread operator is used inside children for Component', function () {
-            expect(transform('<FooBar><BarFoo {...props}/><NoNormalize/></FooBar>')).to.equal('createComponentVNode(2, FooBar, {\n  children: [normalizeProps(createComponentVNode(2, BarFoo, {\n    ...props\n  })), createComponentVNode(2, NoNormalize)]\n});');
+            expect(transform('<FooBar><BarFoo {...props}/><NoNormalize/></FooBar>')).to.equal('createComponentVNode(2, FooBar, {\n  children: [normalizeProps(createComponentVNode(2, BarFoo, { ...props\n  })), createComponentVNode(2, NoNormalize)]\n});');
         });
 
         it('Should do single normalization when multiple spread operators are used', function () {
-            expect(transform('<FooBar><BarFoo {...magics} {...foobars} {...props}/><NoNormalize/></FooBar>')).to.equal('createComponentVNode(2, FooBar, {\n  children: [normalizeProps(createComponentVNode(2, BarFoo, {\n    ...magics,\n    ...foobars,\n    ...props\n  })), createComponentVNode(2, NoNormalize)]\n});');
+            expect(transform('<FooBar><BarFoo {...magics} {...foobars} {...props}/><NoNormalize/></FooBar>')).to.equal('createComponentVNode(2, FooBar, {\n  children: [normalizeProps(createComponentVNode(2, BarFoo, { ...magics,\n    ...foobars,\n    ...props\n  })), createComponentVNode(2, NoNormalize)]\n});');
         });
     });
 
@@ -231,10 +211,10 @@ describe('Transforms', function () {
 
     describe('Pragma option', function () {
         var babelSettingsPragma = {
-            presets: [['es2015', {modules: false}]],
+            presets: [['@babel/preset-env', {modules: false, loose: true, targets: {browsers:"last 1 Chrome versions"}}]],
             plugins: [
-                [plugin, {pragma: 't.some', imports: false}],
-                'syntax-jsx'
+              [plugin, {imports: false, pragma: 't.some'}],
+              '@babel/plugin-syntax-jsx'
             ]
         };
 
@@ -266,13 +246,20 @@ describe('Transforms', function () {
         });
     });
 
+    describe('detection', function () {
+        it('Should use Functional Component and class Component flags if type is known', function () {
+            var expectedResult = '\nfunction Terve() {}\n\nclass FooComponent extends Component {}\n\nvar tester = createComponentVNode(4, FooComponent);\nvar foo = createVNode(1, "div");\nvar b = createComponentVNode(8, Terve);';
+            expect(transform('function Terve() {} class FooComponent extends Component {} var tester = <FooComponent/>; var foo = <div/>; var b = <Terve/>')).to.equal(expectedResult);
+        });
+    });
+
     describe('Imports', function () {
         it('Should not fail if createVNode is already imported', function () {
-            expect(pluginTransform('import {createVNode} from "inferno"; var foo = <div/>;')).to.equal('import { createVNode } from "inferno";var foo = createVNode(1, "div");');
+            expect(pluginTransform('import {createVNode} from "inferno"; var foo = <div/>;')).to.equal('import { createVNode } from "inferno";\nvar foo = createVNode(1, "div");');
         });
 
         it('Should add import to createVNodeComponent but not to createVNode if createVNode is already delcared', function () {
-            expect(pluginTransform('import {createVNode} from "inferno"; var foo = <FooBar/>;')).to.equal('import { createComponentVNode } from "inferno";\nimport { createVNode } from "inferno";var foo = createComponentVNode(2, FooBar);');
+            expect(pluginTransform('import {createVNode} from "inferno"; var foo = <FooBar/>;')).to.equal('import { createComponentVNode } from "inferno";\nimport { createVNode } from "inferno";\nvar foo = createComponentVNode(2, FooBar);');
         });
     });
 
@@ -316,6 +303,96 @@ describe('Transforms', function () {
 
         it('Should prefer xml children over props (null)', function () {
             expect(transform('<foo children={null}></foo>')).to.eql('createVNode(1, "foo");')
+        });
+    });
+
+    describe('Fragments', function () {
+        describe('Short syntax', function () {
+          it('Should createFragment', function () {
+            expect(transform('<>Test</>')).to.eql('createFragment(["Test"], 4);');
+          });
+
+          it('Should createFragment dynamic children', function () {
+            expect(transform('<>{dynamic}</>')).to.eql('createFragment(dynamic, 0);');
+          });
+
+          it('Should createFragment keyed children', function () {
+            expect(transform('<><span key="ok">kk</span><div key="ok2">ok</div></>')).to.eql('createFragment([createVNode(1, "span", null, "kk", 16, null, "ok"), createVNode(1, "div", null, "ok", 16, null, "ok2")], 8);');
+          });
+
+          it('Should createFragment non keyed children', function () {
+            expect(transform('<><div>1</div><span>foo</span></>')).to.eql('createFragment([createVNode(1, "div", null, "1", 16), createVNode(1, "span", null, "foo", 16)], 4);');
+          });
+        });
+
+        describe('Long syntax', function () {
+            describe('Fragment', function () {
+              it('Should createFragment', function () {
+                expect(transform('<Fragment>Test</Fragment>')).to.eql('createFragment(["Test"], 4);');
+              });
+
+              it('Should createFragment dynamic children', function () {
+                expect(transform('<Fragment>{dynamic}</Fragment>')).to.eql('createFragment(dynamic, 0);');
+              });
+
+              it('Should createFragment keyed children', function () {
+                expect(transform('<Fragment><span key="ok">kk</span><div key="ok2">ok</div></Fragment>')).to.eql('createFragment([createVNode(1, "span", null, "kk", 16, null, "ok"), createVNode(1, "div", null, "ok", 16, null, "ok2")], 8);');
+              });
+
+              it('Should createFragment non keyed children', function () {
+                expect(transform('<Fragment><div>1</div><span>foo</span></Fragment>')).to.eql('createFragment([createVNode(1, "div", null, "1", 16), createVNode(1, "span", null, "foo", 16)], 4);');
+              });
+
+              // Long syntax specials
+              it('Should createFragment non keyed children', function () {
+                expect(transform('<Fragment key="foo"><div>1</div><span>foo</span></Fragment>')).to.eql('createFragment([createVNode(1, "div", null, "1", 16), createVNode(1, "span", null, "foo", 16)], 4, "foo");');
+              });
+
+              // Optimization flags
+              it('Should createFragment non keyed children', function () {
+                expect(transform('<Fragment key="foo" $HasKeyedChildren>{magic}</Fragment>')).to.eql('createFragment(magic, 8, "foo");');
+              });
+
+              it('Should createFragment non keyed children', function () {
+                expect(transform('<Fragment key="foo" $HasNonKeyedChildren>{magic}</Fragment>')).to.eql('createFragment(magic, 4, "foo");');
+              });
+            });
+
+            describe('Inferno.Fragment', function () {
+              it('Should createFragment', function () {
+                expect(transform('<Inferno.Fragment>Test</Inferno.Fragment>')).to.eql('createFragment(["Test"], 4);');
+              });
+
+              it('Should createFragment dynamic children', function () {
+                expect(transform('<Inferno.Fragment>{dynamic}</Inferno.Fragment>')).to.eql('createFragment(dynamic, 0);');
+              });
+
+              it('Should createFragment keyed children', function () {
+                expect(transform('<Inferno.Fragment><span key="ok">kk</span><div key="ok2">ok</div></Inferno.Fragment>')).to.eql('createFragment([createVNode(1, "span", null, "kk", 16, null, "ok"), createVNode(1, "div", null, "ok", 16, null, "ok2")], 8);');
+              });
+
+              it('Should createFragment non keyed children', function () {
+                expect(transform('<Inferno.Fragment><div>1</div><span>foo</span></Inferno.Fragment>')).to.eql('createFragment([createVNode(1, "div", null, "1", 16), createVNode(1, "span", null, "foo", 16)], 4);');
+              });
+
+              // Long syntax specials
+              it('Should createFragment non keyed children', function () {
+                expect(transform('<Inferno.Fragment key="foo"><div>1</div><span>foo</span></Inferno.Fragment>')).to.eql('createFragment([createVNode(1, "div", null, "1", 16), createVNode(1, "span", null, "foo", 16)], 4, "foo");');
+              });
+              
+              it('Should ignore all other props', function () {
+                expect(transform('<Inferno.Fragment abc="foobar" id="test" key="foo"><div>1</div><span>foo</span></Inferno.Fragment>')).to.eql('createFragment([createVNode(1, "div", null, "1", 16), createVNode(1, "span", null, "foo", 16)], 4, "foo");');
+              });
+
+              // Optimization flags
+              it('Should createFragment non keyed children', function () {
+                expect(transform('<Inferno.Fragment key="foo" $HasKeyedChildren>{magic}</Inferno.Fragment>')).to.eql('createFragment(magic, 8, "foo");');
+              });
+
+              it('Should createFragment non keyed children', function () {
+                expect(transform('<Inferno.Fragment key="foo" $HasNonKeyedChildren>{magic}</Inferno.Fragment>')).to.eql('createFragment(magic, 4, "foo");');
+              });
+            });
         });
     });
 });

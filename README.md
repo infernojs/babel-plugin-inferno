@@ -53,6 +53,29 @@ Inferno.render(<div autoFocus='true' />, container);
 
 ```
 
+## Fragments
+
+All of the following syntaxes are **reserved** for createFragment call
+
+```js
+<>
+    <div>Foo</div>
+    <div>Bar</div>
+</>
+
+
+<Fragment>
+    <div>Foo</div>
+    <div>Bar</div>
+</Fragment>
+
+<Inferno.Fragment>
+    <div>Foo</div>
+    <div>Bar</div>
+</Inferno.Fragment>
+
+```
+
 ## Special flags
 
 This plugin provides few special compile time flags that can be used to optimize an inferno application.
@@ -111,6 +134,8 @@ Each method that is used from inferno can be replaced by custom name.
 ``` pragmaNormalizeProps ``` (string) defaults to normalizeProps.
  
 ``` pragmaTextVNode ``` (string) defaults to createTextVNode.
+
+``` pragmaFragmentVNode ``` (string) defaults to createFragment.
  
 
 ```js
