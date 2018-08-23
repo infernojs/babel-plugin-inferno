@@ -246,12 +246,13 @@ describe('Transforms', function () {
         });
     });
 
-    describe('detection', function () {
-        it('Should use Functional Component and class Component flags if type is known', function () {
-            var expectedResult = '\nfunction Terve() {}\n\nclass FooComponent extends Component {}\n\nvar tester = createComponentVNode(4, FooComponent);\nvar foo = createVNode(1, "div");\nvar b = createComponentVNode(8, Terve);';
-            expect(transform('function Terve() {} class FooComponent extends Component {} var tester = <FooComponent/>; var foo = <div/>; var b = <Terve/>')).to.equal(expectedResult);
-        });
-    });
+    // TODO: This would be neat feature, implement it if solid way to detect shape is found
+    // describe('detection', function () {
+    //     it('Should use Functional Component and class Component flags if type is known', function () {
+    //         var expectedResult = '\nfunction Terve() {}\n\nclass FooComponent extends Component {}\n\nvar tester = createComponentVNode(4, FooComponent);\nvar foo = createVNode(1, "div");\nvar b = createComponentVNode(8, Terve);';
+    //         expect(transform('function Terve() {} class FooComponent extends Component {} var tester = <FooComponent/>; var foo = <div/>; var b = <Terve/>')).to.equal(expectedResult);
+    //     });
+    // });
 
     describe('Imports', function () {
         it('Should not fail if createVNode is already imported', function () {
