@@ -251,12 +251,57 @@ describe('Transforms', function () {
         expect(transform('<div>Okay<span>foo</span></div>')).to.eql('createVNode(1, "div", null, [createTextVNode("Okay"), createVNode(1, "span", null, "foo", 16)], 4);');
       });
 
+      // SHORT SYNTAX
+
       it('Should createTextVNode when text node is under short syntax fragment', () => {
         expect(transform('<>Okay<span>foo</span></>')).to.eql('createFragment([createTextVNode("Okay"), createVNode(1, "span", null, "foo", 16)], 4);');
       });
 
+      it('Should not wrap dynamic value', () => {
+        expect(transform('<>{magic}</>')).to.eql('createFragment(magic, 0);')
+      });
+
+      it('Should always keep text node as children even if there is one when parent is short syntax Fragment', () => {
+        expect(transform('<><>Text</></>')).to.eql('createFragment([createFragment([createTextVNode("Text")], 4)], 4);');
+      });
+
+      it('Should always short syntax Fragment', () => {
+        expect(transform('<><><div>Text</div></></>')).to.eql('createFragment([createFragment([createVNode(1, "div", null, "Text", 16)], 4)], 4);');
+      });
+
+      it('Should handle many dynamic children short syntax', () => {
+        expect(transform('<><>{Frag}Text{Wohoo}</></>')).to.eql('createFragment([createFragment([Frag, createTextVNode("Text"), Wohoo], 0)], 4);');
+      });
+
+      it('Should handle many dynamic and non dynamic children short syntax', () => {
+        expect(transform('<><><span></span>Text{Wohoo}</></>')).to.eql('createFragment([createFragment([createVNode(1, "span"), createTextVNode("Text"), Wohoo], 0)], 4);');
+      });
+
+
+      // LONG SYNTAX
+
+      it('Should always keep text node as children even if there is one when parent is long syntax Fragment', () => {
+        expect(transform('<Fragment><Fragment>Text</Fragment></Fragment>')).to.eql('createFragment([createFragment([createTextVNode("Text")], 4)], 4);');
+      });
+
       it('Should createTextVNode when text node is under large syntax fragment', () => {
         expect(transform('<Fragment>Okay<span>foo</span></Fragment>')).to.eql('createFragment([createTextVNode("Okay"), createVNode(1, "span", null, "foo", 16)], 4);');
+      });
+
+      it('Should always keep text node as children even if there is one when parent is long syntax Fragment', () => {
+        expect(transform('<Fragment><Fragment>Text</Fragment></Fragment>')).to.eql('createFragment([createFragment([createTextVNode("Text")], 4)], 4);');
+      });
+
+      it('Should always long syntax Fragment', () => {
+        expect(transform('<Fragment><Fragment><div>Text</div></Fragment></Fragment>')).to.eql('createFragment([createFragment([createVNode(1, "div", null, "Text", 16)], 4)], 4);');
+      });
+
+      it('Should handle many dynamic children long syntax', () => {
+        expect(transform('<Fragment><Fragment>{Frag}Text{Wohoo}</Fragment></Fragment>')).to.eql('createFragment([createFragment([Frag, createTextVNode("Text"), Wohoo], 0)], 4);');
+      });
+
+      it('Should handle many dynamic and non dynamic children long syntax', () => {
+        expect(transform('<Fragment><Fragment><span></span>Text{Wohoo}</Fragment></Fragment>')).to.eql('createFragment([createFragment([createVNode(1, "span"), createTextVNode("Text"), Wohoo], 0)], 4);');
       });
     });
 
@@ -324,7 +369,7 @@ describe('Transforms', function () {
     describe('Fragments', function () {
         describe('Short syntax', function () {
           it('Should createFragment', function () {
-            expect(transform('<>Test</>')).to.eql('createFragment(["Test"], 4);');
+            expect(transform('<>Test</>')).to.eql('createFragment([createTextVNode("Test")], 4);');
           });
 
           it('Should createFragment dynamic children', function () {
@@ -343,7 +388,7 @@ describe('Transforms', function () {
         describe('Long syntax', function () {
             describe('Fragment', function () {
               it('Should createFragment', function () {
-                expect(transform('<Fragment>Test</Fragment>')).to.eql('createFragment(["Test"], 4);');
+                expect(transform('<Fragment>Test</Fragment>')).to.eql('createFragment([createTextVNode("Test")], 4);');
               });
 
               it('Should createFragment dynamic children', function () {
@@ -375,7 +420,7 @@ describe('Transforms', function () {
 
             describe('Inferno.Fragment', function () {
               it('Should createFragment', function () {
-                expect(transform('<Inferno.Fragment>Test</Inferno.Fragment>')).to.eql('createFragment(["Test"], 4);');
+                expect(transform('<Inferno.Fragment>Test</Inferno.Fragment>')).to.eql('createFragment([createTextVNode("Test")], 4);');
               });
 
               it('Should createFragment dynamic children', function () {
