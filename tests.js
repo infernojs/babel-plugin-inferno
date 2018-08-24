@@ -246,6 +246,20 @@ describe('Transforms', function () {
         });
     });
 
+    describe('text node and elements mixed', () => {
+      it('Should createTextVNode when there are siblings', () => {
+        expect(transform('<div>Okay<span>foo</span></div>')).to.eql('createVNode(1, "div", null, [createTextVNode("Okay"), createVNode(1, "span", null, "foo", 16)], 4);');
+      });
+
+      it('Should createTextVNode when text node is under short syntax fragment', () => {
+        expect(transform('<>Okay<span>foo</span></>')).to.eql('createFragment([createTextVNode("Okay"), createVNode(1, "span", null, "foo", 16)], 4);');
+      });
+
+      it('Should createTextVNode when text node is under large syntax fragment', () => {
+        expect(transform('<Fragment>Okay<span>foo</span></Fragment>')).to.eql('createFragment([createTextVNode("Okay"), createVNode(1, "span", null, "foo", 16)], 4);');
+      });
+    });
+
     // TODO: This would be neat feature, implement it if solid way to detect shape is found
     // describe('detection', function () {
     //     it('Should use Functional Component and class Component flags if type is known', function () {
