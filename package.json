@@ -1,16 +1,16 @@
 {
   "name": "babel-plugin-inferno",
-  "version": "6.0.0-2",
+  "version": "6.0.0-3",
   "description": "Turn JSX into Inferno virtual DOM",
   "repository": "https://github.com/trueadm/babel-plugin-inferno",
   "license": "MIT",
   "main": "lib/index.js",
   "devDependencies": {
-    "@babel/core": "7.0.0-rc.2",
-    "babel-eslint": "^8.2.6",
-    "@babel/helper-replace-supers": "7.0.0-rc.2",
-    "@babel/plugin-proposal-object-rest-spread": "7.0.0-rc.2",
-    "@babel/preset-env": "7.0.0-rc.2",
+    "@babel/core": "7.0.0",
+    "babel-eslint": "^9.0.0",
+    "@babel/helper-replace-supers": "7.0.0",
+    "@babel/plugin-proposal-object-rest-spread": "7.0.0",
+    "@babel/preset-env": "7.0.0",
     "chai": "^4.1.2",
     "eslint": "^5.4.0",
     "istanbul": "^0.4.5",
@@ -32,13 +32,14 @@
     "jsx"
   ],
   "peerDependencies": {
+    "@babel/core": "^7",
     "inferno": "^6"
   },
   "dependencies": {
-    "@babel/plugin-syntax-jsx": "7.0.0-rc.2",
-    "@babel/types": "7.0.0-rc.2"
+    "@babel/plugin-syntax-jsx": "7.0.0",
+    "@babel/types": "7.0.0"
   },
   "engines": {
-    "node": ">=6"
+    "node": ">=8"
   }
 }
