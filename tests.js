@@ -129,6 +129,18 @@ describe('Transforms', function () {
         it('Should add re create flag', function () {
             expect(transform('<div $ReCreate/>')).to.equal('createVNode(2049, "div");');
         });
+
+        it('Should be possible to define override flags runtime', function () {
+          expect(transform('<img $Flags={bool ? 1 : 2}>{expression}</img>')).to.equal('createVNode(bool ? 1 : 2, "img", null, expression, 0);');
+        });
+
+        it('Should be possible to define override flags with constant', function () {
+          expect(transform('<img $Flags={120}>foobar</img>')).to.equal('createVNode(120, "img", null, "foobar", 16);');
+        });
+
+        it('Should be possible to use expression for flags', function () {
+          expect(transform('<ComponentA $Flags={magic}/>')).to.equal('createComponentVNode(magic, ComponentA);');
+        });
     });
 
     describe('spreadOperator', function () {
@@ -455,5 +467,6 @@ describe('Transforms', function () {
             });
         });
     });
+
 });
 
