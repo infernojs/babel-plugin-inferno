@@ -380,6 +380,10 @@ describe('Transforms', function () {
 
     describe('Fragments', function () {
         describe('Short syntax', function () {
+          it('Should create empty createFragment', function () {
+            expect(transform('<></>')).to.eql('createFragment();');
+          });
+
           it('Should createFragment', function () {
             expect(transform('<>Test</>')).to.eql('createFragment([createTextVNode("Test")], 4);');
           });
@@ -399,6 +403,11 @@ describe('Transforms', function () {
 
         describe('Long syntax', function () {
             describe('Fragment', function () {
+              it('Should create empty createFragment', function () {
+                expect(transform('<Fragment></Fragment>')).to.eql('createFragment();');
+                expect(transform('<Fragment/>')).to.eql('createFragment();');
+              });
+
               it('Should createFragment', function () {
                 expect(transform('<Fragment>Test</Fragment>')).to.eql('createFragment([createTextVNode("Test")], 4);');
               });
