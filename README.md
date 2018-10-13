@@ -150,3 +150,10 @@ Each method that is used from inferno can be replaced by custom name.
     }]]
 }
 ```
+
+### Troubleshoot
+
+You can verify `babel-plugin-inferno` is used by looking at the compiled output.
+This plugin does not generate calls to `createElement` or `h`, but instead it uses low level InfernoJS API
+`createVNode`, `createComponentVNode`, `createFragment` etc. If you see your JSX being transpiled into `createElement` calls
+its good indication that your babel configuration is not correct.
