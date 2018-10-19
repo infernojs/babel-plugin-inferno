@@ -46,6 +46,6 @@
     "@babel/types": "^7"
   },
   "engines": {
-    "node": ">=8"
+    "node": ">=6"
   }
 }
