@@ -8,7 +8,7 @@ var babel = require('@babel/core');
 var babelSettings = {
     presets: [['@babel/preset-env', {modules: false, loose: true, targets: {browsers:"last 1 Chrome versions"}}]],
     plugins: [
-        [plugin, {imports: true}],
+        [plugin, {imports: true, defineAllArguments: false}],
         '@babel/plugin-syntax-jsx'
     ]
 };
@@ -238,6 +238,24 @@ describe('Transforms', function () {
             expect(pluginTransformPragma('<div></div>')).to.equal('t.some(1, "div");');
         });
     });
+
+  describe('defineAllArguments option', function () {
+    var babelSettingsPragma = {
+      presets: [['@babel/preset-env', {modules: false, loose: true, targets: {browsers:"last 1 Chrome versions"}}]],
+      plugins: [
+        [plugin, {imports: false, defineAllArguments: true}],
+        '@babel/plugin-syntax-jsx'
+      ]
+    };
+
+    function pluginTransformAllArgs(input) {
+      return babel.transform(input, babelSettingsPragma).code;
+    }
+
+    it('Should replace createVNode to pragma option value', function () {
+      expect(pluginTransformAllArgs('<div></div>')).to.equal('var createVNode = Inferno.createVNode;\ncreateVNode(1, "div", null, null, 1, null, null, null);');
+    });
+  });
 
     /**
      * In Inferno all SVG attributes are written as in DOM standard

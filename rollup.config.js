@@ -10,7 +10,7 @@ export default [
     input: 'lib/index.js',
     output: {
       name: 'babel-plugin-inferno',
-      file: pkg.browser,
+      file: 'dist/index.umd.js',
       format: 'umd'
     },
     plugins: [
