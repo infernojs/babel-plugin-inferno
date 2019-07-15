@@ -7,18 +7,18 @@
   "main": "lib/index.js",
   "devDependencies": {
     "@babel/core": "7.3.3",
-    "@babel/helper-replace-supers": "7.2.3",
-    "@babel/plugin-proposal-object-rest-spread": "7.3.2",
-    "@babel/preset-env": "^7.3.1",
-    "babel-eslint": "^10.0.1",
+    "@babel/helper-replace-supers": "7.4.4",
+    "@babel/plugin-proposal-object-rest-spread": "7.5.4",
+    "@babel/preset-env": "^7.5.4",
+    "babel-eslint": "^10.0.2",
     "chai": "^4.2.0",
-    "eslint": "^5.14.1",
+    "eslint": "^6.0.1",
     "istanbul": "^0.4.5",
-    "mocha": "^6.0.0",
-    "rollup": "^1.2.2",
-    "rollup-plugin-babel": "^4.3.2",
-    "rollup-plugin-commonjs": "^9.2.0",
-    "rollup-plugin-node-resolve": "^4.0.0",
+    "mocha": "^6.1.4",
+    "rollup": "^1.17.0",
+    "rollup-plugin-babel": "^4.3.3",
+    "rollup-plugin-commonjs": "^10.0.1",
+    "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-uglify": "^6.0.2"
   },
   "scripts": {
@@ -39,7 +39,7 @@
   ],
   "peerDependencies": {
     "@babel/core": "^7",
-    "inferno": ">= 6"
+    "inferno": ">=7"
   },
   "dependencies": {
     "@babel/plugin-syntax-jsx": "^7",
