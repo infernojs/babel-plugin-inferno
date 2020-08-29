@@ -15,8 +15,6 @@ It is recommended to use this plugin for compiling JSX for inferno. It is differ
 
 ## How to install
 
-**Note!** Make sure babel-plugin has same **major** version as the inferno you are using!
-
 ```bash
 npm i --save-dev babel-plugin-inferno
 ```
