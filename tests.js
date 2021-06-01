@@ -478,7 +478,7 @@ describe('Transforms', function () {
               it('Should createFragment non keyed children', function () {
                 expect(transform('<Inferno.Fragment key="foo"><div>1</div><span>foo</span></Inferno.Fragment>')).to.eql('createFragment([createVNode(1, "div", null, "1", 16), createVNode(1, "span", null, "foo", 16)], 4, "foo");');
               });
-              
+
               it('Should ignore all other props', function () {
                 expect(transform('<Inferno.Fragment abc="foobar" id="test" key="foo"><div>1</div><span>foo</span></Inferno.Fragment>')).to.eql('createFragment([createVNode(1, "div", null, "1", 16), createVNode(1, "span", null, "foo", 16)], 4, "foo");');
               });
@@ -491,6 +491,42 @@ describe('Transforms', function () {
               it('Should createFragment non keyed children', function () {
                 expect(transform('<Inferno.Fragment key="foo" $HasNonKeyedChildren>{magic}</Inferno.Fragment>')).to.eql('createFragment(magic, 4, "foo");');
               });
+            });
+
+            describe('React.Fragment', function () {
+                it('Should createFragment', function () {
+                    expect(transform('<React.Fragment>Test</React.Fragment>')).to.eql('createFragment([createTextVNode("Test")], 4);');
+                });
+
+                it('Should createFragment dynamic children', function () {
+                    expect(transform('<React.Fragment>{dynamic}</React.Fragment>')).to.eql('createFragment(dynamic, 0);');
+                });
+
+                it('Should createFragment keyed children', function () {
+                    expect(transform('<React.Fragment><span key="ok">kk</span><div key="ok2">ok</div></React.Fragment>')).to.eql('createFragment([createVNode(1, "span", null, "kk", 16, null, "ok"), createVNode(1, "div", null, "ok", 16, null, "ok2")], 8);');
+                });
+
+                it('Should createFragment non keyed children', function () {
+                    expect(transform('<React.Fragment><div>1</div><span>foo</span></React.Fragment>')).to.eql('createFragment([createVNode(1, "div", null, "1", 16), createVNode(1, "span", null, "foo", 16)], 4);');
+                });
+
+                // Long syntax specials
+                it('Should createFragment non keyed children', function () {
+                    expect(transform('<React.Fragment key="foo"><div>1</div><span>foo</span></React.Fragment>')).to.eql('createFragment([createVNode(1, "div", null, "1", 16), createVNode(1, "span", null, "foo", 16)], 4, "foo");');
+                });
+
+                it('Should ignore all other props', function () {
+                    expect(transform('<React.Fragment abc="foobar" id="test" key="foo"><div>1</div><span>foo</span></React.Fragment>')).to.eql('createFragment([createVNode(1, "div", null, "1", 16), createVNode(1, "span", null, "foo", 16)], 4, "foo");');
+                });
+
+                // Optimization flags
+                it('Should createFragment non keyed children', function () {
+                    expect(transform('<React.Fragment key="foo" $HasKeyedChildren>{magic}</React.Fragment>')).to.eql('createFragment(magic, 8, "foo");');
+                });
+
+                it('Should createFragment non keyed children', function () {
+                    expect(transform('<React.Fragment key="foo" $HasNonKeyedChildren>{magic}</React.Fragment>')).to.eql('createFragment(magic, 4, "foo");');
+                });
             });
         });
     });

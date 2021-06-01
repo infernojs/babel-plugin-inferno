@@ -74,6 +74,8 @@ All of the following syntaxes are **reserved** for createFragment call
 
 ```
 
+React.Fragment is also compiled to inferno createFragment call to ease project migration to Inferno https://github.com/infernojs/babel-plugin-inferno/issues/56.
+
 ## Special flags
 
 This plugin provides few special compile time flags that can be used to optimize an inferno application.
