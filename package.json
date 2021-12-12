@@ -23,9 +23,9 @@
   },
   "scripts": {
     "build": "rollup -c",
-    "coverage": "nyc ./node_modules/.bin/_mocha tests.js",
-    "test": "node ./node_modules/mocha/bin/mocha tests.js",
-    "debug": "node --inspect-brk ./node_modules/mocha/bin/mocha tests.js",
+    "coverage": "nyc ./node_modules/.bin/_mocha tests.js tests2.js",
+    "test": "node ./node_modules/mocha/bin/mocha tests.js tests2.js",
+    "debug": "node --inspect-brk ./node_modules/mocha/bin/mocha tests.js tests2.js",
     "lint": "eslint lib",
     "lintfix": "eslint lib --fix"
   },

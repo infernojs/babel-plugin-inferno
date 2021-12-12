@@ -5,15 +5,15 @@ var chai = require('chai');
 var plugin = require('./lib/index.js');
 var expect = chai.expect;
 var babel = require('@babel/core');
-var babelSettings = {
-    presets: [['@babel/preset-env', {modules: false, loose: true, targets: {browsers:"last 1 Chrome versions"}}]],
-    plugins: [
-        [plugin, {imports: true, defineAllArguments: false}],
-        '@babel/plugin-syntax-jsx'
-    ]
-};
 
 describe('Transforms', function () {
+    var babelSettings = {
+        presets: [['@babel/preset-env', {modules: false, loose: true, targets: {browsers:"last 1 Chrome versions"}}]],
+        plugins: [
+            [plugin, {imports: true, defineAllArguments: false}],
+            '@babel/plugin-syntax-jsx'
+        ]
+    };
 
     function pluginTransform(input) {
         return babel.transform(input, babelSettings).code;
@@ -380,18 +380,21 @@ describe('Transforms', function () {
         });
 
         it('Component Array empty children', function () {
-            expect(transform('<Com>{[]}</Com>')).to.eql('createComponentVNode(2, Com);');
+            expect(transform('<Com>{[]}</Com>')).to.eql('createComponentVNode(2, Com, {\n' +
+                '  children: []\n' +
+                '});');
         });
 
         it('Component should create vNode for children', function () {
             expect(transform('<Com children={<div>1</div>}/>')).to.eql('createComponentVNode(2, Com, {\n  "children": createVNode(1, "div", null, "1", 16)\n});');
         });
 
-        it('Should prefer xml children over props', function () {
+        it('Should get children from props when xml children is not defined', function () {
             expect(transform('<foo children={<span>b</span>}></foo>')).to.eql('createVNode(1, "foo", null, createVNode(1, "span", null, "b", 16), 2);')
         });
 
-        it('Should prefer xml children over props (null)', function () {
+        it('Should get children from props when xml children is not defined (null)', function () {
+            debugger
             expect(transform('<foo children={null}></foo>')).to.eql('createVNode(1, "foo");')
         });
     });
@@ -532,4 +535,3 @@ describe('Transforms', function () {
     });
 
 });
-
