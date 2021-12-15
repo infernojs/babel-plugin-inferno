@@ -394,7 +394,6 @@ describe('Transforms', function () {
         });
 
         it('Should get children from props when xml children is not defined (null)', function () {
-            debugger
             expect(transform('<foo children={null}></foo>')).to.eql('createVNode(1, "foo");')
         });
     });
