@@ -584,6 +584,16 @@ describe('Static ON', function () {
           '};'
       );
     });
+
+    it('Should not add static optimization to components', function () {
+        expect(transform('var d = () => (<div className="topmenu-btn-icon-and-text">\n' +
+        '    <Icon className="white" icon={icon}/>\n' +
+        '    {text && <div className={classNames(\'topmenu-btn-text\')}>{text}</div>}\n' +
+        '</div>);')).to.eql('\nvar d = () => createVNode(1, "div", "topmenu-btn-icon-and-text", [createComponentVNode(2, Icon, {\n' +
+            '  "className": "white",\n' +
+            '  "icon": icon\n' +
+            '}), text && createVNode(1, "div", classNames(\'topmenu-btn-text\'), text, 0)], 0);');
+    })
   });
 });
 
