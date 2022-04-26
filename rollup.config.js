@@ -1,6 +1,6 @@
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
-import { uglify } from "rollup-plugin-uglify";
+import { terser } from "rollup-plugin-terser";
 import babel from 'rollup-plugin-babel';
 
 export default [
@@ -27,7 +27,26 @@ export default [
           ]
         ]
       }),
-      uglify()
+      terser({
+        compress: {
+          ecma: 5,
+          inline: true,
+          if_return: false,
+          reduce_funcs: false,
+          passes: 5,
+          comparisons: false
+        },
+        ie8: false,
+        mangle: {
+          toplevel: true
+        },
+        parse: {
+          html5_comments: false,
+          shebang: false
+        },
+        toplevel: false,
+        warnings: false
+      })
     ]
   }
 ];
