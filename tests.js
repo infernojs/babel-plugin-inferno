@@ -13,6 +13,8 @@ var babelSettings = {
     ]
 };
 
+process.env.BABEL_TYPES_8_BREAKING = true;
+
 describe('Transforms', function () {
 
     function pluginTransform(input) {
@@ -225,7 +227,7 @@ describe('Transforms', function () {
         var babelSettingsPragma = {
             presets: [['@babel/preset-env', {modules: false, loose: true, targets: {browsers:"last 1 Chrome versions"}}]],
             plugins: [
-              [plugin, {imports: false, pragma: 't.some'}],
+              [plugin, {imports: false, pragma: 'tSome'}],
               '@babel/plugin-syntax-jsx'
             ]
         };
@@ -235,7 +237,7 @@ describe('Transforms', function () {
         }
 
         it('Should replace createVNode to pragma option value', function () {
-            expect(pluginTransformPragma('<div></div>')).to.equal('t.some(1, "div");');
+            expect(pluginTransformPragma('<div></div>')).to.equal('tSome(1, "div");');
         });
     });
 
