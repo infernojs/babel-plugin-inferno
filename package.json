@@ -12,7 +12,6 @@
     "@babel/preset-env": "^7.19.0",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-replace": "^4.0.0",
-    "babel-eslint": "^10.1.0",
     "chai": "^4.3.6",
     "eslint": "^8.23.0",
     "mocha": "^10.0.0",
