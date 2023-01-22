@@ -3,7 +3,6 @@ import commonjs from '@rollup/plugin-commonjs';
 import terser from '@rollup/plugin-terser';
 import babel from '@rollup/plugin-babel';
 import replace from '@rollup/plugin-replace';
-import rollupJson from '@rollup/plugin-json';
 
 export default [
   // browser-friendly UMD build
@@ -27,18 +26,8 @@ export default [
         'process.env.BABEL_TYPES_8_BREAKING': false,
         'require(\'@babel/plugin-syntax-jsx\').default': 'Babel.availablePlugins[\'syntax-jsx\']'
       }),
-      rollupJson(),
       babel({
-        'presets': [
-          [
-            '@babel/preset-env',
-            {
-              'targets': {
-                'ie': '11'
-              }
-            }
-          ]
-        ]
+        'presets': [['@babel/preset-env']]
       }),
       terser({
         compress: {
