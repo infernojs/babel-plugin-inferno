@@ -1,8 +1,9 @@
-import resolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
-import { terser } from "rollup-plugin-terser";
-import babel from 'rollup-plugin-babel';
-import replace from "@rollup/plugin-replace";
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import terser from '@rollup/plugin-terser';
+import babel from '@rollup/plugin-babel';
+import replace from '@rollup/plugin-replace';
+import rollupJson from '@rollup/plugin-json';
 
 export default [
   // browser-friendly UMD build
@@ -11,22 +12,29 @@ export default [
     output: {
       name: 'babel-plugin-inferno',
       file: 'dist/index.umd.js',
-      format: 'umd'
+      format: 'umd',
+      globals: {
+        '@babel/plugin-syntax-jsx': 'Babel.availablePlugins[\'syntax-jsx\']',
+        '@babel/core': 'Babel'
+      }
     },
     plugins: [
-      resolve(),  // so Rollup can find `ms`
-      commonjs(), // so Rollup can convert `ms` to an ES module
+      resolve(),
+      commonjs(),
       replace({
+        preventAssignment: true,
         'process.env.NODE_ENV': JSON.stringify('production'),
-        'process.env.BABEL_TYPES_8_BREAKING': true
+        'process.env.BABEL_TYPES_8_BREAKING': false,
+        'require(\'@babel/plugin-syntax-jsx\').default': 'Babel.availablePlugins[\'syntax-jsx\']'
       }),
+      rollupJson(),
       babel({
-        "presets": [
+        'presets': [
           [
-            "@babel/preset-env",
+            '@babel/preset-env',
             {
-              "targets": {
-                "ie": "11"
+              'targets': {
+                'ie': '11'
               }
             }
           ]

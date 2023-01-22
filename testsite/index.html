@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="container"></div>
+
+<script src="https://unpkg.com/inferno@latest/dist/inferno.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@latest/babel.min.js"></script>
+<script src="http://localhost:8080/dist/index.umd.js"></script>
+
+<script>
+    Babel.registerPlugin("inferno", window["babel-plugin-inferno"]);
+    window.inferno = window.Inferno;
+</script>
+
+<script type="text/babel" data-plugins="inferno,transform-modules-umd" data-presets="es2017">
+    // normally these would be imported from "inferno"
+    import { render, Component, version } from "inferno";
+
+    class Clock extends Component {
+        constructor() {
+            super();
+            // set initial time:
+            this.state = {
+                time: Date.now()
+            };
+        }
+
+        componentDidMount() {
+            // update time every second
+            this.timer = setInterval(() => {
+                this.setState({ time: Date.now() });
+            }, 1000);
+        }
+
+        componentWillUnmount() {
+            // stop when not renderable
+            clearInterval(this.timer);
+        }
+
+        render() {
+            let time = new Date(this.state.time).toLocaleTimeString();
+            return (
+                <div>
+                    <span>{ 'Inferno version: ' + version }</span>
+                    <br/>
+                    <span>{ time }</span>
+                </div>
+            );
+        }
+    }
+
+    // render an instance of Clock into <body>:
+    render(<Clock />, document.getElementById('container'));
+</script>
+
+</body>
+</html>
