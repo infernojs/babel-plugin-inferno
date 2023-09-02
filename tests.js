@@ -38,6 +38,10 @@ describe('Transforms', function () {
       expect(transform('<div><FooBar/><div>1</div></div>')).to.equal('createVNode(1, "div", null, [createComponentVNode(2, FooBar), createVNode(1, "div", null, "1", 16)], 4);');
     });
 
+    it('Should not convert text to createVNode when its within Component', function () {
+      expect(transform('<FooBar>1</FooBar>')).to.equal('createComponentVNode(2, FooBar, {\n  children: "1"\n});');
+    });
+
     it('Should create textVNodes when there is no normalization needed and its multiple children', function () {
       expect(transform('<div><FooBar/>foobar</div>')).to.equal('createVNode(1, "div", null, [createComponentVNode(2, FooBar), createTextVNode("foobar")], 4);');
     });
