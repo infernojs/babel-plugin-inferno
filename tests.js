@@ -112,7 +112,7 @@ describe('Transforms', function () {
       expect(transform('<div $HasKeyedChildren>{magic}</div>')).to.equal('createVNode(1, "div", null, magic, 8);');
     });
 
-    it('Should not normalize if noNormalize set', function () {
+    it('Should not normalize if $HasVNodeChildren set', function () {
       expect(transform('<div $HasVNodeChildren>{magic}</div>')).to.equal('createVNode(1, "div", null, magic, 2);');
     });
 
