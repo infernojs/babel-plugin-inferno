@@ -65,6 +65,10 @@ describe('Transforms', function () {
     it('Should mark parent vNode with $HasKeyedChildren if no normalize is needed and all children are keyed', function () {
       expect(transform('<div><FooBar key="foo"/><div key="1">1</div></div>')).to.equal('createVNode(1, "div", null, [createComponentVNode(2, FooBar, null, "foo"), createVNode(1, "div", null, "1", 16, null, "1")], 8);');
     });
+
+    it('Should mark parent vNode with $HasKeyedChildren if even one child is keyed directly', function () {
+      expect(transform('<div><span></span><div key="1">1</div></div>')).to.equal('createVNode(1, "div", null, [createVNode(1, "span"), createVNode(1, "div", null, "1", 16, null, "1")], 8);');
+    });
   });
 
   describe('Dynamic ChildFlags', function () {
@@ -367,7 +371,6 @@ describe('Transforms', function () {
     it('Element Should use prop if no children exists', function () {
       expect(transform('<div children="ab"/>')).to.eql('createVNode(1, "div", null, "ab", 16);');
     });
-
 
     it('Component Should prefer child element over children props', function () {
       expect(transform('<Com children="ab">test</Com>')).to.eql('createComponentVNode(2, Com, {\n  children: "test"\n});');
