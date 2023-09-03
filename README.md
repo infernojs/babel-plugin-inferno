@@ -101,8 +101,8 @@ Change in v4:
 
 
 #### Imports (boolean)
-By default babel-plugin-inferno uses imports. That means you no longer need to import inferno globally.
-Just import the inferno specific code YOUR code uses.
+babel-plugin-inferno will automatically import the required methods from inferno library.
+There is no need to import inferno in every single JSX file. Only import the inferno specific code required by the application.
 
 example:
 ```js
