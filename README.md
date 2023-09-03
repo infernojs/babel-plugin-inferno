@@ -82,6 +82,7 @@ This plugin provides few special compile time flags that can be used to optimize
 
 ```js
 // ChildFlags:
+<div $HasTextChildren /> - Children is rendered as pure text
 <div $HasVNodeChildren /> - Children is another vNode (Element or Component)
 <div $HasNonKeyedChildren /> - Children is always array without keys
 <div $HasKeyedChildren /> - Children is array of vNodes having unique keys
