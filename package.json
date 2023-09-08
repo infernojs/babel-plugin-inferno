@@ -6,8 +6,8 @@
   "license": "MIT",
   "main": "lib/index.js",
   "devDependencies": {
-    "@babel/core": "7.22.11",
-    "@babel/preset-env": "^7.22.14",
+    "@babel/core": "7.22.17",
+    "@babel/preset-env": "^7.22.15",
     "@rollup/plugin-replace": "^5.0.2",
     "@rollup/plugin-babel": "^6.0.3",
     "@rollup/plugin-terser": "^0.4.3",
@@ -17,7 +17,7 @@
     "eslint": "^8.48.0",
     "mocha": "^10.2.0",
     "nyc": "^15.1.0",
-    "rollup": "^3.28.1"
+    "rollup": "^3.29.0"
   },
   "scripts": {
     "build": "rollup -c",

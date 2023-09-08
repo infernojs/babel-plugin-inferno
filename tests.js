@@ -273,6 +273,10 @@ describe('Transforms', function () {
      *
      */
   describe('SVG attributes React syntax support', function () {
+    it('Should support native xlink:href', function () {
+      expect(transform('<svg><use xlink:href="#tester"></use></svg>')).to.equal('createVNode(32, "svg", null, createVNode(32, "use", null, null, 1, {\n  "xlink:href": "#tester"\n}), 2);');
+    });
+
     it('Should transform xlinkHref to xlink:href', function () {
       expect(transform('<svg><use xlinkHref="#tester"></use></svg>')).to.equal('createVNode(32, "svg", null, createVNode(32, "use", null, null, 1, {\n  "xlink:href": "#tester"\n}), 2);');
     });
