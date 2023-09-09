@@ -153,6 +153,27 @@ describe('Transforms', function () {
     });
   });
 
+  describe('onComponent hooks', function () {
+    it('Should add hooks to refs for functional components', () => {
+      expect(transform(`
+<Child
+    key={i}
+    onComponentDidAppear={childOnComponentDidAppear}
+    onComponentDidMount={childOnComponentDidMount}
+>
+  {i}
+</Child>
+`)).to.equal(`
+createComponentVNode(2, Child, {
+  children: i
+}, i, {
+  "onComponentDidAppear": childOnComponentDidAppear,
+  "onComponentDidMount": childOnComponentDidMount
+});
+`.trim());
+    });
+  });
+
   describe('spreadOperator', function () {
     it('Should add call to normalizeProps when spread operator is used', function () {
       expect(transform('<div {...props}>1</div>')).to.equal('normalizeProps(createVNode(1, "div", null, "1", 16, {\n  ...props\n}));');
