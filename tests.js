@@ -172,6 +172,25 @@ createComponentVNode(2, Child, {
 });
 `.trim());
     });
+
+    it('Should handle hooks to refs and ref for functional components', () => {
+      expect(transform(`
+<Child
+    key={i}
+    onComponentDidAppear={childOnComponentDidAppear}
+    onComponentDidMount={childOnComponentDidMount}
+>
+  {i}
+</Child>
+`)).to.equal(`
+createComponentVNode(2, Child, {
+  children: i
+}, i, {
+  "onComponentDidAppear": childOnComponentDidAppear,
+  "onComponentDidMount": childOnComponentDidMount
+});
+`.trim());
+    });
   });
 
   describe('spreadOperator', function () {
