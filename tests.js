@@ -5,6 +5,7 @@ var chai = require('chai');
 var plugin = require('./lib/index.js');
 var expect = chai.expect;
 var babel = require('@babel/core');
+const {desc} = require('./lib/vNodeTypes');
 var babelSettings = {
   presets: [['@babel/preset-env', {modules: false, loose: true, targets: {browsers:'last 1 Chrome versions'}}]],
   plugins: [
@@ -24,6 +25,12 @@ describe('Transforms', function () {
   function transform(input) {
     return pluginTransform(input).replace(new RegExp('import.*"inferno";\\n'), '');
   }
+
+  describe('Empty attrs', function () {
+    it('Should ref', () => {
+      expect(() => transform('<div ref={}>{a}</div>')).to.throw('JSX attributes must only be assigned a non-empty expression.');
+    });
+  });
 
   describe('Dynamic children', function () {
     it('Should add normalize call when there is dynamic children', function () {
