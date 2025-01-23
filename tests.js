@@ -263,6 +263,13 @@ createComponentVNode(2, Child, {
       expect(result).to.equal(expected);
     });
 
+    it('Should transform acceptCharset correctly', function () {
+      var result = transform('<form acceptCharset="ISO-8859-1"/>');
+      var expected = 'createVNode(1, "form", null, null, 1, {\n  "accept-charset": "ISO-8859-1"\n});';
+
+      expect(result).to.equal(expected);
+    });
+
     it('Should transform onDoubleClick to native html event', function () {
       expect(transform('<div onDoubleClick={foobar}></div>')).to.eql('createVNode(1, "div", null, null, 1, {\n  "onDblClick": foobar\n});');
     });
