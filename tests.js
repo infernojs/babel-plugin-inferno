@@ -259,13 +259,20 @@ createComponentVNode(2, Child, {
 
     it('Should transform input and htmlFor correctly', function () {
       var result = transform('<label htmlFor={id}><input id={id} name={name} value={value} onChange={onChange} onInput={onInput} onKeyup={onKeyup} onFocus={onFocus} onClick={onClick} type="number" pattern="[0-9]+([,\.][0-9]+)?" inputMode="numeric" min={minimum}/></label>');
-      var expected = 'createVNode(1, "label", null, createVNode(64, "input", null, null, 1, {\n  "id": id,\n  "name": name,\n  "value": value,\n  "onChange": onChange,\n  "onInput": onInput,\n  "onKeyup": onKeyup,\n  "onFocus": onFocus,\n  "onClick": onClick,\n  "type": "number",\n  "pattern": "[0-9]+([,.][0-9]+)?",\n  "inputMode": "numeric",\n  "min": minimum\n}), 2, {\n  "for": id\n});';
+      var expected = 'createVNode(1, "label", null, createVNode(64, "input", null, null, 1, {\n  "id": id,\n  "name": name,\n  "value": value,\n  "onChange": onChange,\n  "onInput": onInput,\n  "onKeyup": onKeyup,\n  "onFocus": onFocus,\n  "onClick": onClick,\n  "type": "number",\n  "pattern": "[0-9]+([,.][0-9]+)?",\n  "inputmode": "numeric",\n  "min": minimum\n}), 2, {\n  "for": id\n});';
       expect(result).to.equal(expected);
     });
 
     it('Should transform acceptCharset correctly', function () {
       var result = transform('<form acceptCharset="ISO-8859-1"/>');
       var expected = 'createVNode(1, "form", null, null, 1, {\n  "accept-charset": "ISO-8859-1"\n});';
+
+      expect(result).to.equal(expected);
+    });
+
+    it('Should lowerCase f.e. colSpan', function () {
+      var result = transform('<td colSpan="5"/>');
+      var expected = 'createVNode(1, "td", null, null, 1, {\n  "colspan": "5"\n});';
 
       expect(result).to.equal(expected);
     });
