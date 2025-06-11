@@ -349,6 +349,10 @@ createComponentVNode(2, Child, {
     it('Should transform strokeWidth to stroke-width', function () {
       expect(transform('<svg><rect fillOpacity="1"></rect></svg>')).to.equal('createVNode(32, "svg", null, createVNode(32, "rect", null, null, 1, {\n  "fill-opacity": "1"\n}), 2);');
     });
+
+    it('Should not transform strokeWith or other SVG attributes if they are used in component', () => {
+      expect(transform('<Foobar strokeWidth="1px" fillOpacity="1"/>')).to.equal('createComponentVNode(2, Foobar, {\n  "strokeWidth": "1px",\n  "fillOpacity": "1"\n});');
+    });
   });
 
   describe('text node and elements mixed', () => {
