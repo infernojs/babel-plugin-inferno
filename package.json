@@ -1,23 +1,23 @@
 {
   "name": "babel-plugin-inferno",
-  "version": "6.8.5",
+  "version": "6.9.0",
   "description": "Turn JSX into Inferno virtual DOM",
   "repository": "https://github.com/trueadm/babel-plugin-inferno",
   "license": "MIT",
   "main": "lib/index.js",
   "devDependencies": {
-    "@babel/core": "7.29.0",
-    "@babel/preset-env": "^7.29.2",
+    "@babel/core": "8.0.1",
+    "@babel/preset-env": "^8.0.2",
     "@rollup/plugin-replace": "^6.0.3",
-    "@rollup/plugin-babel": "^7.0.0",
+    "@rollup/plugin-babel": "^7.1.0",
     "@rollup/plugin-terser": "^1.0.0",
-    "@rollup/plugin-commonjs": "^29.0.2",
+    "@rollup/plugin-commonjs": "^29.0.3",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "chai": "^6.2.2",
-    "eslint": "^10.2.0",
-    "mocha": "^11.7.5",
+    "eslint": "^10.6.0",
+    "mocha": "^11.7.6",
     "nyc": "^18.0.0",
-    "rollup": "^4.60.1"
+    "rollup": "^4.62.2"
   },
   "scripts": {
     "build": "rollup -c",
@@ -36,8 +36,8 @@
     "jsx"
   ],
   "dependencies": {
-    "@babel/plugin-syntax-jsx": "^7",
-    "@babel/types": "^7"
+    "@babel/plugin-syntax-jsx": "^8",
+    "@babel/types": "^8"
   },
   "engines": {
     "node": ">=18"

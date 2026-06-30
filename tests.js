@@ -7,7 +7,7 @@ var expect = chai.expect;
 var babel = require('@babel/core');
 const {desc} = require('./lib/vNodeTypes');
 var babelSettings = {
-  presets: [['@babel/preset-env', {modules: false, loose: true, targets: {browsers:'last 1 Chrome versions'}}]],
+  presets: [['@babel/preset-env', {modules: false, targets: {browsers:'last 1 Chrome versions'}}]],
   plugins: [
     [plugin, {imports: true, defineAllArguments: false}],
     '@babel/plugin-syntax-jsx'
@@ -19,7 +19,7 @@ process.env.BABEL_TYPES_8_BREAKING = true;
 describe('Transforms', function () {
 
   function pluginTransform(input) {
-    return babel.transform(input, babelSettings).code;
+    return babel.transformSync(input, babelSettings).code;
   }
 
   function transform(input) {
@@ -294,7 +294,7 @@ createComponentVNode(2, Child, {
 
   describe('Pragma option', function () {
     var babelSettingsPragma = {
-      presets: [['@babel/preset-env', {modules: false, loose: true, targets: {browsers:'last 1 Chrome versions'}}]],
+      presets: [['@babel/preset-env', {modules: false, targets: {browsers:'last 1 Chrome versions'}}]],
       plugins: [
         [plugin, {imports: false, pragma: 'tSome'}],
         '@babel/plugin-syntax-jsx'
@@ -302,7 +302,7 @@ createComponentVNode(2, Child, {
     };
 
     function pluginTransformPragma(input) {
-      return babel.transform(input, babelSettingsPragma).code;
+      return babel.transformSync(input, babelSettingsPragma).code;
     }
 
     it('Should replace createVNode to pragma option value', function () {
@@ -312,7 +312,7 @@ createComponentVNode(2, Child, {
 
   describe('defineAllArguments option', function () {
     var babelSettingsPragma = {
-      presets: [['@babel/preset-env', {modules: false, loose: true, targets: {browsers:'last 1 Chrome versions'}}]],
+      presets: [['@babel/preset-env', {modules: false, targets: {browsers:'last 1 Chrome versions'}}]],
       plugins: [
         [plugin, {imports: false, defineAllArguments: true}],
         '@babel/plugin-syntax-jsx'
@@ -320,7 +320,7 @@ createComponentVNode(2, Child, {
     };
 
     function pluginTransformAllArgs(input) {
-      return babel.transform(input, babelSettingsPragma).code;
+      return babel.transformSync(input, babelSettingsPragma).code;
     }
 
     it('Should replace createVNode to pragma option value', function () {
