@@ -14,10 +14,10 @@
     "@rollup/plugin-commonjs": "^29.0.3",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "chai": "^6.2.2",
-    "eslint": "^10.6.0",
-    "mocha": "^11.7.6",
+    "eslint": "^10.8.1",
+    "mocha": "^11.8.0",
     "nyc": "^18.0.0",
-    "rollup": "^4.62.2"
+    "rollup": "^4.62.4"
   },
   "scripts": {
     "build": "rollup -c",
