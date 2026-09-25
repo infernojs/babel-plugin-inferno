@@ -4,6 +4,8 @@ var it = mocha.it;
 var expect = require('chai').expect;
 var helpers = require('./helpers');
 var transform = helpers.transform;
+var transformWith = helpers.transformWith;
+var es5 = helpers.es5;
 
 describe('Expression children', function () {
   describe('empty expressions', function () {
@@ -105,6 +107,56 @@ describe('Expression children', function () {
   });
 
   // An empty expression still counts as a dynamic child, so childFlags become 0 (UnknownChildren) instead of the static shape
+  describe('spread children', function () {
+    it('Should spread children of an element', function () {
+      expect(transform('<div>{...children}</div>')).to.equal('createVNode(1, "div", null, [...children], 0);');
+    });
+
+    it('Should spread children of a component', function () {
+      expect(transform('<Foo>{...children}</Foo>')).to.equal('createComponentVNode(2, Foo, {\n  children: [...children]\n});');
+    });
+
+    it('Should spread children of a fragment', function () {
+      expect(transform('<>{...children}</>')).to.equal('createFragment([...children], 0);');
+    });
+
+    it('Should spread children of a keyed Fragment', function () {
+      expect(transform('<Fragment key="k">{...a}</Fragment>')).to.equal('createFragment([...a], 0, "k");');
+    });
+
+    it('Should spread several children in order (oxc spread-children-multiple-automatic)', function () {
+      expect(transform('<div>{...[1, 2]}{...[3, 4]}</div>')).to.equal('createVNode(1, "div", null, [...[1, 2], ...[3, 4]], 0);');
+    });
+
+    it('Should spread children around a static element (oxc spread-children-mixed-automatic)', function () {
+      expect(transform('<div>{...a}<span/>{...b}</div>')).to.equal('createVNode(1, "div", null, [...a, createVNode(1, "span"), ...b], 0);');
+    });
+
+    it('Should spread a JSX element child (babel constant-elements)', function () {
+      expect(transform('<div>{...<span/>}</div>')).to.equal('createVNode(1, "div", null, [...createVNode(1, "span")], 0);');
+    });
+
+    it('Should spread children next to text', function () {
+      expect(transform('<div>text{...a}</div>')).to.equal('createVNode(1, "div", null, [createTextVNode("text"), ...a], 0);');
+    });
+
+    it('Should spread component children next to text', function () {
+      expect(transform('<Foo>text{...a}</Foo>')).to.equal('createComponentVNode(2, Foo, {\n  children: ["text", ...a]\n});');
+    });
+
+    it('Should normalize spread children next to a keyed child', function () {
+      expect(transform('<div><span key="k"/>{...a}</div>')).to.equal('createVNode(1, "div", null, [createVNode(1, "span", null, null, 1, null, "k"), ...a], 0);');
+    });
+
+    it('Should use the child flag given for spread children', function () {
+      expect(transform('<div $HasNonKeyedChildren>{...a}</div>')).to.equal('createVNode(1, "div", null, [...a], 4);');
+    });
+
+    it('Should compile spread children for ES5 targets', function () {
+      expect(transformWith({imports: true}, '<div>{...a}</div>', es5)).to.contain('createVNode(1, "div", null, _toConsumableArray(a), 0);');
+    });
+  });
+
   describe('children prop', function () {
     it('Should normalize a string children prop', function () {
       expect(transform('<div children={"txt"} />')).to.equal('createVNode(1, "div", null, "txt", 0);');
