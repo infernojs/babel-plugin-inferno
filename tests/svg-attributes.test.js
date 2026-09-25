@@ -57,9 +57,6 @@ var mixedCaseAttributes = [
   'targetY', 'textLength', 'viewBox', 'viewTarget', 'xChannelSelector', 'yChannelSelector', 'zoomAndPan'
 ];
 
-// Hyphenated presentation attributes whose camelCase name is not mapped; see known-bugs/svg-presentation-attributes.test.js
-var unmappedAttributes = ['font-width', 'mask-type', 'text-overflow', 'white-space'];
-
 // React-style camelCase names of lowercase attributes
 var lowercaseAliases = {
   autoFocus: 'autofocus',
@@ -117,11 +114,29 @@ describe('SVG attributes (MDN reference)', function () {
 
   describe('camelCase names of hyphenated and namespaced attributes', function () {
     mdnAttributes.filter(function (name) {
-      return /[-:]/.test(name) && unmappedAttributes.indexOf(name) === -1;
+      return /[-:]/.test(name);
     }).forEach(function (name) {
       it('Should map ' + camelCase(name) + ' to ' + name, function () {
         expect(transform('<rect ' + camelCase(name) + '="v" />')).to.equal(rectProps(name));
       });
+    });
+  });
+
+  describe('camelCase names of presentation attributes on their elements', function () {
+    it('Should map maskType to mask-type on mask', function () {
+      expect(transform('<mask maskType="alpha" />')).to.equal('createVNode(32, "mask", null, null, 1, {\n  "mask-type": "alpha"\n});');
+    });
+
+    it('Should map textOverflow to text-overflow on text', function () {
+      expect(transform('<text textOverflow="ellipsis" />')).to.equal('createVNode(32, "text", null, null, 1, {\n  "text-overflow": "ellipsis"\n});');
+    });
+
+    it('Should map whiteSpace to white-space on text', function () {
+      expect(transform('<text whiteSpace="nowrap" />')).to.equal('createVNode(32, "text", null, null, 1, {\n  "white-space": "nowrap"\n});');
+    });
+
+    it('Should map fontWidth to font-width on text', function () {
+      expect(transform('<text fontWidth="condensed" />')).to.equal('createVNode(32, "text", null, null, 1, {\n  "font-width": "condensed"\n});');
     });
   });
 
