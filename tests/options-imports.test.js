@@ -18,6 +18,10 @@ describe('Options and imports', function () {
       expect(transformWith({imports: 'false'}, '<div/>')).to.equal('var createVNode = Inferno.createVNode;\ncreateVNode(1, "div");');
     });
 
+    it('Should treat the string "true" like true', function () {
+      expect(transformWith({imports: 'true'}, '<div/>')).to.equal('import { createVNode } from "inferno";\ncreateVNode(1, "div");');
+    });
+
     it('Should import from inferno when imports is omitted', function () {
       expect(transformWith({}, '<div/>')).to.equal('import { createVNode } from "inferno";\ncreateVNode(1, "div");');
     });
