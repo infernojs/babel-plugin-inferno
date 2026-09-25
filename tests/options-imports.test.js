@@ -3,6 +3,8 @@ var describe = mocha.describe;
 var it = mocha.it;
 var expect = require('chai').expect;
 var helpers = require('./helpers');
+var babel = helpers.babel;
+var plugin = helpers.plugin;
 var transformWith = helpers.transformWith;
 var stripInfernoImport = helpers.stripInfernoImport;
 
@@ -32,8 +34,42 @@ describe('Options and imports', function () {
       expect(transformWith({imports: false}, 'import {a} from "b";\nfunction f() { return <div><Foo/></div>; }\nconst g = () => <span/>;')).to.equal('import { a } from "b";\nvar createVNode = Inferno.createVNode,\n  createComponentVNode = Inferno.createComponentVNode;\nfunction f() {\n  return createVNode(1, "div", null, createComponentVNode(2, Foo), 2);\n}\nconst g = () => createVNode(1, "span");');
     });
 
-    it('Should insert the var before the statement with the first JSX', function () {
-      expect(transformWith({imports: false}, '"use strict";\nfoo();\nfunction f() { return <div/>; }')).to.equal('"use strict";\n\nfoo();\nvar createVNode = Inferno.createVNode;\nfunction f() {\n  return createVNode(1, "div");\n}');
+    it('Should insert the var after directives and before other code', function () {
+      expect(transformWith({imports: false}, '"use strict";\nfoo();\nfunction f() { return <div/>; }')).to.equal('"use strict";\n\nvar createVNode = Inferno.createVNode;\nfoo();\nfunction f() {\n  return createVNode(1, "div");\n}');
+    });
+
+    it('Should declare helpers before a call to a hoisted function that uses JSX', function () {
+      expect(transformWith({imports: false}, 'render();\nfunction render() {\n  return <div/>;\n}')).to.equal('var createVNode = Inferno.createVNode;\nrender();\nfunction render() {\n  return createVNode(1, "div");\n}');
+    });
+
+    it('Should declare helpers after imports and before other code', function () {
+      expect(transformWith({imports: false}, 'import a from "a";\nrender();\nfunction render() {\n  return <div/>;\n}')).to.equal('import a from "a";\nvar createVNode = Inferno.createVNode;\nrender();\nfunction render() {\n  return createVNode(1, "div");\n}');
+    });
+
+    it('Should declare helpers after a required Inferno', function () {
+      expect(transformWith({imports: false}, 'var Inferno = require("inferno");\nfunction App() { return <div/>; }')).to.equal('var Inferno = require("inferno");\nvar createVNode = Inferno.createVNode;\nfunction App() {\n  return createVNode(1, "div");\n}');
+    });
+
+    it('Should declare helpers after an Inferno declaration that follows other code', function () {
+      expect(transformWith({imports: false}, 'foo();\nconst Inferno = require("inferno");\nexport const a = <div/>;')).to.equal('foo();\nconst Inferno = require("inferno");\nvar createVNode = Inferno.createVNode;\nexport const a = createVNode(1, "div");');
+    });
+
+    it('Should ignore Inferno bindings in nested scopes', function () {
+      expect(transformWith({imports: false}, 'function f() { var Inferno = x; return <div/>; }')).to.equal('var createVNode = Inferno.createVNode;\nfunction f() {\n  var Inferno = x;\n  return createVNode(1, "div");\n}');
+    });
+
+    it('Should declare helpers in every file compiled with a reused config', function () {
+      var config = babel.loadOptionsSync({babelrc: false, configFile: false, plugins: [[plugin, {imports: false}]]});
+
+      babel.transformSync('const a = <div/>;', config);
+      expect(babel.transformSync('const b = <span/>;', config).code).to.equal('var createVNode = Inferno.createVNode;\nconst b = createVNode(1, "span");');
+    });
+
+    it('Should declare helpers in every file compiled with the same options object', function () {
+      var config = {babelrc: false, configFile: false, plugins: [[plugin, {imports: false}]]};
+
+      babel.transformSync('const a = <div/>;', config);
+      expect(babel.transformSync('const b = <span/>;', config).code).to.equal('var createVNode = Inferno.createVNode;\nconst b = createVNode(1, "span");');
     });
 
     it('Should keep existing Inferno imports when declaring the var', function () {
