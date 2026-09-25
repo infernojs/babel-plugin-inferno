@@ -17,19 +17,50 @@ var presetEnv = ['@babel/preset-env', {modules: false, targets: {browsers: 'last
 var es5 = {presets: [['@babel/preset-env', {modules: false, targets: 'ie 11'}]]};
 var es5CommonJS = {presets: [['@babel/preset-env', {modules: 'commonjs', targets: 'ie 11'}]]};
 
+/*
+ * Runs fn with console.warn replaced by a collector, so that the flag warnings of the plugin do not clutter the test
+ * output. Returns {result, warnings}.
+ */
+function collectWarnings(fn) {
+  var warn = console.warn;
+  var warnings = [];
+
+  console.warn = function (message) {
+    warnings.push(message);
+  };
+  try {
+    return {result: fn(), warnings: warnings};
+  } finally {
+    console.warn = warn;
+  }
+}
+
+function babelTransformWarnings(pluginOptions, input, extraConfig) {
+  return collectWarnings(function () {
+    return babel.transformSync(input, Object.assign({
+      babelrc: false,
+      configFile: false,
+      cwd: root,
+      // Plain code frames in error messages, also when the tests run in a color terminal
+      highlightCode: false,
+      presets: [presetEnv],
+      plugins: [
+        [plugin, pluginOptions],
+        '@babel/plugin-syntax-jsx'
+      ]
+    }, extraConfig));
+  });
+}
+
 function babelTransform(pluginOptions, input, extraConfig) {
-  return babel.transformSync(input, Object.assign({
-    babelrc: false,
-    configFile: false,
-    cwd: root,
-    // Plain code frames in error messages, also when the tests run in a color terminal
-    highlightCode: false,
-    presets: [presetEnv],
-    plugins: [
-      [plugin, pluginOptions],
-      '@babel/plugin-syntax-jsx'
-    ]
-  }, extraConfig));
+  return babelTransformWarnings(pluginOptions, input, extraConfig).result;
+}
+
+// Returns {code, warnings} with the messages the plugin passed to console.warn
+function transformWarnings(input, pluginOptions, extraConfig) {
+  var transformed = babelTransformWarnings(pluginOptions || {imports: true, defineAllArguments: false}, input, extraConfig);
+
+  return {code: stripInfernoImport(transformed.result.code), warnings: transformed.warnings};
 }
 
 function transformWith(pluginOptions, input, extraConfig) {
@@ -48,16 +79,22 @@ function transform(input) {
   return stripInfernoImport(pluginTransform(input));
 }
 
+function transformTSXWarnings(input, pluginOptions, typescriptOptions) {
+  return collectWarnings(function () {
+    return babel.transformSync(input, {
+      babelrc: false,
+      configFile: false,
+      cwd: root,
+      highlightCode: false,
+      filename: 'file.tsx',
+      presets: [['@babel/preset-typescript', typescriptOptions || {}]],
+      plugins: [[plugin, pluginOptions || {imports: true}]]
+    }).code;
+  });
+}
+
 function transformTSX(input, pluginOptions, typescriptOptions) {
-  return babel.transformSync(input, {
-    babelrc: false,
-    configFile: false,
-    cwd: root,
-    highlightCode: false,
-    filename: 'file.tsx',
-    presets: [['@babel/preset-typescript', typescriptOptions || {}]],
-    plugins: [[plugin, pluginOptions || {imports: true}]]
-  }).code;
+  return transformTSXWarnings(input, pluginOptions, typescriptOptions).result;
 }
 
 function expectValidJS(code, sourceType) {
@@ -97,6 +134,9 @@ module.exports = {
   stripInfernoImport: stripInfernoImport,
   transform: transform,
   transformTSX: transformTSX,
+  transformTSXWarnings: transformTSXWarnings,
+  transformWarnings: transformWarnings,
+  collectWarnings: collectWarnings,
   expectValidJS: expectValidJS,
   originalPosition: originalPosition
 };

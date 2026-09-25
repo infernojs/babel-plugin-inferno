@@ -94,6 +94,35 @@ This plugin provides few special compile time flags that can be used to optimize
 
 Flag called `noNormalize` has been removed in v4, and is replaced by `$HasVNodeChildren`
 
+### Useless flags
+
+Child flags are only needed for children whose shape the plugin cannot see, such as `{expression}` children or a `children={expression}` prop.
+When the children are written as JSX, the plugin sets the child flags itself.
+It warns about flags that cannot improve the output:
+
+```js
+// The children are known at compile time: the plugin already compiles them with HasVNodeChildren
+<div $HasVNodeChildren>
+  <h1>Hi</h1>
+</div>
+
+// Components get their children in props.children, so child flags do nothing
+<Foo $HasKeyedChildren>{items}</Foo>
+
+// Only one child flag applies. The order is $ChildFlag, $HasKeyedChildren, $HasNonKeyedChildren,
+// $HasTextChildren, $HasVNodeChildren
+<div $HasKeyedChildren $HasNonKeyedChildren>{items}</div>
+
+// $Flags replaces all the vNode flags, including ReCreate
+<div $ReCreate $Flags={1} />
+
+// Fragments have no vNode flags
+<Fragment $Flags={1} $ReCreate>{items}</Fragment>
+```
+
+The warning is printed with `console.warn` and shows the file, line and column of the flag.
+The `uselessFlags` option below turns it into an error or turns it off.
+
 ## Options
 
 
@@ -148,6 +177,23 @@ Each method that is used from inferno can be replaced by custom name.
         "pragmaCreateComponentVNode": "",
         "pragmaNormalizeProps": "",
         "pragmaTextVNode": ""
+    }]]
+}
+```
+
+#### uselessFlags (string)
+
+What to do about the [useless flags](#useless-flags):
+
+- `"warn"` (default): print a warning with `console.warn`.
+- `"error"`: stop the build with an error that points at the flag. For example, CI can use it to keep useless flags out.
+- `"off"`: do nothing.
+
+```js
+{
+    "plugins": [["inferno", {
+        "imports": true,
+        "uselessFlags": "error"
     }]]
 }
 ```

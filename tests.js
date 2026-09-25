@@ -6,6 +6,7 @@ var plugin = require('./lib/index.js');
 var expect = chai.expect;
 var babel = require('@babel/core');
 const {desc} = require('./lib/vNodeTypes');
+var collectWarnings = require('./tests/helpers').collectWarnings;
 var babelSettings = {
   presets: [['@babel/preset-env', {modules: false, targets: {browsers:'last 1 Chrome versions'}}]],
   plugins: [
@@ -18,8 +19,11 @@ process.env.BABEL_TYPES_8_BREAKING = true;
 
 describe('Transforms', function () {
 
+  // Useless flag warnings are tested in tests/useless-flags.test.js
   function pluginTransform(input) {
-    return babel.transformSync(input, babelSettings).code;
+    return collectWarnings(function () {
+      return babel.transformSync(input, babelSettings).code;
+    }).result;
   }
 
   function transform(input) {
