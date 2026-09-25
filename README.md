@@ -198,6 +198,43 @@ What to do about the [useless flags](#useless-flags):
 }
 ```
 
+A warning shows the file, line and column, the reason and the code around the flag:
+
+```
+babel-plugin-inferno: /project/src/App.jsx:3:10: $HasVNodeChildren is not needed: the children are known at compile time, so the plugin sets their child flags. Child flags only help with dynamic children such as {expression}.
+  1 | function App() {
+  2 |   return (
+> 3 |     <div $HasVNodeChildren>
+    |          ^^^^^^^^^^^^^^^^^
+  4 |       <h1>Hi</h1>
+  5 |     </div>
+```
+
+With `"error"` the build fails at the first useless flag, with the same message and code.
+Any value other than `"warn"`, `"error"` or `"off"` fails when Babel loads the config, so a typo does not turn the check off silently.
+
+To use a different level in CI or in some folders, set it in `babel.config.js`.
+Babel replaces the options of a plugin in `overrides` and `env` instead of merging them, so repeat the other options there too:
+
+```js
+// babel.config.js
+module.exports = {
+    plugins: [["inferno", {
+        "imports": true,
+        // Most CI services set CI=true
+        "uselessFlags": process.env.CI ? "error" : "warn"
+    }]],
+    overrides: [{
+        // Code that has not been cleaned up yet
+        test: "./src/legacy",
+        plugins: [["inferno", {
+            "imports": true,
+            "uselessFlags": "off"
+        }]]
+    }]
+};
+```
+
 ### Troubleshoot
 
 You can verify `babel-plugin-inferno` is used by looking at the compiled output.
