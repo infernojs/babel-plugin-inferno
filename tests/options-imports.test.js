@@ -7,6 +7,7 @@ var babel = helpers.babel;
 var plugin = helpers.plugin;
 var transformWith = helpers.transformWith;
 var stripInfernoImport = helpers.stripInfernoImport;
+var expectValidJS = helpers.expectValidJS;
 
 describe('Options and imports', function () {
   describe('imports option', function () {
@@ -168,8 +169,39 @@ describe('Options and imports', function () {
       expect(transformWith({imports: true}, 'const a = <div>\n  <span/>\n</div>;', {retainLines: true})).to.equal('import { createVNode } from "inferno";const a = createVNode(1, "div", null, createVNode(1, "span"), 2);');
     });
 
-    it('Should import into a file parsed as script by sourceType unambiguous', function () {
-      expect(transformWith({imports: true}, 'const a = require("x");\nconst b = <div/>;', {sourceType: 'unambiguous'})).to.equal('import { createVNode } from "inferno";\nconst a = require("x");\nconst b = createVNode(1, "div");');
+    it('Should require helpers in a file parsed as script by sourceType unambiguous', function () {
+      expect(transformWith({imports: true}, 'const a = require("x");\nconst b = <div/>;', {sourceType: 'unambiguous'})).to.equal('var _inferno = require("inferno"),\n  createVNode = _inferno.createVNode;\nconst a = require("x");\nconst b = createVNode(1, "div");');
+    });
+
+    it('Should import helpers in a file parsed as module by sourceType unambiguous', function () {
+      expect(transformWith({imports: true}, 'import x from "x";\nconst b = <div/>;', {sourceType: 'unambiguous'})).to.equal('import { createVNode } from "inferno";\nimport x from "x";\nconst b = createVNode(1, "div");');
+    });
+
+    it('Should require every used helper in a script', function () {
+      var code = transformWith({imports: true}, 'const a = <div><Foo {...p}/>text<></></div>;', {sourceType: 'script'});
+
+      expect(code).to.equal('var _inferno = require("inferno"),\n  createVNode = _inferno.createVNode,\n  createFragment = _inferno.createFragment,\n  createComponentVNode = _inferno.createComponentVNode,\n  normalizeProps = _inferno.normalizeProps,\n  createTextVNode = _inferno.createTextVNode;\nconst a = createVNode(1, "div", null, [normalizeProps(createComponentVNode(2, Foo, {\n  ...p\n})), createTextVNode("text"), createFragment()], 4);');
+      expectValidJS(code, 'script');
+    });
+
+    it('Should require helpers after directives in a script', function () {
+      expect(transformWith({imports: true}, '"use strict";\nconst a = <div/>;', {sourceType: 'script'})).to.equal('"use strict";\n\nvar _inferno = require("inferno"),\n  createVNode = _inferno.createVNode;\nconst a = createVNode(1, "div");');
+    });
+
+    it('Should require helpers from a custom module name in a script', function () {
+      expect(transformWith({imports: 'inferno-compat'}, 'const a = <div/>;', {sourceType: 'script'})).to.equal('var _infernoCompat = require("inferno-compat"),\n  createVNode = _infernoCompat.createVNode;\nconst a = createVNode(1, "div");');
+    });
+
+    it('Should require helpers under their pragma names in a script', function () {
+      expect(transformWith({imports: true, pragma: 'cv'}, 'const a = <div><Foo/></div>;', {sourceType: 'script'})).to.equal('var _inferno = require("inferno"),\n  cv = _inferno.createVNode,\n  createComponentVNode = _inferno.createComponentVNode;\nconst a = cv(1, "div", null, createComponentVNode(2, Foo), 2);');
+    });
+
+    it('Should not require helpers that are already declared in a script', function () {
+      expect(transformWith({imports: true}, 'function createVNode() {}\nconst a = <div><Foo/></div>;', {sourceType: 'script'})).to.equal('var _inferno = require("inferno"),\n  createComponentVNode = _inferno.createComponentVNode;\nfunction createVNode() {}\nconst a = createVNode(1, "div", null, createComponentVNode(2, Foo), 2);');
+    });
+
+    it('Should use a unique name for the required module in a script', function () {
+      expect(transformWith({imports: true}, 'var _inferno = 1;\nconst a = <div/>;', {sourceType: 'script'})).to.equal('var _inferno2 = require("inferno"),\n  createVNode = _inferno2.createVNode;\nvar _inferno = 1;\nconst a = createVNode(1, "div");');
     });
   });
 
