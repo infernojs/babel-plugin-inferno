@@ -105,6 +105,40 @@ describe('Expression children', function () {
   });
 
   // An empty expression still counts as a dynamic child, so childFlags become 0 (UnknownChildren) instead of the static shape
+  describe('children prop', function () {
+    it('Should normalize a string children prop', function () {
+      expect(transform('<div children={"txt"} />')).to.equal('createVNode(1, "div", null, "txt", 0);');
+    });
+
+    it('Should normalize an array children prop', function () {
+      expect(transform('<div children={[a, b]} />')).to.equal('createVNode(1, "div", null, [a, b], 0);');
+    });
+
+    it('Should normalize an unknown children prop expression', function () {
+      expect(transform('<div children={a} />')).to.equal('createVNode(1, "div", null, a, 0);');
+    });
+
+    it('Should use a JSX element children prop given without braces', function () {
+      expect(transform('<div children=<span/> />')).to.equal('createVNode(1, "div", null, createVNode(1, "span"), 2);');
+    });
+
+    it('Should use a JSX fragment children prop given without braces', function () {
+      expect(transform('<div children=<>{a}</> />')).to.equal('createVNode(1, "div", null, createFragment(a, 0), 2);');
+    });
+
+    it('Should trust $HasVNodeChildren for a children prop expression', function () {
+      expect(transform('<div $HasVNodeChildren children={a} />')).to.equal('createVNode(1, "div", null, a, 2);');
+    });
+
+    it('Should normalize a Fragment children prop like Fragment children', function () {
+      expect(transform('<Fragment children={a} />')).to.equal('createFragment(a, 0);');
+    });
+
+    it('Should normalize a JSX Fragment children prop', function () {
+      expect(transform('<Fragment children={<span/>} />')).to.equal('createFragment(createVNode(1, "span"), 0);');
+    });
+  });
+
   describe('current behaviour (questionable)', function () {
     it('Should mark an element with only a comment child as UnknownChildren', function () {
       expect(transform('<div>{/* comment */}</div>')).to.equal('createVNode(1, "div", null, null, 0);');
