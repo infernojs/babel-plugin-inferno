@@ -71,6 +71,22 @@ describe('Options and imports', function () {
     it('Should define all element arguments', function () {
       expect(stripInfernoImport(transformWith({imports: true, defineAllArguments: true}, '<div className="c">x</div>'))).to.equal('createVNode(1, "div", "c", "x", 16, null, null, null);');
     });
+
+    it('Should define all arguments of an empty short syntax fragment', function () {
+      expect(stripInfernoImport(transformWith({imports: true, defineAllArguments: true}, '<></>'))).to.equal('createFragment(null, 1, null);');
+    });
+
+    it('Should define all arguments of a short syntax fragment with dynamic children', function () {
+      expect(stripInfernoImport(transformWith({imports: true, defineAllArguments: true}, '<>{a}</>'))).to.equal('createFragment(a, 0, null);');
+    });
+
+    it('Should define all arguments of a short syntax fragment with static children', function () {
+      expect(stripInfernoImport(transformWith({imports: true, defineAllArguments: true}, '<><div/></>'))).to.equal('createFragment([createVNode(1, "div", null, null, 1, null, null, null)], 4, null);');
+    });
+
+    it('Should define all arguments of an empty long syntax Fragment like short syntax', function () {
+      expect(stripInfernoImport(transformWith({imports: true, defineAllArguments: true}, '<Fragment></Fragment>'))).to.equal('createFragment(null, 1, null);');
+    });
   });
 
   describe('existing bindings', function () {
