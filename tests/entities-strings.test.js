@@ -70,6 +70,14 @@ describe('Entities and strings', function () {
       expect(code).to.equal('createVNode(1, "div", null, "&Egrave &#123 &#x123", 16);');
       expectValidJS(code);
     });
+
+    it('Should decode &#11; to a vertical tab', function () {
+      expect(transform('<div>&#11;</div>')).to.equal('createVNode(1, "div", null, "\u000B", 16);');
+    });
+
+    it('Should keep a numeric entity outside of Unicode verbatim', function () {
+      expect(transform('<div>&#x110000;</div>')).to.equal('createVNode(1, "div", null, "&#x110000;", 16);');
+    });
   });
 
   describe('unicode text', function () {
@@ -131,6 +139,14 @@ describe('Entities and strings', function () {
 
       expect(code).to.equal('createVNode(1, "div", null, null, 1, {\n  "title": "it\\"s"\n});');
       expectValidJS(code);
+    });
+
+    it('Should keep entity text in an expression container string verbatim', function () {
+      expect(transform('<div title={"a&amp;b"} />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "title": "a&amp;b"\n});');
+    });
+
+    it('Should keep entity text in an expression container child verbatim', function () {
+      expect(transform('<div>{"a&amp;b"}</div>')).to.equal('createVNode(1, "div", null, "a&amp;b", 0);');
     });
   });
 
@@ -264,6 +280,11 @@ describe('Entities and strings', function () {
 
     it('Should decode &amp; and keep unknown entities (babel-parser basic/4)', function () {
       expect(transform('<a d="&amp;" e="&ampr;" />')).to.equal('createVNode(1, "a", null, null, 1, {\n  "d": "&",\n  "e": "&ampr;"\n});');
+    });
+
+    // Babel's react-jsx collapses line breaks after decoding entities, so an encoded one goes too; ts-plugin-inferno keeps it like tsc
+    it('Should collapse an encoded line break in an attribute string', function () {
+      expect(transform('<div title="a&#10;\n  b" />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "title": "a b"\n});');
     });
   });
 

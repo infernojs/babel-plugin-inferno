@@ -55,6 +55,18 @@ describe('TSX with @babel/preset-typescript', function () {
     it('Should compile JSX after a generic class', function () {
       expect(stripInfernoImport(transformTSX('class C extends D<T> {}\n<C/>;'))).to.equal('class C extends D {}\ncreateComponentVNode(2, C);');
     });
+
+    it('Should drop type arguments of components with text children', function () {
+      expect(stripInfernoImport(transformTSX('<Foo<string>>text</Foo>'))).to.equal('createComponentVNode(2, Foo, {\n  children: "text"\n});');
+    });
+
+    it('Should drop type arguments of member expression components', function () {
+      expect(stripInfernoImport(transformTSX('<Foo.Bar<string> />'))).to.equal('createComponentVNode(2, Foo.Bar);');
+    });
+
+    it('Should compile JSX cast in children', function () {
+      expect(stripInfernoImport(transformTSX('<div>{(<span/>) as unknown as string}</div>'))).to.equal('createVNode(1, "div", null, createVNode(1, "span"), 0);');
+    });
   });
 
   describe('import elision', function () {

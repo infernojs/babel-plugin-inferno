@@ -4,6 +4,8 @@ var it = mocha.it;
 var expect = require('chai').expect;
 var helpers = require('./helpers');
 var transform = helpers.transform;
+var transformTSX = helpers.transformTSX;
+var stripInfernoImport = helpers.stripInfernoImport;
 
 describe('Whitespace and text', function () {
   describe('multi-line text', function () {
@@ -68,6 +70,10 @@ describe('Whitespace and text', function () {
     it('Should drop indentation between expressions', function () {
       expect(transform('<div>\n  {a}\n  {b}\n</div>')).to.equal('createVNode(1, "div", null, [a, b], 0);');
     });
+
+    it('Should keep a single space between two expressions with type assertions', function () {
+      expect(stripInfernoImport(transformTSX('<div>{a as string} {b!}</div>'))).to.equal('createVNode(1, "div", null, [a, createTextVNode(" "), b], 0);');
+    });
   });
 
   describe('text next to expressions', function () {
@@ -103,6 +109,10 @@ describe('Whitespace and text', function () {
 
     it('Should keep single-line whitespace inside a long syntax Fragment', function () {
       expect(transform('<Fragment>  </Fragment>')).to.equal('createFragment([createTextVNode("  ")], 4);');
+    });
+
+    it('Should pass single-line whitespace as children of a component with type arguments', function () {
+      expect(stripInfernoImport(transformTSX('<Foo<Props>>  </Foo>'))).to.equal('createComponentVNode(2, Foo, {\n  children: "  "\n});');
     });
   });
 

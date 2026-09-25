@@ -12,6 +12,8 @@ var expect = require('chai').expect;
 var helpers = require('./helpers');
 var transform = helpers.transform;
 var expectValidJS = helpers.expectValidJS;
+var transformTSX = helpers.transformTSX;
+var stripInfernoImport = helpers.stripInfernoImport;
 
 describe('React parity', function () {
   describe('TransformJSXToReactJSX-test', function () {
@@ -182,6 +184,24 @@ describe('React parity', function () {
 
     it('Should keep a whitespace-only line between inline elements (whitespace transformer README)', function () {
       expect(transform('<div>\n  Monkeys:\n  <input type="text" /> <button />\n</div>')).to.equal('createVNode(1, "div", null, [createTextVNode("Monkeys:"), createVNode(64, "input", null, null, 1, {\n  "type": "text"\n}), createTextVNode(" "), createVNode(1, "button")], 4);');
+    });
+
+    it('Should keep a whitespace-only text between inline elements as a text vNode (whitespace transformer README)', function () {
+      expect(transform('<div><b/> <i/></div>')).to.equal('createVNode(1, "div", null, [createVNode(1, "b"), createTextVNode(" "), createVNode(1, "i")], 4);');
+    });
+  });
+
+  describe('TSX variants', function () {
+    it('Should compile a single array child with a type assertion', function () {
+      expect(stripInfernoImport(transformTSX('<div>{[<span key="0" />, <span key="1" />] as VNode[]}</div>'))).to.equal('createVNode(1, "div", null, [createVNode(1, "span", null, null, 1, null, "0"), createVNode(1, "span", null, null, 1, null, "1")], 0);');
+    });
+
+    it('Should compile a spread with a type assertion followed by a prop', function () {
+      expect(stripInfernoImport(transformTSX('<Component {...(props as Props)} sound="moo" />'))).to.equal('normalizeProps(createComponentVNode(2, Component, {\n  ...props,\n  "sound": "moo"\n}));');
+    });
+
+    it('Should keep key and style after a spread on a generic component', function () {
+      expect(stripInfernoImport(transformTSX('<Stringify<Props> {...buttonProps} key={`button-${i}`} style={s as CSSProperties} />'))).to.equal('normalizeProps(createComponentVNode(2, Stringify, {\n  ...buttonProps,\n  "style": s\n}, `button-${i}`));');
     });
   });
 

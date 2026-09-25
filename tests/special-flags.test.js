@@ -4,6 +4,8 @@ var it = mocha.it;
 var expect = require('chai').expect;
 var helpers = require('./helpers');
 var transform = helpers.transform;
+var transformTSX = helpers.transformTSX;
+var stripInfernoImport = helpers.stripInfernoImport;
 
 describe('Special flags', function () {
   describe('flag precedence', function () {
@@ -30,6 +32,14 @@ describe('Special flags', function () {
     it('Should prefer $Flags over $ReCreate and contentEditable', function () {
       expect(transform('<div $ReCreate contentEditable $Flags={9}/>')).to.equal('createVNode(9, "div", null, null, 1, {\n  "contentEditable": true\n});');
     });
+
+    it('Should strip type syntax from a $ChildFlag expression', function () {
+      expect(stripInfernoImport(transformTSX('<div $ChildFlag={flag as ChildFlags}>{a}</div>'))).to.equal('createVNode(1, "div", null, a, flag);');
+    });
+
+    it('Should use a $Flags expression as the flags of a generic component', function () {
+      expect(stripInfernoImport(transformTSX('<Foo<T> $Flags={flags as number} />'))).to.equal('createComponentVNode(flags, Foo);');
+    });
   });
 
   describe('$ReCreate', function () {
@@ -48,6 +58,10 @@ describe('Special flags', function () {
     it('Should combine ReCreate and ContentEditable flags', function () {
       expect(transform('<div $ReCreate contentEditable/>')).to.equal('createVNode(6145, "div", null, null, 1, {\n  "contentEditable": true\n});');
     });
+
+    it('Should add the ReCreate flag to generic components', function () {
+      expect(stripInfernoImport(transformTSX('<Foo<T> $ReCreate/>'))).to.equal('createComponentVNode(2050, Foo);');
+    });
   });
 
   describe('other combinations', function () {
@@ -65,6 +79,10 @@ describe('Special flags', function () {
 
     it('Should keep $HasVNodeChildren with a spread', function () {
       expect(transform('<div {...p} $HasVNodeChildren>{a}</div>')).to.equal('normalizeProps(createVNode(1, "div", null, a, 2, {\n  ...p\n}));');
+    });
+
+    it('Should drop $Flags on a Fragment', function () {
+      expect(transform('<Fragment $Flags={1}>x</Fragment>')).to.equal('createFragment([createTextVNode("x")], 4);');
     });
   });
 

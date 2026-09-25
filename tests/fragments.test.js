@@ -6,6 +6,8 @@ var helpers = require('./helpers');
 var transform = helpers.transform;
 var transformWith = helpers.transformWith;
 var pluginTransform = helpers.pluginTransform;
+var transformTSX = helpers.transformTSX;
+var stripInfernoImport = helpers.stripInfernoImport;
 
 describe('Fragments', function () {
   describe('keyed fragments', function () {
@@ -27,6 +29,22 @@ describe('Fragments', function () {
 
     it('Should create an empty Fragment with $HasKeyedChildren', function () {
       expect(transform('<Fragment $HasKeyedChildren/>')).to.equal('createFragment();');
+    });
+
+    it('Should create a keyed empty React.Fragment', function () {
+      expect(stripInfernoImport(transformTSX('<React.Fragment key={id!} />'))).to.equal('createFragment(null, 1, id);');
+    });
+
+    it('Should create a keyed Fragment with dynamic children', function () {
+      expect(transform('<Fragment key="k">{a}</Fragment>')).to.equal('createFragment(a, 0, "k");');
+    });
+
+    it('Should create a keyed React.Fragment with non keyed children', function () {
+      expect(transform('<React.Fragment key="k"><a/><b/></React.Fragment>')).to.equal('createFragment([createVNode(1, "a"), createVNode(1, "b")], 4, "k");');
+    });
+
+    it('Should strip a type assertion from a Fragment key', function () {
+      expect(stripInfernoImport(transformTSX('<Fragment key={k as string}><a/></Fragment>'))).to.equal('createFragment([createVNode(1, "a")], 4, k);');
     });
   });
 
@@ -167,6 +185,10 @@ describe('Fragments', function () {
 
     it('Should compile a fragment inside an element next to text', function () {
       expect(transform('<div>text<>{a}</></div>')).to.equal('createVNode(1, "div", null, [createTextVNode("text"), createFragment(a, 0)], 4);');
+    });
+
+    it('Should compile a fragment as children of a generic component', function () {
+      expect(stripInfernoImport(transformTSX('<Foo<string>><>{a}</></Foo>'))).to.equal('createComponentVNode(2, Foo, {\n  children: createFragment(a, 0)\n});');
     });
   });
 

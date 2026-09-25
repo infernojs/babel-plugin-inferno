@@ -5,6 +5,8 @@ var expect = require('chai').expect;
 var helpers = require('./helpers');
 var transform = helpers.transform;
 var expectValidJS = helpers.expectValidJS;
+var transformTSX = helpers.transformTSX;
+var stripInfernoImport = helpers.stripInfernoImport;
 
 describe('Attributes', function () {
   describe('verbatim attributes', function () {
@@ -269,6 +271,12 @@ describe('Attributes', function () {
     it('Should keep replaced values that may have side effects', function () {
       expect(transform('<div children={[...a]}>c</div>')).to.equal('createVNode(1, "div", null, ([...a], "c"), 16);');
     });
+
+    it('Should reject duplicate props on generic components', function () {
+      expect(function () {
+        transformTSX('<Foo<string> title="a" title="b" />');
+      }).to.throw('Multiple title props are not supported. Remove the duplicate title prop.');
+    });
   });
 
   describe('JSX as attribute values', function () {
@@ -395,6 +403,10 @@ describe('Attributes', function () {
     it('Should keep __proto__ next to other props (babel proto-in-jsx-attribute)', function () {
       expect(transform('<p __proto__={null} class="bar" />')).to.equal('createVNode(1, "p", "bar", null, 1, {\n  ["__proto__"]: null\n});');
     });
+
+    it('Should emit __proto__ as a computed key on generic components', function () {
+      expect(stripInfernoImport(transformTSX('<Foo<Bar> __proto__={x} />'))).to.equal('createComponentVNode(2, Foo, {\n  ["__proto__"]: x\n});');
+    });
   });
 
   describe('Object.prototype names as attributes', function () {
@@ -419,6 +431,20 @@ describe('Attributes', function () {
     });
   });
 
+  describe('TSX', function () {
+    it('Should strip type assertions from attribute values', function () {
+      expect(stripInfernoImport(transformTSX('<Foo value={x as number} other={y!} third={z satisfies string} />'))).to.equal('createComponentVNode(2, Foo, {\n  "value": x,\n  "other": y,\n  "third": z\n});');
+    });
+
+    it('Should pass a className with a type assertion', function () {
+      expect(stripInfernoImport(transformTSX('<div className={cls as string} style={{color: "red"} as const} />'))).to.equal('createVNode(1, "div", cls, null, 1, {\n  "style": {\n    color: "red"\n  }\n});');
+    });
+
+    it('Should keep className, htmlFor and onDoubleClick as props on a generic component', function () {
+      expect(stripInfernoImport(transformTSX('<Foo<string> className="x" htmlFor="y" onDoubleClick={f} />'))).to.equal('createComponentVNode(2, Foo, {\n  "className": "x",\n  "htmlFor": "y",\n  "onDoubleClick": f\n});');
+    });
+  });
+
   describe('current behaviour (questionable)', function () {
     it('Should pass true as className for a valueless className', function () {
       expect(transform('<div className />')).to.equal('createVNode(1, "div", true);');
@@ -427,6 +453,14 @@ describe('Attributes', function () {
     // Babel keeps them as leading comments of the props
     it('Should drop comments between attributes', function () {
       expect(transform('<div\n  /* a multi-line\n     comment */\n  attr1="foo">\n  <span // a double-slash comment\n    attr2="bar"\n  />\n</div>')).to.equal('createVNode(1, "div", null, createVNode(1, "span", null, null, 1, {\n  "attr2": "bar"\n}), 2, {\n  "attr1": "foo"\n});');
+    });
+
+    // ts-plugin-inferno rejects these deprecated props, this plugin has passed them through since 2018
+    it('Should pass the deprecated noNormalize, $NoNormalize, hasKeyedChildren and hasNonKeyedChildren props through', function () {
+      expect(transform('<div noNormalize />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "noNormalize": true\n});');
+      expect(transform('<div $NoNormalize />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "$NoNormalize": true\n});');
+      expect(transform('<div hasKeyedChildren />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "hasKeyedChildren": true\n});');
+      expect(transform('<div hasNonKeyedChildren />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "hasNonKeyedChildren": true\n});');
     });
   });
 });

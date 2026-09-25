@@ -6,6 +6,8 @@ var it = mocha.it;
 var expect = require('chai').expect;
 var helpers = require('./helpers');
 var transform = helpers.transform;
+var transformTSX = helpers.transformTSX;
+var stripInfernoImport = helpers.stripInfernoImport;
 
 describe('Preact parity', function () {
   describe('children and text', function () {
@@ -174,6 +176,24 @@ describe('Preact parity', function () {
 
     it('Should compile a complete table', function () {
       expect(transform('<table><tbody><tr><td /></tr></tbody></table>')).to.equal('createVNode(1, "table", null, createVNode(1, "tbody", null, createVNode(1, "tr", null, createVNode(1, "td"), 2), 2), 2);');
+    });
+  });
+
+  describe('TSX variants', function () {
+    it('Should pass a const asserted array children prop to a component', function () {
+      expect(stripInfernoImport(transformTSX('<Foo a="b" children={[<span class="bar">bar</span>, "123", 456] as const} />'))).to.equal('createComponentVNode(2, Foo, {\n  "a": "b",\n  "children": [createVNode(1, "span", "bar", "bar", 16), "123", 456]\n});');
+    });
+
+    it('Should compile a typed function child of a lowercase consumer', function () {
+      expect(stripInfernoImport(transformTSX('<context.Consumer>{(v: State) => <p>{v.state}</p>}</context.Consumer>'))).to.equal('createComponentVNode(2, context.Consumer, {\n  children: v => createVNode(1, "p", null, v.state, 0)\n});');
+    });
+
+    it('Should keep a key after a spread on a generic component', function () {
+      expect(stripInfernoImport(transformTSX('<ListItem<Item> {...{ isSelected, setSelected, ...item }} key={item.name} />'))).to.equal('normalizeProps(createComponentVNode(2, ListItem, {\n  ...{\n    isSelected,\n    setSelected,\n    ...item\n  }\n}, item.name));');
+    });
+
+    it('Should compile a multiple select with a satisfies array value', function () {
+      expect(stripInfernoImport(transformTSX('<select multiple value={["B", "C"] satisfies string[]}><option selected value="B">B</option></select>'))).to.equal('createVNode(256, "select", null, createVNode(1, "option", null, "B", 16, {\n  "selected": true,\n  "value": "B"\n}), 2, {\n  "multiple": true,\n  "value": ["B", "C"]\n});');
     });
   });
 });

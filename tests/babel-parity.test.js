@@ -10,6 +10,8 @@ var expect = require('chai').expect;
 var helpers = require('./helpers');
 var transform = helpers.transform;
 var expectValidJS = helpers.expectValidJS;
+var transformTSX = helpers.transformTSX;
+var stripInfernoImport = helpers.stripInfernoImport;
 
 describe('Babel parity', function () {
   describe('transform-react-jsx fixtures', function () {
@@ -240,6 +242,36 @@ describe('Babel parity', function () {
 
     it('lowercase-member-expression (transform-react-inline-elements)', function () {
       expect(transform('<form.TestComponent />')).to.equal('createComponentVNode(2, form.TestComponent);');
+    });
+  });
+
+  describe('TSX variants', function () {
+    it('should-allow-js-namespacing with type arguments', function () {
+      expect(stripInfernoImport(transformTSX('<Namespace.Component<string> />;'))).to.equal('createComponentVNode(2, Namespace.Component);');
+    });
+
+    it('should-allow-deeper-js-namespacing with type arguments', function () {
+      expect(stripInfernoImport(transformTSX('<Namespace.DeepNamespace.Component<Props, State> value={1} />;'))).to.equal('createComponentVNode(2, Namespace.DeepNamespace.Component, {\n  "value": 1\n});');
+    });
+
+    it('this-tag-name with type arguments', function () {
+      expect(stripInfernoImport(transformTSX('var div = <this.Foo<string>>test</this.Foo>;'))).to.equal('var div = createComponentVNode(2, this.Foo, {\n  children: "test"\n});');
+    });
+
+    it('assignment with a type assertion in the spread', function () {
+      expect(stripInfernoImport(transformTSX('var div = <Component {...(props as Props)} foo="bar" />'))).to.equal('var div = normalizeProps(createComponentVNode(2, Component, {\n  ...props,\n  "foo": "bar"\n}));');
+    });
+
+    it('assignment with non-null and satisfies expressions', function () {
+      expect(stripInfernoImport(transformTSX('var div = <Component {...props!} foo={bar satisfies string} />'))).to.equal('var div = normalizeProps(createComponentVNode(2, Component, {\n  ...props,\n  "foo": bar\n}));');
+    });
+
+    it('should-not-mangle-expressioncontainer-attribute-values with a type assertion', function () {
+      expect(stripInfernoImport(transformTSX('<button data-value={"a value\\n  with\\nnewlines" as string}>Button</button>;'))).to.equal('createVNode(1, "button", null, "Button", 16, {\n  "data-value": "a value\\n  with\\nnewlines"\n});');
+    });
+
+    it('Should compile a generic arrow function render prop', function () {
+      expect(stripInfernoImport(transformTSX('<Foo render={<T,>(item: T) => <div>{item}</div>} />'))).to.equal('createComponentVNode(2, Foo, {\n  "render": item => createVNode(1, "div", null, item, 0)\n});');
     });
   });
 

@@ -8,6 +8,8 @@ var plugin = helpers.plugin;
 var transformWith = helpers.transformWith;
 var stripInfernoImport = helpers.stripInfernoImport;
 var expectValidJS = helpers.expectValidJS;
+var transformTSX = helpers.transformTSX;
+var es5CommonJS = helpers.es5CommonJS;
 
 describe('Options and imports', function () {
   describe('imports option', function () {
@@ -154,6 +156,35 @@ describe('Options and imports', function () {
     it('Should ignore bindings named after other JSX runtimes', function () {
       expect(transformWith({imports: true}, 'const _jsx = 1, jsx = 2;\n<div/>;')).to.equal('import { createVNode } from "inferno";\nconst _jsx = 1,\n  jsx = 2;\ncreateVNode(1, "div");');
     });
+
+    it('Should import helpers next to an existing inferno import', function () {
+      expect(transformWith({imports: true}, 'import {Component} from "inferno";\nexport class A extends Component { render() { return <div/>; } }')).to.equal('import { createVNode } from "inferno";\nimport { Component } from "inferno";\nexport class A extends Component {\n  render() {\n    return createVNode(1, "div");\n  }\n}');
+    });
+
+    it('Should not import a helper twice when the code also calls it', function () {
+      expect(transformWith({imports: true}, 'import {createVNode} from "inferno";\nexport const a = <div/>;\nexport const b = createVNode(1, "b");')).to.equal('import { createVNode } from "inferno";\nexport const a = createVNode(1, "div");\nexport const b = createVNode(1, "b");');
+    });
+
+    it('Should import missing helpers next to an import of other helpers', function () {
+      expect(transformWith({imports: true}, 'import {createFragment} from "inferno";\nexport const a = <><div/></>;\ncreateFragment;')).to.equal('import { createVNode } from "inferno";\nimport { createFragment } from "inferno";\nexport const a = createFragment([createVNode(1, "div")], 4);\ncreateFragment;');
+    });
+
+    it('Should import helpers when only types are imported from inferno', function () {
+      expect(transformTSX('import type {VNode} from "inferno";\nexport const a: VNode = <div/>;')).to.equal('import { createVNode } from "inferno";\nexport const a = createVNode(1, "div");');
+      expect(transformTSX('import {type VNode} from "inferno";\nexport const a: VNode = <div/>;')).to.equal('import { createVNode } from "inferno";\nimport "inferno";\nexport const a = createVNode(1, "div");');
+    });
+
+    it('Should not treat a re-export of inferno as an import', function () {
+      expect(transformWith({imports: true}, 'export * from "inferno";\nexport const a = <div/>;')).to.equal('import { createVNode } from "inferno";\nexport * from "inferno";\nexport const a = createVNode(1, "div");');
+    });
+
+    it('Should import helpers next to a used default import', function () {
+      expect(transformWith({imports: true}, 'import Inferno from "inferno";\nInferno.render(<div/>, root);')).to.equal('import { createVNode } from "inferno";\nimport Inferno from "inferno";\nInferno.render(createVNode(1, "div"), root);');
+    });
+
+    it('Should import helpers next to a side effect import', function () {
+      expect(transformWith({imports: true}, 'import "inferno";\nexport const a = <div/>;')).to.equal('import { createVNode } from "inferno";\nimport "inferno";\nexport const a = createVNode(1, "div");');
+    });
   });
 
   describe('import emission', function () {
@@ -202,6 +233,25 @@ describe('Options and imports', function () {
 
     it('Should use a unique name for the required module in a script', function () {
       expect(transformWith({imports: true}, 'var _inferno = 1;\nconst a = <div/>;', {sourceType: 'script'})).to.equal('var _inferno2 = require("inferno"),\n  createVNode = _inferno2.createVNode;\nvar _inferno = 1;\nconst a = createVNode(1, "div");');
+    });
+
+    it('Should import helpers after the "use client" directive', function () {
+      expect(transformWith({imports: true}, '"use client";\nexport const a = <div/>;')).to.equal('"use client";\n\nimport { createVNode } from "inferno";\nexport const a = createVNode(1, "div");');
+    });
+
+    it('Should emit a valid ES module', function () {
+      var code = transformWith({imports: true}, 'import {a} from "b";\nexport const el = <div><Foo {...p}/>text<></>{a}</div>;');
+
+      expect(code).to.equal('import { createVNode, createFragment, createComponentVNode, normalizeProps, createTextVNode } from "inferno";\nimport { a } from "b";\nexport const el = createVNode(1, "div", null, [normalizeProps(createComponentVNode(2, Foo, {\n  ...p\n})), createTextVNode("text"), createFragment(), a], 0);');
+      expectValidJS(code);
+    });
+
+    it('Should emit a valid CommonJS module', function () {
+      var code = transformWith({imports: true}, 'import {a} from "b";\nexport const el = <div><Foo {...p}/>text<></>{a}</div>;', es5CommonJS);
+
+      expect(code).to.not.contain('import ');
+      expect(code).to.contain('require("inferno")');
+      expectValidJS(code, 'script');
     });
   });
 

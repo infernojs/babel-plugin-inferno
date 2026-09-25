@@ -6,6 +6,8 @@ var helpers = require('./helpers');
 var transform = helpers.transform;
 var transformWith = helpers.transformWith;
 var es5 = helpers.es5;
+var transformTSX = helpers.transformTSX;
+var stripInfernoImport = helpers.stripInfernoImport;
 
 describe('Tag names', function () {
   describe('member expressions', function () {
@@ -31,6 +33,14 @@ describe('Tag names', function () {
 
     it('Should compile a member expression ending in this', function () {
       expect(transform('<a.this />')).to.equal('createComponentVNode(2, a.this);');
+    });
+
+    it('Should compile a this member expression ending in an uppercase name as a component', function () {
+      expect(transform('<this.Foo />')).to.equal('createComponentVNode(2, this.Foo);');
+    });
+
+    it('Should compile a lowercase generic member expression as a component', function () {
+      expect(stripInfernoImport(transformTSX('<icons.close<Props> size={1} />'))).to.equal('createComponentVNode(2, icons.close, {\n  "size": 1\n});');
     });
   });
 
@@ -226,6 +236,16 @@ describe('Tag names', function () {
   describe('tag evaluation order', function () {
     it('Should read the outer component tag before evaluating its children', function () {
       expect(transform('<Tag>{((Tag = Other), v)}<Tag /></Tag>')).to.equal('createComponentVNode(2, Tag, {\n  children: [(Tag = Other, v), createComponentVNode(2, Tag)]\n});');
+    });
+  });
+
+  describe('type arguments', function () {
+    it('Should drop object type arguments and keep the props', function () {
+      expect(stripInfernoImport(transformTSX('<Foo<{a: number}> a={1} />'))).to.equal('createComponentVNode(2, Foo, {\n  "a": 1\n});');
+    });
+
+    it('Should drop the type arguments of a generic member expression component with children', function () {
+      expect(stripInfernoImport(transformTSX('<Ns.Foo<T>>x</Ns.Foo>'))).to.equal('createComponentVNode(2, Ns.Foo, {\n  children: "x"\n});');
     });
   });
 

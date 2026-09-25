@@ -6,6 +6,8 @@ var helpers = require('./helpers');
 var transform = helpers.transform;
 var transformWith = helpers.transformWith;
 var es5 = helpers.es5;
+var transformTSX = helpers.transformTSX;
+var stripInfernoImport = helpers.stripInfernoImport;
 
 describe('Expression children', function () {
   describe('empty expressions', function () {
@@ -104,6 +106,10 @@ describe('Expression children', function () {
     it('Should keep optional chaining in a sequence expression', function () {
       expect(transform('<div>{(this?.class, this.class)}</div>')).to.equal('createVNode(1, "div", null, (this?.class, this.class), 0);');
     });
+
+    it('Should pass a typed function as children of a component with type arguments', function () {
+      expect(stripInfernoImport(transformTSX('<Foo<string>>{(v: string) => <div>{v}</div>}</Foo>'))).to.equal('createComponentVNode(2, Foo, {\n  children: v => createVNode(1, "div", null, v, 0)\n});');
+    });
   });
 
   // An empty expression still counts as a dynamic child, so childFlags become 0 (UnknownChildren) instead of the static shape
@@ -155,6 +161,20 @@ describe('Expression children', function () {
     it('Should compile spread children for ES5 targets', function () {
       expect(transformWith({imports: true}, '<div>{...a}</div>', es5)).to.contain('createVNode(1, "div", null, _toConsumableArray(a), 0);');
     });
+
+    it('Should spread children given with a type assertion', function () {
+      expect(stripInfernoImport(transformTSX('<div>{...(items as Item[])}</div>'))).to.equal('createVNode(1, "div", null, [...items], 0);');
+    });
+
+    // Array.prototype.concat flattens array arguments, so the plain child is wrapped to keep an array child nested
+    it('Should keep the order of spread and plain children for ES5 targets', function () {
+      var code = transformWith({imports: false}, 'var vNode = <div>{...a}{b}{...c}</div>;', es5);
+      var Inferno = {createVNode: function (flags, type, className, children, childFlags) { return {children: children, childFlags: childFlags}; }};
+      var vNode = new Function('Inferno', 'a', 'b', 'c', code + '\nreturn vNode;')(Inferno, [1], [2], [3]);
+
+      expect(code).to.contain('createVNode(1, "div", null, [].concat(_toConsumableArray(a), [b], _toConsumableArray(c)), 0);');
+      expect(vNode.children).to.deep.equal([1, [2], 3]);
+    });
   });
 
   describe('children prop', function () {
@@ -188,6 +208,32 @@ describe('Expression children', function () {
 
     it('Should normalize a JSX Fragment children prop', function () {
       expect(transform('<Fragment children={<span/>} />')).to.equal('createFragment(createVNode(1, "span"), 0);');
+    });
+
+    it('Should use a JSX element children prop given in braces', function () {
+      expect(transform('<div children={<span/>} />')).to.equal('createVNode(1, "div", null, createVNode(1, "span"), 2);');
+    });
+
+    it('Should create no children for a null children prop', function () {
+      expect(transform('<div children={null} />')).to.equal('createVNode(1, "div");');
+    });
+
+    it('Should normalize a children prop expression with a type assertion', function () {
+      expect(stripInfernoImport(transformTSX('<div children={a as Child} />'))).to.equal('createVNode(1, "div", null, a, 0);');
+    });
+  });
+
+  describe('type assertions', function () {
+    it('Should compile an as expression child', function () {
+      expect(stripInfernoImport(transformTSX('<div>{value as string}</div>'))).to.equal('createVNode(1, "div", null, value, 0);');
+    });
+
+    it('Should compile a non-null assertion child', function () {
+      expect(stripInfernoImport(transformTSX('<div>{maybe!}</div>'))).to.equal('createVNode(1, "div", null, maybe, 0);');
+    });
+
+    it('Should compile a satisfies expression child', function () {
+      expect(stripInfernoImport(transformTSX('<div>{(x satisfies Item)}</div>'))).to.equal('createVNode(1, "div", null, x, 0);');
     });
   });
 

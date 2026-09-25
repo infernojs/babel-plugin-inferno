@@ -11,6 +11,8 @@ var it = mocha.it;
 var expect = require('chai').expect;
 var helpers = require('./helpers');
 var transform = helpers.transform;
+var transformTSX = helpers.transformTSX;
+var stripInfernoImport = helpers.stripInfernoImport;
 
 // Attribute names as they appear in the DOM. `class` and `data-*` are tested separately.
 // MDN spells the DOM property referrerPolicy; the attribute is lowercase because it is not in the HTML spec table.
@@ -145,6 +147,16 @@ describe('SVG attributes (MDN reference)', function () {
       it('Should map ' + name + ' to ' + lowercaseAliases[name], function () {
         expect(transform('<rect ' + name + '="v" />')).to.equal(rectProps(lowercaseAliases[name]));
       });
+    });
+  });
+
+  describe('TSX', function () {
+    it('Should map camelCase svg attributes whose values have type assertions', function () {
+      expect(stripInfernoImport(transformTSX('<rect strokeWidth={1 as const} xlinkHref={h satisfies string} fillOpacity={o!} />'))).to.equal('createVNode(32, "rect", null, null, 1, {\n  "stroke-width": 1,\n  "xlink:href": h,\n  "fill-opacity": o\n});');
+    });
+
+    it('Should keep camelCase svg attributes on a generic component', function () {
+      expect(stripInfernoImport(transformTSX('<Icon<string> strokeWidth={2} viewBox="0 0 1 1" />'))).to.equal('createComponentVNode(2, Icon, {\n  "strokeWidth": 2,\n  "viewBox": "0 0 1 1"\n});');
     });
   });
 });

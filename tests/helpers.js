@@ -67,17 +67,18 @@ function expectValidJS(code, sourceType) {
 }
 
 /*
- * Maps the first occurrence of `needle` in the generated code back to the input.
+ * Maps the first occurrence of `needle` in the generated code, moved right by `offset` columns, back to the input.
+ * The offset lets a needle include text before a short token, e.g. ('"bar": x', 7) for the x.
  * Returns {line, column} (line 1-based, column 0-based) or {line: null, column: null} when unmapped.
  */
-function originalPosition(result, needle) {
+function originalPosition(result, needle, offset) {
   var lines = result.code.split('\n');
 
   for (var i = 0; i < lines.length; i++) {
     var column = lines[i].indexOf(needle);
 
     if (column !== -1) {
-      var position = traceMapping.originalPositionFor(new traceMapping.TraceMap(result.map), {line: i + 1, column: column});
+      var position = traceMapping.originalPositionFor(new traceMapping.TraceMap(result.map), {line: i + 1, column: column + (offset || 0)});
 
       return {line: position.line, column: position.column};
     }

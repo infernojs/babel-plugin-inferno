@@ -7,6 +7,8 @@ var transform = helpers.transform;
 var transformWith = helpers.transformWith;
 var es5 = helpers.es5;
 var es5CommonJS = helpers.es5CommonJS;
+var transformTSX = helpers.transformTSX;
+var stripInfernoImport = helpers.stripInfernoImport;
 
 describe('Spread attributes', function () {
   describe('spread position', function () {
@@ -45,6 +47,26 @@ describe('Spread attributes', function () {
     it('Should keep a comment inside a spread', function () {
       expect(transform('<div {.../*i18n*/{ id: "hello" }} />')).to.equal('normalizeProps(createVNode(1, "div", null, null, 1, {\n  ... /*i18n*/{\n    id: "hello"\n  }\n}));');
     });
+
+    it('Should compile JSX nested inside a spread expression', function () {
+      expect(stripInfernoImport(transformTSX('<Foo {...{icon: <Icon<T> />}} />'))).to.equal('normalizeProps(createComponentVNode(2, Foo, {\n  ...{\n    icon: createComponentVNode(2, Icon)\n  }\n}));');
+    });
+
+    it('Should strip a type assertion from a spread', function () {
+      expect(stripInfernoImport(transformTSX('<Foo {...p as any} />'))).to.equal('normalizeProps(createComponentVNode(2, Foo, {\n  ...p\n}));');
+    });
+
+    it('Should strip a non-null assertion from a spread', function () {
+      expect(stripInfernoImport(transformTSX('<Foo {...p!} a="1" />'))).to.equal('normalizeProps(createComponentVNode(2, Foo, {\n  ...p,\n  "a": "1"\n}));');
+    });
+
+    it('Should strip satisfies from a spread', function () {
+      expect(stripInfernoImport(transformTSX('<Foo {...(p satisfies object)} />'))).to.equal('normalizeProps(createComponentVNode(2, Foo, {\n  ...p\n}));');
+    });
+
+    it('Should keep a spread on a generic component', function () {
+      expect(stripInfernoImport(transformTSX('<Foo<Props> {...p} a={1} />'))).to.equal('normalizeProps(createComponentVNode(2, Foo, {\n  ...p,\n  "a": 1\n}));');
+    });
   });
 
   describe('spread with special props', function () {
@@ -82,6 +104,14 @@ describe('Spread attributes', function () {
 
     it('Should keep a spread of a conditional object', function () {
       expect(transform('<div {...(c ? {class: "x"} : {})} />')).to.equal('normalizeProps(createVNode(1, "div", null, null, 1, {\n  ...(c ? {\n    class: "x"\n  } : {})\n}));');
+    });
+
+    it('Should prefer JSX children over children from a spread', function () {
+      expect(transform('<Foo {...p}>b</Foo>')).to.equal('normalizeProps(createComponentVNode(2, Foo, {\n  ...p,\n  children: "b"\n}));');
+    });
+
+    it('Should put JSX children after the spread on a generic component', function () {
+      expect(stripInfernoImport(transformTSX('<Foo<T> {...p}><a/><b/></Foo>'))).to.equal('normalizeProps(createComponentVNode(2, Foo, {\n  ...p,\n  children: [createVNode(1, "a"), createVNode(1, "b")]\n}));');
     });
   });
 

@@ -141,6 +141,10 @@ describe('oxc parity', function () {
     it('issue-10956: Should ignore @jsx and @jsxRuntime pragmas with onlyRemoveTypeImports', function () {
       expect(transformTSX('/** @jsx h */\n/** @jsxRuntime classic */\nexport const foo = <div/>;', {imports: true}, {onlyRemoveTypeImports: true})).to.equal('import { createVNode } from "inferno";\n/** @jsx h */\n/** @jsxRuntime classic */\nexport const foo = createVNode(1, "div");');
     });
+
+    it('issue-10956: Should add the inferno import when a type-only inferno import is elided', function () {
+      expect(transformTSX('import type {VNode} from "inferno";\n/** @jsx h */\nexport const foo: VNode = <div/>;')).to.equal('import { createVNode } from "inferno";\n/** @jsx h */\nexport const foo = createVNode(1, "div");');
+    });
   });
 
   describe('transform-arrow-functions/with-this-member-expression', function () {

@@ -4,6 +4,8 @@ var it = mocha.it;
 var expect = require('chai').expect;
 var helpers = require('./helpers');
 var transform = helpers.transform;
+var transformTSX = helpers.transformTSX;
+var stripInfernoImport = helpers.stripInfernoImport;
 
 describe('key, ref and onComponent hooks', function () {
   describe('ref', function () {
@@ -41,6 +43,10 @@ describe('key, ref and onComponent hooks', function () {
 
     it('Should pass every argument to a component', function () {
       expect(transform('<Parent a="a" b={{b: "b"}} c={C} key="testKey" ref={testRef} />')).to.equal('createComponentVNode(2, Parent, {\n  "a": "a",\n  "b": {\n    b: "b"\n  },\n  "c": C\n}, "testKey", testRef);');
+    });
+
+    it('Should pass key and ref to a generic component', function () {
+      expect(stripInfernoImport(transformTSX('<Foo<string> key="k" ref={r} />'))).to.equal('createComponentVNode(2, Foo, null, "k", r);');
     });
   });
 
@@ -80,6 +86,20 @@ describe('key, ref and onComponent hooks', function () {
         transform('<ul>\n  <li key>a</li>\n</ul>');
       }).to.throw('> 2 |   <li key>a</li>\n    |       ^^^');
     });
+
+    it('Should strip type syntax from key and ref', function () {
+      expect(stripInfernoImport(transformTSX('<div key={k!} ref={r as any} />'))).to.equal('createVNode(1, "div", null, null, 1, null, k, r);');
+    });
+
+    it('Should strip satisfies from a key', function () {
+      expect(stripInfernoImport(transformTSX('<Foo key={id satisfies string} />'))).to.equal('createComponentVNode(2, Foo, null, id);');
+    });
+
+    it('Should reject a valueless key on a generic component', function () {
+      expect(function () {
+        transformTSX('<Foo<string> key />');
+      }).to.throw('Please provide an explicit key value. Using "key" as a shorthand for "key={true}" is not allowed.');
+    });
   });
 
   describe('keyed children', function () {
@@ -105,6 +125,14 @@ describe('key, ref and onComponent hooks', function () {
 
     it('Should not detect keys passed through spread', function () {
       expect(transform('<div><Foo {...{key: "k"}}/><Foo {...{key: "j"}}/></div>')).to.equal('createVNode(1, "div", null, [normalizeProps(createComponentVNode(2, Foo, {\n  ...{\n    key: "k"\n  }\n})), normalizeProps(createComponentVNode(2, Foo, {\n  ...{\n    key: "j"\n  }\n}))], 4);');
+    });
+
+    it('Should mark self-closing keyed component children as keyed', function () {
+      expect(stripInfernoImport(transformTSX('<div><Item<T> key={a} /><Item<T> key={b} /></div>'))).to.equal('createVNode(1, "div", null, [createComponentVNode(2, Item, null, a), createComponentVNode(2, Item, null, b)], 8);');
+    });
+
+    it('Should mark keyed children of an element with a spread as keyed', function () {
+      expect(transform('<div {...p}><span key="a"></span><span key="b"></span></div>')).to.equal('normalizeProps(createVNode(1, "div", null, [createVNode(1, "span", null, null, 1, null, "a"), createVNode(1, "span", null, null, 1, null, "b")], 8, {\n  ...p\n}));');
     });
   });
 
@@ -139,6 +167,14 @@ describe('key, ref and onComponent hooks', function () {
 
     it('Should move hooks next to spread props', function () {
       expect(transform('<Foo {...p} onComponentDidMount={m} />')).to.equal('normalizeProps(createComponentVNode(2, Foo, {\n  ...p\n}, null, {\n  "onComponentDidMount": m\n}));');
+    });
+
+    it('Should move hooks into ref for generic member expression components', function () {
+      expect(stripInfernoImport(transformTSX('<Ns.Foo<T> onComponentDidMount={m} />'))).to.equal('createComponentVNode(2, Ns.Foo, null, null, {\n  "onComponentDidMount": m\n});');
+    });
+
+    it('Should merge ref into the hooks of a generic component', function () {
+      expect(stripInfernoImport(transformTSX('<Foo<string> ref={r as any} onComponentDidMount={m} />'))).to.equal('createComponentVNode(2, Foo, null, null, {\n  ...r,\n  "onComponentDidMount": m\n});');
     });
   });
 
