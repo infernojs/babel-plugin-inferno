@@ -61,8 +61,15 @@ describe('Babel parity', function () {
       expect(transform('<button data-value={"a value\\n  with\\nnewlines\\n   and spaces"}>Button</button>;')).to.equal('createVNode(1, "button", null, "Button", 16, {\n  "data-value": "a value\\n  with\\nnewlines\\n   and spaces"\n});');
     });
 
-    it('duplicate-props', function () {
-      expect(transform('<p prop prop></p>;\n<p {...{prop, prop}}></p>;\n<p prop {...{prop}}></p>;\n<p {...{prop}} prop></p>;')).to.equal('createVNode(1, "p", null, null, 1, {\n  "prop": true,\n  "prop": true\n});\nnormalizeProps(createVNode(1, "p", null, null, 1, {\n  ...{\n    prop,\n    prop\n  }\n}));\nnormalizeProps(createVNode(1, "p", null, null, 1, {\n  "prop": true,\n  ...{\n    prop\n  }\n}));\nnormalizeProps(createVNode(1, "p", null, null, 1, {\n  ...{\n    prop\n  },\n  "prop": true\n}));');
+    it('duplicate-props (spread variants)', function () {
+      expect(transform('<p {...{prop, prop}}></p>;\n<p prop {...{prop}}></p>;\n<p {...{prop}} prop></p>;')).to.equal('normalizeProps(createVNode(1, "p", null, null, 1, {\n  ...{\n    prop,\n    prop\n  }\n}));\nnormalizeProps(createVNode(1, "p", null, null, 1, {\n  "prop": true,\n  ...{\n    prop\n  }\n}));\nnormalizeProps(createVNode(1, "p", null, null, 1, {\n  ...{\n    prop\n  },\n  "prop": true\n}));');
+    });
+
+    // Babel keeps both copies; repeated attributes are a compile error here
+    it('duplicate-props (repeated attribute)', function () {
+      expect(function () {
+        transform('<p prop prop></p>;');
+      }).to.throw('Multiple prop props are not supported. Remove the duplicate prop prop.');
     });
 
     it('flattens-spread', function () {

@@ -82,14 +82,6 @@ describe('Attributes', function () {
   });
 
   describe('className and class', function () {
-    it('Should use the last of className and class', function () {
-      expect(transform('<div className={a} class={b} />')).to.equal('createVNode(1, "div", b);');
-    });
-
-    it('Should use the last of class and className', function () {
-      expect(transform('<div class="a" className="b" />')).to.equal('createVNode(1, "div", "b");');
-    });
-
     it('Should pass an empty className', function () {
       expect(transform('<div className="" />')).to.equal('createVNode(1, "div", "");');
     });
@@ -112,12 +104,170 @@ describe('Attributes', function () {
   });
 
   describe('duplicate attributes', function () {
-    it('Should use the last key', function () {
-      expect(transform('<div key="a" key="b" />')).to.equal('createVNode(1, "div", null, null, 1, null, "b");');
+    it('Should reject duplicate key props', function () {
+      expect(function () {
+        transform('<div key="a" key={b()} />');
+      }).to.throw('Multiple key props are not supported. Remove the duplicate key prop.');
     });
 
-    it('Should keep both copies of a duplicate prop', function () {
-      expect(transform('<p prop prop />')).to.equal('createVNode(1, "p", null, null, 1, {\n  "prop": true,\n  "prop": true\n});');
+    it('Should reject duplicate props on elements', function () {
+      expect(function () {
+        transform('<p prop prop />');
+      }).to.throw('Multiple prop props are not supported. Remove the duplicate prop prop.');
+    });
+
+    it('Should reject duplicate props on components', function () {
+      expect(function () {
+        transform('<Foo title="a" id="x" title="b" />');
+      }).to.throw('Multiple title props are not supported. Remove the duplicate title prop.');
+    });
+
+    it('Should reject duplicate onComponent hooks', function () {
+      expect(function () {
+        transform('<Foo onComponentDidMount={a} onComponentDidMount={b} />');
+      }).to.throw('Multiple onComponentDidMount props are not supported. Remove the duplicate onComponentDidMount prop.');
+    });
+
+    it('Should reject duplicate special flags', function () {
+      expect(function () {
+        transform('<div $HasKeyedChildren $HasKeyedChildren>{a}</div>');
+      }).to.throw('Multiple $HasKeyedChildren props are not supported. Remove the duplicate $HasKeyedChildren prop.');
+    });
+
+    it('Should point the duplicate prop error at the duplicate', function () {
+      expect(function () {
+        transform('<Foo title="a" id="x" title="b" />');
+      }).to.throw('> 1 | <Foo title="a" id="x" title="b" />\n    |                       ^^^^^^^^^');
+    });
+
+    it('Should reject htmlFor together with for on elements', function () {
+      expect(function () {
+        transform('<label htmlFor="a" for="b" />');
+      }).to.throw('htmlFor and for both set the for prop. Remove one of them.');
+    });
+
+    it('Should reject a lowercased attribute together with its camelCase name', function () {
+      expect(function () {
+        transform('<div tabIndex="1" tabindex="2" />');
+      }).to.throw('tabIndex and tabindex both set the tabindex prop. Remove one of them.');
+    });
+
+    it('Should reject an svg attribute together with its camelCase name', function () {
+      expect(function () {
+        transform('<rect strokeWidth="1" stroke-width="2" />');
+      }).to.throw('strokeWidth and stroke-width both set the stroke-width prop. Remove one of them.');
+    });
+
+    it('Should reject a namespaced attribute together with its camelCase name', function () {
+      expect(function () {
+        transform('<use xlinkHref="#a" xlink:href="#b" />');
+      }).to.throw('xlinkHref and xlink:href both set the xlink:href prop. Remove one of them.');
+    });
+
+    it('Should point the mapped attribute error at the second attribute', function () {
+      expect(function () {
+        transform('<label\n  htmlFor="a"\n  for="b"\n/>');
+      }).to.throw('> 3 |   for="b"\n    |   ^^^^^^^');
+    });
+
+    it('Should allow htmlFor together with for on components', function () {
+      expect(transform('<Foo htmlFor="a" for="b" />')).to.equal('createComponentVNode(2, Foo, {\n  "htmlFor": "a",\n  "for": "b"\n});');
+    });
+
+    it('Should allow a prop next to a spread containing the same prop', function () {
+      expect(transform('<p {...{prop}} prop />')).to.equal('normalizeProps(createVNode(1, "p", null, null, 1, {\n  ...{\n    prop\n  },\n  "prop": true\n}));');
+    });
+
+    it('Should evaluate a component children prop replaced by JSX children', function () {
+      expect(transform('<Foo children={f()}>2</Foo>')).to.equal('createComponentVNode(2, Foo, {\n  children: (f(), "2")\n});');
+    });
+
+    it('Should evaluate an element children prop replaced by JSX children', function () {
+      expect(transform('<div children={f()}>x</div>')).to.equal('createVNode(1, "div", null, (f(), "x"), 16);');
+    });
+
+    it('Should evaluate a children prop replaced by several JSX children', function () {
+      expect(transform('<div children={f()}><a/><b/></div>')).to.equal('createVNode(1, "div", null, (f(), [createVNode(1, "a"), createVNode(1, "b")]), 4);');
+    });
+
+    it('Should reject duplicate children props on components', function () {
+      expect(function () {
+        transform('<Foo children={1} children={4}>2</Foo>');
+      }).to.throw('Multiple children props are not supported. Remove the duplicate children prop.');
+    });
+
+    it('Should reject duplicate children props on elements', function () {
+      expect(function () {
+        transform('<div children={a()} children={b()} />');
+      }).to.throw('Multiple children props are not supported. Remove the duplicate children prop.');
+    });
+
+    it('Should point the duplicate children prop error at the duplicate', function () {
+      expect(function () {
+        transform('<div\n  id="x"\n  children={a()}\n  children={b()}\n/>');
+      }).to.throw('> 4 |   children={b()}\n    |   ^^^^^^^^^^^^^^');
+    });
+
+    it('Should reject duplicate ref props on elements', function () {
+      expect(function () {
+        transform('<div ref={a} ref={b} />');
+      }).to.throw('Multiple ref props are not supported. Remove the duplicate ref prop.');
+    });
+
+    it('Should reject duplicate ref props on components', function () {
+      expect(function () {
+        transform('<Foo ref={a} onComponentDidMount={m} ref={b} />');
+      }).to.throw('Multiple ref props are not supported. Remove the duplicate ref prop.');
+    });
+
+    it('Should point the duplicate ref prop error at the duplicate', function () {
+      expect(function () {
+        transform('<div ref={a} ref={b} />');
+      }).to.throw('> 1 | <div ref={a} ref={b} />\n    |              ^^^^^^^');
+    });
+
+    it('Should reject duplicate className props on elements', function () {
+      expect(function () {
+        transform('<div className="a" className={b} />');
+      }).to.throw('Multiple className props are not supported. Remove the duplicate className prop.');
+    });
+
+    it('Should reject duplicate class props on elements', function () {
+      expect(function () {
+        transform('<div class="a" class={b} />');
+      }).to.throw('Multiple class props are not supported. Remove the duplicate class prop.');
+    });
+
+    it('Should reject className together with class on elements', function () {
+      expect(function () {
+        transform('<div className={a} class={b} />');
+      }).to.throw('className and class both set the class name. Remove one of them.');
+    });
+
+    it('Should reject class together with className on elements', function () {
+      expect(function () {
+        transform('<div class="a" className="b" />');
+      }).to.throw('className and class both set the class name. Remove one of them.');
+    });
+
+    it('Should point the className and class error at the second one', function () {
+      expect(function () {
+        transform('<div\n  className={a}\n  class={b}\n/>');
+      }).to.throw('> 3 |   class={b}\n    |   ^^^^^^^^^');
+    });
+
+    it('Should reject duplicate className props on components', function () {
+      expect(function () {
+        transform('<Foo className="a" className="b" />');
+      }).to.throw('Multiple className props are not supported. Remove the duplicate className prop.');
+    });
+
+    it('Should drop replaced values without side effects', function () {
+      expect(transform('<div a children={["a", {b: 1}, () => x, -1]}>c</div>')).to.equal('createVNode(1, "div", null, "c", 16, {\n  "a": true\n});');
+    });
+
+    it('Should keep replaced values that may have side effects', function () {
+      expect(transform('<div children={[...a]}>c</div>')).to.equal('createVNode(1, "div", null, ([...a], "c"), 16);');
     });
   });
 

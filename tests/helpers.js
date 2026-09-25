@@ -22,6 +22,8 @@ function babelTransform(pluginOptions, input, extraConfig) {
     babelrc: false,
     configFile: false,
     cwd: root,
+    // Plain code frames in error messages, also when the tests run in a color terminal
+    highlightCode: false,
     presets: [presetEnv],
     plugins: [
       [plugin, pluginOptions],
@@ -51,6 +53,7 @@ function transformTSX(input, pluginOptions, typescriptOptions) {
     babelrc: false,
     configFile: false,
     cwd: root,
+    highlightCode: false,
     filename: 'file.tsx',
     presets: [['@babel/preset-typescript', typescriptOptions || {}]],
     plugins: [[plugin, pluginOptions || {imports: true}]]
