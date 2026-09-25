@@ -166,7 +166,7 @@ describe('Options and imports', function () {
     });
 
     it('Should keep output on the original lines with retainLines', function () {
-      expect(transformWith({imports: true}, 'const a = <div>\n  <span/>\n</div>;', {retainLines: true})).to.equal('import { createVNode } from "inferno";const a = createVNode(1, "div", null, createVNode(1, "span"), 2);');
+      expect(transformWith({imports: true}, 'const a = <div>\n  <span/>\n</div>;', {retainLines: true})).to.equal('import { createVNode } from "inferno";const a = createVNode(1, "div", null,\ncreateVNode(1, "span"), 2\n);');
     });
 
     it('Should require helpers in a file parsed as script by sourceType unambiguous', function () {
