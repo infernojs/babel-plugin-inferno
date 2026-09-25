@@ -53,6 +53,10 @@ describe('Babel parity', function () {
       expect(transform('var e = <F aaa new const var default foo-bar/>;')).to.equal('var e = createComponentVNode(2, F, {\n  "aaa": true,\n  "new": true,\n  "const": true,\n  "var": true,\n  "default": true,\n  "foo-bar": true\n});');
     });
 
+    it('should-quote-jsx-attributes', function () {
+      expect(transform('<button data-value=\'a value\'>Button</button>;')).to.equal('createVNode(1, "button", null, "Button", 16, {\n  "data-value": "a value"\n});');
+    });
+
     it('should-not-mangle-expressioncontainer-attribute-values', function () {
       expect(transform('<button data-value={"a value\\n  with\\nnewlines\\n   and spaces"}>Button</button>;')).to.equal('createVNode(1, "button", null, "Button", 16, {\n  "data-value": "a value\\n  with\\nnewlines\\n   and spaces"\n});');
     });
@@ -233,11 +237,6 @@ describe('Babel parity', function () {
   });
 
   describe('current behaviour (questionable)', function () {
-    // Babel prints "a value"; the quotes change once known-bugs/attribute-strings is fixed
-    it('should-quote-jsx-attributes (keeps the single quotes of the source)', function () {
-      expect(transform('<button data-value=\'a value\'>Button</button>;')).to.equal('createVNode(1, "button", null, "Button", 16, {\n  "data-value": \'a value\'\n});');
-    });
-
     // Babel compiles <this /> to a this reference
     it('arrow-functions (compiles <this /> to an element)', function () {
       expect(transform('var foo = function () {\n  return () => <this />;\n};\n\nvar bar = function () {\n  return () => <this.foo />;\n};')).to.equal('var foo = function () {\n  return () => createVNode(1, "this");\n};\nvar bar = function () {\n  return () => createComponentVNode(2, this.foo);\n};');

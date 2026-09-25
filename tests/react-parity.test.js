@@ -130,6 +130,10 @@ describe('React parity', function () {
       expect(transform('<div>If the string contains the string &#123;pageNumber&#125; it will be\n    replaced</div>')).to.equal('createVNode(1, "div", null, "If the string contains the string {pageNumber} it will be replaced", 16);');
     });
 
+    it('Should keep double quotes inside a single-quoted attribute (quoted-strings-in-jsx-attribute)', function () {
+      expect(transform('<Stringify text=\'Some "text"\' />')).to.equal('createComponentVNode(2, Stringify, {\n  "text": "Some \\"text\\""\n});');
+    });
+
     it('Should keep escapes of strings in expression containers (jsx-string-attribute-expression-container)', function () {
       expect(transform('<Foo value={\'\\n\'} other={\'A\\tE\'} />')).to.equal('createComponentVNode(2, Foo, {\n  "value": \'\\n\',\n  "other": \'A\\tE\'\n});');
     });
@@ -182,11 +186,6 @@ describe('React parity', function () {
   });
 
   describe('current behaviour (questionable)', function () {
-    // The quotes change once known-bugs/attribute-strings is fixed
-    it('Should keep the single quotes of a single-quoted attribute (quoted-strings-in-jsx-attribute)', function () {
-      expect(transform('<Stringify text=\'Some "text"\' />')).to.equal('createComponentVNode(2, Stringify, {\n  "text": \'Some "text"\'\n});');
-    });
-
     // React drops the comments entirely: the span gets no children and the div two static children
     it('Should keep empty spans and UnknownChildren when comments sit between children (TransformJSXToReactJSX-test)', function () {
       expect(transform('<div>\n  {/* A comment at the beginning */}\n  {/* A second comment at the beginning */}\n  <span>\n    {/* A nested comment */}\n  </span>\n  {/* A sandwiched comment */}\n  <br />\n  {/* A comment at the end */}\n  {/* A second comment at the end */}\n</div>')).to.equal('createVNode(1, "div", null, [createVNode(1, "span", null, null, 0), createVNode(1, "br")], 0);');
