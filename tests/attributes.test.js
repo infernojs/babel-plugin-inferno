@@ -372,6 +372,53 @@ describe('Attributes', function () {
     });
   });
 
+  describe('__proto__ prop', function () {
+    it('Should emit __proto__ as a computed key on components', function () {
+      expect(transform('<Foo __proto__={x} />')).to.equal('createComponentVNode(2, Foo, {\n  ["__proto__"]: x\n});');
+    });
+
+    it('Should give the component an own __proto__ prop', function () {
+      var code = transform('<Foo __proto__={x} />');
+      var x = {marker: true};
+      var props = new Function('createComponentVNode', 'Foo', 'x', 'return ' + code)(function (flags, type, p) {
+        return p;
+      }, null, x);
+
+      expect(Object.prototype.hasOwnProperty.call(props, '__proto__')).to.equal(true);
+      expect(Object.getPrototypeOf(props)).to.equal(Object.prototype);
+    });
+
+    it('Should emit __proto__ as a computed key on elements', function () {
+      expect(transform('<div __proto__={x} />')).to.equal('createVNode(1, "div", null, null, 1, {\n  ["__proto__"]: x\n});');
+    });
+
+    it('Should keep __proto__ next to other props (babel proto-in-jsx-attribute)', function () {
+      expect(transform('<p __proto__={null} class="bar" />')).to.equal('createVNode(1, "p", "bar", null, 1, {\n  ["__proto__"]: null\n});');
+    });
+  });
+
+  describe('Object.prototype names as attributes', function () {
+    it('Should pass constructor as a prop', function () {
+      expect(transform('<div constructor="foo" />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "constructor": "foo"\n});');
+    });
+
+    it('Should pass toString and hasOwnProperty as props', function () {
+      expect(transform('<div toString="x" hasOwnProperty="y" />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "toString": "x",\n  "hasOwnProperty": "y"\n});');
+    });
+
+    it('Should pass valueOf as a prop', function () {
+      expect(transform('<div valueOf={v} />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "valueOf": v\n});');
+    });
+
+    it('Should pass isPrototypeOf and propertyIsEnumerable as props', function () {
+      expect(transform('<div isPrototypeOf={v} propertyIsEnumerable={w} />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "isPrototypeOf": v,\n  "propertyIsEnumerable": w\n});');
+    });
+
+    it('Should pass constructor as a prop on svg elements', function () {
+      expect(transform('<rect constructor="x" />')).to.equal('createVNode(32, "rect", null, null, 1, {\n  "constructor": "x"\n});');
+    });
+  });
+
   describe('current behaviour (questionable)', function () {
     it('Should pass true as className for a valueless className', function () {
       expect(transform('<div className />')).to.equal('createVNode(1, "div", true);');

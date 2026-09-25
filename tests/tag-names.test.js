@@ -76,6 +76,24 @@ describe('Tag names', function () {
     });
   });
 
+  describe('Object.prototype names as tags', function () {
+    it('Should compile <hasOwnProperty> as an element (babel should-handle-has-own-property-correctly)', function () {
+      expect(transform('<hasOwnProperty>testing</hasOwnProperty>')).to.equal('createVNode(1, "hasOwnProperty", null, "testing", 16);');
+    });
+
+    it('Should compile <constructor> as an element', function () {
+      expect(transform('<constructor />')).to.equal('createVNode(1, "constructor");');
+    });
+
+    it('Should compile <toString> as an element', function () {
+      expect(transform('<toString />')).to.equal('createVNode(1, "toString");');
+    });
+
+    it('Should compile <valueOf> as an element', function () {
+      expect(transform('<valueOf />')).to.equal('createVNode(1, "valueOf");');
+    });
+  });
+
   describe('custom elements', function () {
     it('Should compile a hyphenated tag as an element', function () {
       expect(transform('<my-element foo="bar" />')).to.equal('createVNode(1, "my-element", null, null, 1, {\n  "foo": "bar"\n});');
