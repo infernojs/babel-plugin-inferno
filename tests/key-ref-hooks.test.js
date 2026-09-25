@@ -56,6 +56,30 @@ describe('key, ref and onComponent hooks', function () {
     it('Should pass an object key', function () {
       expect(transform('<div key={obj} />')).to.equal('createVNode(1, "div", null, null, 1, null, obj);');
     });
+
+    it('Should reject a valueless key on an element', function () {
+      expect(function () {
+        transform('<div key />');
+      }).to.throw('Please provide an explicit key value. Using "key" as a shorthand for "key={true}" is not allowed.');
+    });
+
+    it('Should reject a valueless key on a component', function () {
+      expect(function () {
+        transform('<Foo key />');
+      }).to.throw('Please provide an explicit key value. Using "key" as a shorthand for "key={true}" is not allowed.');
+    });
+
+    it('Should reject a valueless key inside an array (babel should-disallow-valueless-key)', function () {
+      expect(function () {
+        transform('[<div key></div>]');
+      }).to.throw('Please provide an explicit key value. Using "key" as a shorthand for "key={true}" is not allowed.');
+    });
+
+    it('Should point the valueless key error at the key', function () {
+      expect(function () {
+        transform('<ul>\n  <li key>a</li>\n</ul>');
+      }).to.throw('> 2 |   <li key>a</li>\n    |       ^^^');
+    });
   });
 
   describe('keyed children', function () {
