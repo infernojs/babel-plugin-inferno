@@ -28,9 +28,13 @@
     "coverage": "nyc ./node_modules/.bin/_mocha tests.js \"tests/*.test.js\"",
     "test": "node ./node_modules/mocha/bin/mocha tests.js \"tests/*.test.js\"",
     "test:bugs": "node ./node_modules/mocha/bin/mocha \"tests/known-bugs/*.test.js\"",
+    "bench": "node bench/run.js",
+    "bench:quick": "node bench/run.js --quick",
+    "bench:profile": "node bench/run.js --profile",
+    "bench:compare": "node bench/run.js --baseline HEAD",
     "debug": "node --inspect-brk ./node_modules/mocha/bin/mocha tests.js \"tests/*.test.js\"",
-    "lint": "eslint lib",
-    "lintfix": "eslint lib --fix"
+    "lint": "eslint lib bench",
+    "lintfix": "eslint lib bench --fix"
   },
   "keywords": [
     "babel-plugin",
@@ -45,6 +49,6 @@
     "@babel/types": "^8"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=24"
   }
 }
