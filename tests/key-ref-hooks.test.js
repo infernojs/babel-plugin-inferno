@@ -97,6 +97,22 @@ describe('key, ref and onComponent hooks', function () {
       expect(transform('<div onComponentDidMount={f} />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "onComponentDidMount": f\n});');
     });
 
+    it('Should merge ref into the hooks when ref comes before a hook', function () {
+      expect(transform('<Foo ref={r} onComponentDidMount={m} />')).to.equal('createComponentVNode(2, Foo, null, null, {\n  ...r,\n  "onComponentDidMount": m\n});');
+    });
+
+    it('Should merge ref into the hooks when ref comes after the hooks', function () {
+      expect(transform('<Foo onComponentDidMount={m} ref={r} />')).to.equal('createComponentVNode(2, Foo, null, null, {\n  ...r,\n  "onComponentDidMount": m\n});');
+    });
+
+    it('Should compile ref and hooks the same in any order', function () {
+      expect(transform('<Foo ref={r} onComponentDidMount={m} />')).to.equal(transform('<Foo onComponentDidMount={m} ref={r} />'));
+    });
+
+    it('Should merge ref with several hooks, key and children', function () {
+      expect(transform('<Foo key={i} ref={r} onComponentDidAppear={a} onComponentDidMount={b}>{i}</Foo>')).to.equal('createComponentVNode(2, Foo, {\n  children: i\n}, i, {\n  ...r,\n  "onComponentDidAppear": a,\n  "onComponentDidMount": b\n});');
+    });
+
     it('Should move hooks next to spread props', function () {
       expect(transform('<Foo {...p} onComponentDidMount={m} />')).to.equal('normalizeProps(createComponentVNode(2, Foo, {\n  ...p\n}, null, {\n  "onComponentDidMount": m\n}));');
     });
