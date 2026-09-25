@@ -17,8 +17,12 @@ var stats = require('./stats');
 var performance = perfHooks.performance;
 var root = path.resolve(__dirname, '..');
 
-// A single read of V8's cumulative allocation counter can be a few hundred KB off, so batches allocate at least this
-var ALLOCATION_BATCH_BYTES = 64 * 1024 * 1024;
+/*
+ * A single read of V8's cumulative allocation counter can be a few hundred KB off, so batches allocate at least this.
+ * The plugin's bytes are the difference of two such counts, which for small files is a fraction of either, so the
+ * batches are much larger than the read error alone would need: at 64 MB, small cases varied by up to 14%.
+ */
+var ALLOCATION_BATCH_BYTES = 256 * 1024 * 1024;
 var MAX_BATCH_RUNS = 10000;
 var ALLOCATION_WARMUP_RUNS = 1;
 
