@@ -94,6 +94,64 @@ describe('Tag names', function () {
     });
   });
 
+  describe('namespaced tags', function () {
+    it('Should reject namespaced svg tags', function () {
+      expect(function () {
+        transform('<svg:rect />');
+      }).to.throw('Namespace tags like <svg:rect> are not supported.');
+    });
+
+    it('Should reject namespaced tags with namespaced attributes', function () {
+      expect(function () {
+        transform('<f:image n:attr />');
+      }).to.throw('Namespace tags like <f:image> are not supported.');
+    });
+
+    it('Should reject namespaced component tags', function () {
+      expect(function () {
+        transform('<Namespace:Component />');
+      }).to.throw('Namespace tags like <Namespace:Component> are not supported.');
+    });
+
+    it('Should point the namespace tag error at the tag name', function () {
+      expect(function () {
+        transform('<div>\n  <svg:rect />\n</div>');
+      }).to.throw('> 2 |   <svg:rect />\n    |    ^^^^^^^^');
+    });
+  });
+
+  describe('tags that are not valid identifiers', function () {
+    it('Should compile an uppercase hyphenated tag as an element', function () {
+      expect(transform('<Foo-bar />')).to.equal('createVNode(1, "Foo-bar");');
+    });
+
+    it('Should compile a mixed-case hyphenated tag with children (babel-parser basic/7)', function () {
+      expect(transform('<AbC-def test="x">bar</AbC-def>')).to.equal('createVNode(1, "AbC-def", null, "bar", 16, {\n  "test": "x"\n});');
+    });
+
+    it('Should compile an underscore-prefixed hyphenated tag as an element', function () {
+      expect(transform('<_foo-bar />')).to.equal('createVNode(1, "_foo-bar");');
+    });
+
+    it('Should compile a hyphenated member expression property as a computed access', function () {
+      expect(transform('<Foo.bar-baz />')).to.equal('createComponentVNode(2, Foo["bar-baz"]);');
+    });
+
+    it('Should compile a hyphenated property in a deeper member expression', function () {
+      expect(transform('<Foo.bar-baz.Qux>x</Foo.bar-baz.Qux>')).to.equal('createComponentVNode(2, Foo["bar-baz"].Qux, {\n  children: "x"\n});');
+    });
+
+    it('Should compile a hyphenated property of this', function () {
+      expect(transform('<this.foo-bar />')).to.equal('createComponentVNode(2, this["foo-bar"]);');
+    });
+
+    it('Should reject a hyphenated member expression object', function () {
+      expect(function () {
+        transform('<a-b.c />');
+      }).to.throw('a-b is not a valid variable name for a member expression tag.\n> 1 | <a-b.c />\n    |  ^^^');
+    });
+  });
+
   describe('custom elements', function () {
     it('Should compile a hyphenated tag as an element', function () {
       expect(transform('<my-element foo="bar" />')).to.equal('createVNode(1, "my-element", null, null, 1, {\n  "foo": "bar"\n});');
