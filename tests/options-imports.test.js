@@ -1,0 +1,148 @@
+var mocha = require('mocha');
+var describe = mocha.describe;
+var it = mocha.it;
+var expect = require('chai').expect;
+var helpers = require('./helpers');
+var transformWith = helpers.transformWith;
+var stripInfernoImport = helpers.stripInfernoImport;
+
+describe('Options and imports', function () {
+  describe('imports option', function () {
+    it('Should import from a custom module name', function () {
+      expect(transformWith({imports: 'inferno-compat'}, '<div><Foo {...p}/>text<></></div>')).to.equal('import { createVNode, createFragment, createComponentVNode, normalizeProps, createTextVNode } from "inferno-compat";\ncreateVNode(1, "div", null, [normalizeProps(createComponentVNode(2, Foo, {\n  ...p\n})), createTextVNode("text"), createFragment()], 4);');
+    });
+
+    it('Should treat the string "false" like false', function () {
+      expect(transformWith({imports: 'false'}, '<div/>')).to.equal('var createVNode = Inferno.createVNode;\ncreateVNode(1, "div");');
+    });
+
+    it('Should import from inferno when imports is omitted', function () {
+      expect(transformWith({}, '<div/>')).to.equal('import { createVNode } from "inferno";\ncreateVNode(1, "div");');
+    });
+
+    it('Should import every used helper in one declaration', function () {
+      expect(transformWith({imports: true}, '<div><Foo {...p}/>text<></></div>')).to.equal('import { createVNode, createFragment, createComponentVNode, normalizeProps, createTextVNode } from "inferno";\ncreateVNode(1, "div", null, [normalizeProps(createComponentVNode(2, Foo, {\n  ...p\n})), createTextVNode("text"), createFragment()], 4);');
+    });
+
+    it('Should declare every used helper from the Inferno global in one var', function () {
+      expect(transformWith({imports: false}, '<div><Foo {...p}/>text<></></div>')).to.equal('var createVNode = Inferno.createVNode,\n  createFragment = Inferno.createFragment,\n  createComponentVNode = Inferno.createComponentVNode,\n  normalizeProps = Inferno.normalizeProps,\n  createTextVNode = Inferno.createTextVNode;\ncreateVNode(1, "div", null, [normalizeProps(createComponentVNode(2, Foo, {\n  ...p\n})), createTextVNode("text"), createFragment()], 4);');
+    });
+
+    it('Should insert the var after existing imports', function () {
+      expect(transformWith({imports: false}, 'import {a} from "b";\nfunction f() { return <div><Foo/></div>; }\nconst g = () => <span/>;')).to.equal('import { a } from "b";\nvar createVNode = Inferno.createVNode,\n  createComponentVNode = Inferno.createComponentVNode;\nfunction f() {\n  return createVNode(1, "div", null, createComponentVNode(2, Foo), 2);\n}\nconst g = () => createVNode(1, "span");');
+    });
+
+    it('Should insert the var before the statement with the first JSX', function () {
+      expect(transformWith({imports: false}, '"use strict";\nfoo();\nfunction f() { return <div/>; }')).to.equal('"use strict";\n\nfoo();\nvar createVNode = Inferno.createVNode;\nfunction f() {\n  return createVNode(1, "div");\n}');
+    });
+
+    it('Should keep existing Inferno imports when declaring the var', function () {
+      expect(transformWith({imports: false}, 'import * as Inferno from "inferno";\nexport const a = <div/>;')).to.equal('import * as Inferno from "inferno";\nvar createVNode = Inferno.createVNode;\nexport const a = createVNode(1, "div");');
+    });
+
+    it('Should not declare a var when pragma is set', function () {
+      expect(transformWith({imports: false, pragma: 'h'}, '<div/>')).to.equal('h(1, "div");');
+    });
+  });
+
+  describe('pragma options', function () {
+    it('Should import every helper under its pragma name', function () {
+      expect(transformWith({imports: true, pragma: 'cv', pragmaCreateComponentVNode: 'ccv', pragmaNormalizeProps: 'np', pragmaTextVNode: 'ctv', pragmaFragmentVNode: 'cf'}, '<div><Foo {...p}/>text<></></div>')).to.equal('import { createVNode as cv, createFragment as cf, createComponentVNode as ccv, normalizeProps as np, createTextVNode as ctv } from "inferno";\ncv(1, "div", null, [np(ccv(2, Foo, {\n  ...p\n})), ctv("text"), cf()], 4);');
+    });
+
+    it('Should call every helper by its pragma name without imports', function () {
+      expect(transformWith({imports: false, pragma: 'cv', pragmaCreateComponentVNode: 'ccv', pragmaNormalizeProps: 'np', pragmaTextVNode: 'ctv', pragmaFragmentVNode: 'cf'}, '<div><Foo {...p}/>text<></></div>')).to.equal('cv(1, "div", null, [np(ccv(2, Foo, {\n  ...p\n})), ctv("text"), cf()], 4);');
+    });
+
+    it('Should declare default helper names when only a component pragma is set', function () {
+      expect(transformWith({imports: false, pragmaCreateComponentVNode: 'ccv'}, '<div><Foo {...p}/>text<></></div>')).to.equal('var createVNode = Inferno.createVNode,\n  createFragment = Inferno.createFragment,\n  createComponentVNode = Inferno.createComponentVNode,\n  normalizeProps = Inferno.normalizeProps,\n  createTextVNode = Inferno.createTextVNode;\ncreateVNode(1, "div", null, [normalizeProps(ccv(2, Foo, {\n  ...p\n})), createTextVNode("text"), createFragment()], 4);');
+    });
+  });
+
+  describe('defineAllArguments option', function () {
+    it('Should define all component arguments', function () {
+      expect(stripInfernoImport(transformWith({imports: true, defineAllArguments: true}, '<Foo/>'))).to.equal('createComponentVNode(2, Foo, null, null, null);');
+    });
+
+    it('Should accept the string "true"', function () {
+      expect(stripInfernoImport(transformWith({imports: true, defineAllArguments: 'true'}, '<Foo key="a"/>'))).to.equal('createComponentVNode(2, Foo, null, "a", null);');
+    });
+
+    it('Should define all element arguments', function () {
+      expect(stripInfernoImport(transformWith({imports: true, defineAllArguments: true}, '<div className="c">x</div>'))).to.equal('createVNode(1, "div", "c", "x", 16, null, null, null);');
+    });
+  });
+
+  describe('existing bindings', function () {
+    it('Should use a top-level createVNode function instead of importing', function () {
+      expect(transformWith({imports: true}, 'function createVNode(){}\nconst a = <div/>;')).to.equal('function createVNode() {}\nconst a = createVNode(1, "div");');
+    });
+
+    it('Should use createVNode imported from another module', function () {
+      expect(transformWith({imports: true}, 'import {createVNode} from "other-lib";\nconst a = <div/>;')).to.equal('import { createVNode } from "other-lib";\nconst a = createVNode(1, "div");');
+    });
+
+    it('Should still import createVNode when it is imported under another name', function () {
+      expect(transformWith({imports: true}, 'import {createVNode as cv} from "inferno";\nconst a = <div/>;')).to.equal('import { createVNode } from "inferno";\nimport { createVNode as cv } from "inferno";\nconst a = createVNode(1, "div");');
+    });
+
+    it('Should import createVNode next to a namespace import', function () {
+      expect(transformWith({imports: true}, 'import * as Inferno from "inferno";\nconst a = <div/>;')).to.equal('import { createVNode } from "inferno";\nimport * as Inferno from "inferno";\nconst a = createVNode(1, "div");');
+    });
+
+    it('Should not import helpers that are already imported', function () {
+      expect(transformWith({imports: true}, 'import {createVNode, createComponentVNode} from "inferno";\nconst a = <div><Foo/></div>;')).to.equal('import { createVNode, createComponentVNode } from "inferno";\nconst a = createVNode(1, "div", null, createComponentVNode(2, Foo), 2);');
+    });
+
+    it('Should ignore bindings named after other JSX runtimes', function () {
+      expect(transformWith({imports: true}, 'const _jsx = 1, jsx = 2;\n<div/>;')).to.equal('import { createVNode } from "inferno";\nconst _jsx = 1,\n  jsx = 2;\ncreateVNode(1, "div");');
+    });
+  });
+
+  describe('import emission', function () {
+    it('Should not import anything without JSX', function () {
+      expect(transformWith({imports: true}, 'const a = 1;')).to.equal('const a = 1;');
+    });
+
+    it('Should import once for many JSX roots', function () {
+      expect(transformWith({imports: true}, 'const a = <div/>;\nconst b = <span/>;')).to.equal('import { createVNode } from "inferno";\nconst a = createVNode(1, "div");\nconst b = createVNode(1, "span");');
+    });
+
+    it('Should keep output on the original lines with retainLines', function () {
+      expect(transformWith({imports: true}, 'const a = <div>\n  <span/>\n</div>;', {retainLines: true})).to.equal('import { createVNode } from "inferno";const a = createVNode(1, "div", null, createVNode(1, "span"), 2);');
+    });
+
+    it('Should import into a file parsed as script by sourceType unambiguous', function () {
+      expect(transformWith({imports: true}, 'const a = require("x");\nconst b = <div/>;', {sourceType: 'unambiguous'})).to.equal('import { createVNode } from "inferno";\nconst a = require("x");\nconst b = createVNode(1, "div");');
+    });
+  });
+
+  // JSX pragma comments are not supported; they stay in the output unchanged
+  describe('pragma comments', function () {
+    it('Should ignore @jsx and @jsxFrag comments', function () {
+      expect(transformWith({imports: true}, '/** @jsx h */\n/** @jsxFrag F */\n<><div/></>')).to.equal('import { createVNode, createFragment } from "inferno";\n/** @jsx h */\n/** @jsxFrag F */\ncreateFragment([createVNode(1, "div")], 4);');
+    });
+
+    it('Should ignore @jsxRuntime and @jsxImportSource comments', function () {
+      expect(transformWith({imports: true}, '/** @jsxRuntime classic */\n/** @jsxImportSource preact */\n<div/>')).to.equal('import { createVNode } from "inferno";\n/** @jsxRuntime classic */\n/** @jsxImportSource preact */\ncreateVNode(1, "div");');
+    });
+  });
+
+  describe('current behaviour (questionable)', function () {
+    // The generated call resolves to the local constant
+    it('Should not detect a local binding that shadows createVNode', function () {
+      expect(transformWith({imports: true}, 'function f(){ const createVNode = 1; return <div/>; }')).to.equal('import { createVNode } from "inferno";\nfunction f() {\n  const createVNode = 1;\n  return createVNode(1, "div");\n}');
+    });
+
+    // Babel annotates generated calls with /*#__PURE__*/ for tree-shaking
+    it('Should not add pure annotations to generated calls', function () {
+      var code = transformWith({imports: true}, '<div><Foo/></div>');
+
+      expect(code).to.not.contain('__PURE__');
+    });
+
+    it('Should ignore unknown options', function () {
+      expect(transformWith({imports: true, pragmaa: 'x'}, '<div/>')).to.equal('import { createVNode } from "inferno";\ncreateVNode(1, "div");');
+    });
+  });
+});
