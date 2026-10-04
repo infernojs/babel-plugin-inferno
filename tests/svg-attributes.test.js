@@ -76,7 +76,7 @@ function camelCase(name) {
 }
 
 function rectProps(name) {
-  return 'createVNode(32, "rect", null, null, 1, {\n  "' + name + '": "v"\n});';
+  return 'newVNode(80, "rect", null, null, {\n  "' + name + '": "v"\n});';
 }
 
 describe('SVG attributes (MDN reference)', function () {
@@ -90,7 +90,7 @@ describe('SVG attributes (MDN reference)', function () {
     });
 
     it('Should pass class as the className argument', function () {
-      expect(transform('<rect class="v" />')).to.equal('createVNode(32, "rect", "v");');
+      expect(transform('<rect class="v" />')).to.equal('newVNode(80, "rect", "v");');
     });
 
     it('Should keep data-* attributes', function () {
@@ -106,11 +106,11 @@ describe('SVG attributes (MDN reference)', function () {
     });
 
     it('Should keep lengthAdjust in camelCase on svg text', function () {
-      expect(transform('<svg><text lengthAdjust="spacing" /></svg>')).to.equal('createVNode(32, "svg", null, createVNode(32, "text", null, null, 1, {\n  "lengthAdjust": "spacing"\n}), 2);');
+      expect(transform('<svg><text lengthAdjust="spacing" /></svg>')).to.equal('newVNode(72, "svg", null, newVNode(80, "text", null, null, {\n  "lengthAdjust": "spacing"\n}));');
     });
 
     it('Should keep xChannelSelector and yChannelSelector in camelCase on feDisplacementMap', function () {
-      expect(transform('<feDisplacementMap xChannelSelector="R" yChannelSelector="G" />')).to.equal('createVNode(32, "feDisplacementMap", null, null, 1, {\n  "xChannelSelector": "R",\n  "yChannelSelector": "G"\n});');
+      expect(transform('<feDisplacementMap xChannelSelector="R" yChannelSelector="G" />')).to.equal('newVNode(80, "feDisplacementMap", null, null, {\n  "xChannelSelector": "R",\n  "yChannelSelector": "G"\n});');
     });
   });
 
@@ -126,19 +126,19 @@ describe('SVG attributes (MDN reference)', function () {
 
   describe('camelCase names of presentation attributes on their elements', function () {
     it('Should map maskType to mask-type on mask', function () {
-      expect(transform('<mask maskType="alpha" />')).to.equal('createVNode(32, "mask", null, null, 1, {\n  "mask-type": "alpha"\n});');
+      expect(transform('<mask maskType="alpha" />')).to.equal('newVNode(80, "mask", null, null, {\n  "mask-type": "alpha"\n});');
     });
 
     it('Should map textOverflow to text-overflow on text', function () {
-      expect(transform('<text textOverflow="ellipsis" />')).to.equal('createVNode(32, "text", null, null, 1, {\n  "text-overflow": "ellipsis"\n});');
+      expect(transform('<text textOverflow="ellipsis" />')).to.equal('newVNode(80, "text", null, null, {\n  "text-overflow": "ellipsis"\n});');
     });
 
     it('Should map whiteSpace to white-space on text', function () {
-      expect(transform('<text whiteSpace="nowrap" />')).to.equal('createVNode(32, "text", null, null, 1, {\n  "white-space": "nowrap"\n});');
+      expect(transform('<text whiteSpace="nowrap" />')).to.equal('newVNode(80, "text", null, null, {\n  "white-space": "nowrap"\n});');
     });
 
     it('Should map fontWidth to font-width on text', function () {
-      expect(transform('<text fontWidth="condensed" />')).to.equal('createVNode(32, "text", null, null, 1, {\n  "font-width": "condensed"\n});');
+      expect(transform('<text fontWidth="condensed" />')).to.equal('newVNode(80, "text", null, null, {\n  "font-width": "condensed"\n});');
     });
   });
 
@@ -152,11 +152,11 @@ describe('SVG attributes (MDN reference)', function () {
 
   describe('TSX', function () {
     it('Should map camelCase svg attributes whose values have type assertions', function () {
-      expect(stripInfernoImport(transformTSX('<rect strokeWidth={1 as const} xlinkHref={h satisfies string} fillOpacity={o!} />'))).to.equal('createVNode(32, "rect", null, null, 1, {\n  "stroke-width": 1,\n  "xlink:href": h,\n  "fill-opacity": o\n});');
+      expect(stripInfernoImport(transformTSX('<rect strokeWidth={1 as const} xlinkHref={h satisfies string} fillOpacity={o!} />'))).to.equal('newVNode(80, "rect", null, null, {\n  "stroke-width": 1,\n  "xlink:href": h,\n  "fill-opacity": o\n});');
     });
 
     it('Should keep camelCase svg attributes on a generic component', function () {
-      expect(stripInfernoImport(transformTSX('<Icon<string> strokeWidth={2} viewBox="0 0 1 1" />'))).to.equal('createComponentVNode(2, Icon, {\n  "strokeWidth": 2,\n  "viewBox": "0 0 1 1"\n});');
+      expect(stripInfernoImport(transformTSX('<Icon<string> strokeWidth={2} viewBox="0 0 1 1" />'))).to.equal('newComponentVNode(0, Icon, {\n  "strokeWidth": 2,\n  "viewBox": "0 0 1 1"\n});');
     });
   });
 });

@@ -18,6 +18,75 @@ function flagName(flag) {
   return flag.split('=')[0];
 }
 
+var NEEDS = {
+  '$HasVNodeChildren': 'one element or component child',
+  '$HasTextChildren': 'one text child',
+  '$HasNonKeyedChildren': 'an array of elements or components',
+  '$HasKeyedChildren': 'an array of elements or components that all have a key',
+  '$ChildFlag={1}': 'no children'
+};
+var LABELS = {'$ChildFlag={1}': '$ChildFlag={1} (HasInvalidChildren)'};
+
+// Why each child flag cannot have children of each shape; flags that are missing fit the shape
+var SHAPE_ERRORS = {
+  none: {
+    '$HasVNodeChildren': 'there are no children',
+    '$HasTextChildren': 'there are no children',
+    '$HasNonKeyedChildren': 'there are no children',
+    '$HasKeyedChildren': 'there are no children'
+  },
+  text: {
+    '$HasVNodeChildren': 'the child is text',
+    '$HasNonKeyedChildren': 'the child is text',
+    '$HasKeyedChildren': 'the child is text',
+    '$ChildFlag={1}': 'the child is text'
+  },
+  vnode: {
+    '$HasTextChildren': 'the child is an element',
+    '$HasNonKeyedChildren': 'the only child is an element, not an array',
+    '$HasKeyedChildren': 'the only child is an element, not an array',
+    '$ChildFlag={1}': 'the child is an element'
+  },
+  // Two elements without keys, or an element and an expression
+  two: {
+    '$HasVNodeChildren': 'there are 2 children',
+    '$HasTextChildren': 'there are 2 children',
+    '$HasKeyedChildren': 'the child at index 0 has no key',
+    '$ChildFlag={1}': 'there are 2 children'
+  },
+  keyed: {
+    '$HasVNodeChildren': 'there are 2 children',
+    '$HasTextChildren': 'there are 2 children',
+    '$ChildFlag={1}': 'there are 2 children'
+  },
+  // Text and another child
+  textFirst: {
+    '$HasVNodeChildren': 'there are 2 children',
+    '$HasTextChildren': 'there are 2 children',
+    '$HasKeyedChildren': 'the child at index 0 is text, which has no key',
+    '$ChildFlag={1}': 'there are 2 children'
+  },
+  null: {
+    '$HasVNodeChildren': 'the child is null, which renders nothing',
+    '$HasTextChildren': 'the child is null, which renders nothing',
+    '$HasNonKeyedChildren': 'the child is null, which renders nothing',
+    '$HasKeyedChildren': 'the child is null, which renders nothing'
+  },
+  spread: {
+    '$HasVNodeChildren': 'the child is a spread, which makes an array',
+    '$HasTextChildren': 'the child is a spread, which makes an array',
+    '$ChildFlag={1}': 'the child is a spread, which makes an array'
+  },
+  dynamic: {}
+};
+
+// The error for a child flag on children of a shape, or null when the flag fits them
+function shapeError(flag, shape) {
+  var reason = SHAPE_ERRORS[shape][flag];
+
+  return reason ? (LABELS[flag] || flag) + ' needs ' + NEEDS[flag] + ', but ' + reason + '.' : null;
+}
+
 function warnings(input, pluginOptions) {
   return transformWarnings(input, pluginOptions).warnings;
 }
@@ -50,45 +119,55 @@ describe('Useless flags', function () {
       expect(result.warnings[0]).to.have.string('> 3 |     <div $HasVNodeChildren>\n');
     });
 
+    // The shape of the children as the JSX shows it, see SHAPE_ERRORS
     var shapes = [
-      '<div FLAG />',
-      '<div FLAG>\n  </div>',
-      '<div FLAG>text</div>',
-      '<div FLAG><a/></div>',
-      '<div FLAG><Foo/></div>',
-      '<div FLAG><></></div>',
-      '<div FLAG><a/><b/></div>',
-      '<div FLAG><a key="1"/><b key="2"/></div>',
-      '<div FLAG>text<a/></div>',
-      '<input FLAG />',
-      '<div FLAG children="t" />',
-      '<div FLAG children={<a/>} />',
-      '<div FLAG children=<a/> />',
-      '<div FLAG children={<></>} />',
-      '<div FLAG children={null} />',
-      '<div FLAG children={a}><b/></div>',
-      '<Fragment FLAG />',
-      '<Fragment FLAG>text</Fragment>',
-      '<Fragment FLAG><a/></Fragment>',
-      '<Fragment FLAG><a/><b/></Fragment>',
-      '<Fragment FLAG key="k"><a key="1"/><b key="2"/></Fragment>',
-      '<Fragment FLAG children="t" />',
-      '<Fragment FLAG children={null} />',
-      '<Inferno.Fragment FLAG><a/></Inferno.Fragment>'
+      ['<div FLAG />', 'none'],
+      ['<div FLAG>\n  </div>', 'none'],
+      ['<div FLAG>text</div>', 'text'],
+      ['<div FLAG><a/></div>', 'vnode'],
+      ['<div FLAG><Foo/></div>', 'vnode'],
+      ['<div FLAG><></></div>', 'vnode'],
+      ['<div FLAG><a/><b/></div>', 'two'],
+      ['<div FLAG><a key="1"/><b key="2"/></div>', 'keyed'],
+      ['<div FLAG>text<a/></div>', 'textFirst'],
+      ['<input FLAG />', 'none'],
+      ['<div FLAG children="t" />', 'text'],
+      ['<div FLAG children={<a/>} />', 'vnode'],
+      ['<div FLAG children=<a/> />', 'vnode'],
+      ['<div FLAG children={<></>} />', 'vnode'],
+      ['<div FLAG children={null} />', 'null'],
+      ['<div FLAG children={a}><b/></div>', 'vnode'],
+      ['<Fragment FLAG />', 'none'],
+      ['<Fragment FLAG>text</Fragment>', 'text'],
+      ['<Fragment FLAG><a/></Fragment>', 'vnode'],
+      ['<Fragment FLAG><a/><b/></Fragment>', 'two'],
+      ['<Fragment FLAG key="k"><a key="1"/><b key="2"/></Fragment>', 'keyed'],
+      ['<Fragment FLAG children="t" />', 'text'],
+      ['<Fragment FLAG children={null} />', 'null'],
+      ['<Inferno.Fragment FLAG><a/></Inferno.Fragment>', 'vnode']
     ];
 
     CHILD_FLAGS.forEach(function (flag) {
       shapes.forEach(function (shape) {
-        var input = shape.replace('FLAG', flag);
+        var input = shape[0].replace('FLAG', flag);
+        var error = shapeError(flag, shape[1]);
 
-        it('Should warn about ' + JSON.stringify(input), function () {
-          expect(messages(input)).to.eql([flagName(flag) + KNOWN]);
-        });
+        if (error) {
+          it('Should throw for ' + JSON.stringify(input), function () {
+            expect(function () {
+              transform(input);
+            }).to.throw(error);
+          });
+        } else {
+          it('Should warn about ' + JSON.stringify(input), function () {
+            expect(messages(input)).to.eql([flagName(flag) + KNOWN]);
+          });
+        }
       });
     });
 
     it('Should warn about every child flag when there are several', function () {
-      expect(messages('<div $HasKeyedChildren $HasNonKeyedChildren><a/></div>')).to.eql([
+      expect(messages('<div $HasKeyedChildren $HasNonKeyedChildren><a key="1"/><b key="2"/></div>')).to.eql([
         '$HasKeyedChildren' + KNOWN,
         '$HasNonKeyedChildren' + KNOWN
       ]);
@@ -98,38 +177,46 @@ describe('Useless flags', function () {
       expect(messages('<div {...p} $HasVNodeChildren><a/></div>')).to.eql(['$HasVNodeChildren' + KNOWN]);
     });
 
-    it('Should not warn about $Flags and $ReCreate on static children', function () {
+    it('Should not warn about $Flags on static children', function () {
       expect(warnings('<div $Flags={1}><a/></div>')).to.eql([]);
-      expect(warnings('<div $ReCreate><a/></div>')).to.eql([]);
     });
   });
 
   describe('dynamic children', function () {
     var shapes = [
-      '<div FLAG>{a}</div>',
-      '<div FLAG>{...a}</div>',
-      '<div FLAG>text{a}</div>',
-      '<div FLAG><a/>{b}</div>',
-      '<div FLAG>{<a/>}</div>',
-      '<div FLAG>{"text"}</div>',
-      '<div FLAG>{/* c */}<a/></div>',
-      '<div FLAG children={a} />',
-      '<div FLAG children={"t"} />',
-      '<div FLAG children={a}>\n  </div>',
-      '<div {...p} FLAG>{a}</div>',
-      '<Fragment FLAG>{a}</Fragment>',
-      '<Fragment FLAG children={a} />',
-      '<Fragment FLAG children={<a/>} />',
-      '<Fragment FLAG children=<a/> />'
+      ['<div FLAG>{a}</div>', 'dynamic'],
+      ['<div FLAG>{...a}</div>', 'spread'],
+      ['<div FLAG>text{a}</div>', 'textFirst'],
+      ['<div FLAG><a/>{b}</div>', 'two'],
+      ['<div FLAG>{<a/>}</div>', 'vnode'],
+      ['<div FLAG>{"text"}</div>', 'text'],
+      ['<div FLAG>{/* c */}<a/></div>', 'vnode'],
+      ['<div FLAG children={a} />', 'dynamic'],
+      ['<div FLAG children={"t"} />', 'text'],
+      ['<div FLAG children={a}>\n  </div>', 'dynamic'],
+      ['<div {...p} FLAG>{a}</div>', 'dynamic'],
+      ['<Fragment FLAG>{a}</Fragment>', 'dynamic'],
+      ['<Fragment FLAG children={a} />', 'dynamic'],
+      ['<Fragment FLAG children={<a/>} />', 'vnode'],
+      ['<Fragment FLAG children=<a/> />', 'vnode']
     ];
 
     CHILD_FLAGS.forEach(function (flag) {
       shapes.forEach(function (shape) {
-        var input = shape.replace('FLAG', flag);
+        var input = shape[0].replace('FLAG', flag);
+        var error = shapeError(flag, shape[1]);
 
-        it('Should not warn about ' + JSON.stringify(input), function () {
-          expect(warnings(input)).to.eql([]);
-        });
+        if (error) {
+          it('Should throw for ' + JSON.stringify(input), function () {
+            expect(function () {
+              transform(input);
+            }).to.throw(error);
+          });
+        } else {
+          it('Should not warn about ' + JSON.stringify(input), function () {
+            expect(warnings(input)).to.eql([]);
+          });
+        }
       });
     });
 
@@ -171,9 +258,8 @@ describe('Useless flags', function () {
       expect(transform('<Foo $HasKeyedChildren>{a}</Foo>')).to.equal(transform('<Foo>{a}</Foo>'));
     });
 
-    it('Should not warn about $Flags or $ReCreate on a component', function () {
+    it('Should not warn about $Flags on a component', function () {
       expect(warnings('<Foo $Flags={4}/>')).to.eql([]);
-      expect(warnings('<Foo $ReCreate/>')).to.eql([]);
     });
   });
 
@@ -215,24 +301,13 @@ describe('Useless flags', function () {
     it('Should point at the ignored flag', function () {
       expect(warnings('<div $HasKeyedChildren $HasNonKeyedChildren>{a}</div>')[0]).to.match(/^babel-plugin-inferno: unknown file:1:24: /);
     });
-
-    it('Should warn about $ReCreate with $Flags on an element', function () {
-      expect(messages('<div $ReCreate $Flags={9}/>')).to.eql(['$ReCreate is ignored because $Flags replaces the vNode flags. Include ReCreate (2048) in $Flags instead.']);
-      expect(transform('<div $ReCreate $Flags={9}/>')).to.equal(transform('<div $Flags={9}/>'));
-    });
-
-    it('Should warn about $ReCreate with $Flags on a component', function () {
-      expect(messages('<Foo $Flags={2} $ReCreate/>')).to.eql(['$ReCreate is ignored because $Flags replaces the vNode flags. Include ReCreate (2048) in $Flags instead.']);
-      expect(transform('<Foo $Flags={2} $ReCreate/>')).to.equal(transform('<Foo $Flags={2}/>'));
-    });
   });
 
   describe('Fragments', function () {
     var cases = [
       ['<Fragment $Flags={1}>{x}</Fragment>', '$Flags'],
-      ['<Fragment $ReCreate>{x}</Fragment>', '$ReCreate'],
       ['<Inferno.Fragment $Flags={1} key="k">{x}</Inferno.Fragment>', '$Flags'],
-      ['<React.Fragment $ReCreate>{x}</React.Fragment>', '$ReCreate']
+      ['<React.Fragment $Flags={1}>{x}</React.Fragment>', '$Flags']
     ];
 
     cases.forEach(function (testCase) {
@@ -244,12 +319,8 @@ describe('Useless flags', function () {
       });
 
       it('Should compile ' + JSON.stringify(input) + ' the same without ' + flag, function () {
-        expect(transform(input)).to.equal(transform(input.replace(/ \$(Flags=\{1\}|ReCreate)/, '')));
+        expect(transform(input)).to.equal(transform(input.replace(' $Flags={1}', '')));
       });
-    });
-
-    it('Should warn about $Flags and $ReCreate together on a Fragment', function () {
-      expect(messages('<Fragment $ReCreate $Flags={1}>{x}</Fragment>')).to.eql(['$ReCreate' + FRAGMENT, '$Flags' + FRAGMENT]);
     });
 
     it('Should warn about a Fragment flag and a child flag separately', function () {
@@ -368,7 +439,7 @@ describe('Useless flags', function () {
       });
 
       expect(result.warnings).to.eql(['babel-plugin-inferno: unknown file: $HasTextChildren' + KNOWN]);
-      expect(helpers.stripInfernoImport(result.result)).to.equal('const el = createVNode(1, "div", null, "text", 16);');
+      expect(helpers.stripInfernoImport(result.result)).to.equal('const el = newVNode(3, "div", null, "text");');
     });
   });
 });

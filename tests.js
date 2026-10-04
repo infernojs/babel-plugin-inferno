@@ -38,51 +38,51 @@ describe('Transforms', function () {
 
   describe('Dynamic children', function () {
     it('Should add normalize call when there is dynamic children', function () {
-      expect(transform('<div>{a}</div>')).to.equal('createVNode(1, "div", null, a, 0);');
+      expect(transform('<div>{a}</div>')).to.equal('newVNode(1, "div", null, a);');
     });
 
     it('Should add normalize call when there is dynamic and static children mixed', function () {
-      expect(transform('<div>{a}<div>1</div></div>')).to.equal('createVNode(1, "div", null, [a, createVNode(1, "div", null, "1", 16)], 0);');
+      expect(transform('<div>{a}<div>1</div></div>')).to.equal('newVNode(1, "div", null, [a, newVNode(3, "div", null, "1")]);');
     });
 
     it('Should not add normalize call when all children are known', function () {
-      expect(transform('<div><FooBar/><div>1</div></div>')).to.equal('createVNode(1, "div", null, [createComponentVNode(2, FooBar), createVNode(1, "div", null, "1", 16)], 4);');
+      expect(transform('<div><FooBar/><div>1</div></div>')).to.equal('newVNode(5, "div", null, [newComponentVNode(0, FooBar), newVNode(3, "div", null, "1")]);');
     });
 
     it('Should not convert text to createVNode when its within Component', function () {
-      expect(transform('<FooBar>1</FooBar>')).to.equal('createComponentVNode(2, FooBar, {\n  children: "1"\n});');
+      expect(transform('<FooBar>1</FooBar>')).to.equal('newComponentVNode(0, FooBar, {\n  children: "1"\n});');
     });
 
     it('Should create textVNodes when there is no normalization needed and its multiple children', function () {
-      expect(transform('<div><FooBar/>foobar</div>')).to.equal('createVNode(1, "div", null, [createComponentVNode(2, FooBar), createTextVNode("foobar")], 4);');
+      expect(transform('<div><FooBar/>foobar</div>')).to.equal('newVNode(5, "div", null, [newComponentVNode(0, FooBar), newTextVNode("foobar")]);');
     });
 
     it('Should create textVNodes when there is single children', function () {
-      expect(transform('<div>foobar</div>')).to.equal('createVNode(1, "div", null, "foobar", 16);');
+      expect(transform('<div>foobar</div>')).to.equal('newVNode(3, "div", null, "foobar");');
     });
 
     it('Should create textVNodes when there is single children', function () {
-      expect(transform('<div>1</div>')).to.equal('createVNode(1, "div", null, "1", 16);');
+      expect(transform('<div>1</div>')).to.equal('newVNode(3, "div", null, "1");');
     });
 
     it('Should not normalize Component prop children', function () {
-      expect(transform('<Com>{a}</Com>')).to.equal('createComponentVNode(2, Com, {\n  children: a\n});');
+      expect(transform('<Com>{a}</Com>')).to.equal('newComponentVNode(0, Com, {\n  children: a\n});');
     });
 
     it('Should not normalize component children as they are in props', function () {
-      expect(transform('<Com>{a}{b}{c}</Com>')).to.equal('createComponentVNode(2, Com, {\n  children: [a, b, c]\n});');
+      expect(transform('<Com>{a}{b}{c}</Com>')).to.equal('newComponentVNode(0, Com, {\n  children: [a, b, c]\n});');
     });
 
     it('Should mark parent vNode with $HasNonKeyedChildren if no normalize is needed and all children are non keyed', function () {
-      expect(transform('<div><FooBar/><div>1</div></div>')).to.equal('createVNode(1, "div", null, [createComponentVNode(2, FooBar), createVNode(1, "div", null, "1", 16)], 4);');
+      expect(transform('<div><FooBar/><div>1</div></div>')).to.equal('newVNode(5, "div", null, [newComponentVNode(0, FooBar), newVNode(3, "div", null, "1")]);');
     });
 
     it('Should mark parent vNode with $HasKeyedChildren if no normalize is needed and all children are keyed', function () {
-      expect(transform('<div><FooBar key="foo"/><div key="1">1</div></div>')).to.equal('createVNode(1, "div", null, [createComponentVNode(2, FooBar, null, "foo"), createVNode(1, "div", null, "1", 16, null, "1")], 8);');
+      expect(transform('<div><FooBar key="foo"/><div key="1">1</div></div>')).to.equal('newVNode(33, "div", null, [newComponentVNode(0, FooBar, null, "foo"), newVNode(3, "div", null, "1", null, "1")]);');
     });
 
     it('Should mark parent vNode with $HasKeyedChildren if even one child is keyed directly', function () {
-      expect(transform('<div><span></span><div key="1">1</div></div>')).to.equal('createVNode(1, "div", null, [createVNode(1, "span"), createVNode(1, "div", null, "1", 16, null, "1")], 8);');
+      expect(transform('<div><span></span><div key="1">1</div></div>')).to.equal('newVNode(33, "div", null, [newVNode(17, "span"), newVNode(3, "div", null, "1", null, "1")]);');
     });
   });
 
@@ -92,7 +92,7 @@ describe('Transforms', function () {
     });
 
     it('Should be possible to define override childFlags runtime', function () {
-      expect(transform('<img $ChildFlag={1}>foobar</img>')).to.equal('createVNode(1, "img", null, "foobar", 1);');
+      expect(transform('<img $ChildFlag={1}>{foobar}</img>')).to.equal('newVNode(17, "img", null, foobar);');
     });
 
     it('Should be possible to use expression for childFlags', function () {
@@ -102,65 +102,67 @@ describe('Transforms', function () {
 
   describe('different types', function () {
     it('Should transform img', function () {
-      expect(transform('<img>foobar</img>')).to.equal('createVNode(1, "img", null, "foobar", 16);');
+      expect(transform('<img>foobar</img>')).to.equal('newVNode(3, "img", null, "foobar");');
     });
 
     it('Should transform br', function () {
-      expect(transform('<br>foobar</br>')).to.equal('createVNode(1, "br", null, "foobar", 16);');
+      expect(transform('<br>foobar</br>')).to.equal('newVNode(3, "br", null, "foobar");');
     });
 
     it('Should transform media', function () {
-      expect(transform('<media>foobar</media>')).to.equal('createVNode(1, "media", null, "foobar", 16);');
+      expect(transform('<media>foobar</media>')).to.equal('newVNode(3, "media", null, "foobar");');
     });
 
     it('Should transform textarea', function () {
-      expect(transform('<textarea>foobar</textarea>')).to.equal('createVNode(128, "textarea", null, "foobar", 16);');
+      expect(transform('<textarea>foobar</textarea>')).to.equal('newVNode(2050, "textarea", null, "foobar");');
     });
   });
 
   describe('Special flags', function () {
     it('Should add keyed children flag', function () {
-      expect(transform('<div $HasKeyedChildren>{magic}</div>')).to.equal('createVNode(1, "div", null, magic, 8);');
+      expect(transform('<div $HasKeyedChildren>{magic}</div>')).to.equal('newVNode(33, "div", null, magic);');
     });
 
     it('Should not normalize if $HasVNodeChildren set', function () {
-      expect(transform('<div $HasVNodeChildren>{magic}</div>')).to.equal('createVNode(1, "div", null, magic, 2);');
+      expect(transform('<div $HasVNodeChildren>{magic}</div>')).to.equal('newVNode(9, "div", null, magic);');
     });
 
     it('Should set hasTextChildren flag and not create textVNode when $HasTextChildren is used ( dynamic )', function () {
-      expect(transform('<div $HasTextChildren>{foobar}</div>')).to.equal('createVNode(1, "div", null, foobar, 16);');
+      expect(transform('<div $HasTextChildren>{foobar}</div>')).to.equal('newVNode(3, "div", null, foobar);');
     });
 
     it('Should set hasTextChildren flag and not create textVNode when $HasTextChildren is used ( hardcoded )', function () {
-      expect(transform('<div $HasTextChildren>text</div>')).to.equal('createVNode(1, "div", null, "text", 16);');
+      expect(transform('<div $HasTextChildren>text</div>')).to.equal('newVNode(3, "div", null, "text");');
     });
 
     it('Should set hasTextChildren flag and not create textVNode when $HasTextChildren is used ( hardcoded ) #2', function () {
-      expect(transform('<div $HasTextChildren>{"testing"}</div>')).to.equal('createVNode(1, "div", null, "testing", 16);');
+      expect(transform('<div $HasTextChildren>{"testing"}</div>')).to.equal('newVNode(3, "div", null, "testing");');
     });
 
     it('Should use optimized text children instead createTextVNode for element single child', function () {
-      expect(transform('<div>text</div>')).to.equal('createVNode(1, "div", null, "text", 16);');
+      expect(transform('<div>text</div>')).to.equal('newVNode(3, "div", null, "text");');
     });
 
     it('Should add non keyed children flag', function () {
-      expect(transform('<div $HasNonKeyedChildren>{test}</div>')).to.equal('createVNode(1, "div", null, test, 4);');
+      expect(transform('<div $HasNonKeyedChildren>{test}</div>')).to.equal('newVNode(5, "div", null, test);');
     });
 
-    it('Should add re create flag', function () {
-      expect(transform('<div $ReCreate/>')).to.equal('createVNode(2049, "div");');
+    it('Should throw for the removed re create flag', function () {
+      expect(function () {
+        transform('<div $ReCreate/>');
+      }).to.throw('$ReCreate has been removed in Inferno 10. To re-create the element, change its key instead, for example key={version}.');
     });
 
     it('Should be possible to define override flags runtime', function () {
-      expect(transform('<img $Flags={bool ? 1 : 2}>{expression}</img>')).to.equal('createVNode(bool ? 1 : 2, "img", null, expression, 0);');
+      expect(transform('<img $Flags={bool ? 1 : 2}>{expression}</img>')).to.equal('newVNode(bool ? 1 : 2, "img", null, expression);');
     });
 
     it('Should be possible to define override flags with constant', function () {
-      expect(transform('<img $Flags={120}>foobar</img>')).to.equal('createVNode(120, "img", null, "foobar", 16);');
+      expect(transform('<img $Flags={120}>foobar</img>')).to.equal('newVNode(122, "img", null, "foobar");');
     });
 
     it('Should be possible to use expression for flags', function () {
-      expect(transform('<ComponentA $Flags={magic}/>')).to.equal('createComponentVNode(magic, ComponentA);');
+      expect(transform('<ComponentA $Flags={magic}/>')).to.equal('newComponentVNode(magic | 16, ComponentA);');
     });
   });
 
@@ -175,7 +177,7 @@ describe('Transforms', function () {
   {i}
 </Child>
 `)).to.equal(`
-createComponentVNode(2, Child, {
+newComponentVNode(0, Child, {
   children: i
 }, i, {
   "onComponentDidAppear": childOnComponentDidAppear,
@@ -194,7 +196,7 @@ createComponentVNode(2, Child, {
   {i}
 </Child>
 `)).to.equal(`
-createComponentVNode(2, Child, {
+newComponentVNode(0, Child, {
   children: i
 }, i, {
   "onComponentDidAppear": childOnComponentDidAppear,
@@ -206,93 +208,93 @@ createComponentVNode(2, Child, {
 
   describe('spreadOperator', function () {
     it('Should add call to normalizeProps when spread operator is used', function () {
-      expect(transform('<div {...props}>1</div>')).to.equal('normalizeProps(createVNode(1, "div", null, "1", 16, {\n  ...props\n}));');
+      expect(transform('<div {...props}>1</div>')).to.equal('normalizeProps(newVNode(3, "div", null, "1", {\n  ...props\n}));');
     });
 
     it('Should add call to normalizeProps when spread operator is used #2', function () {
-      expect(transform('<div foo="bar" className="test" {...props}/>')).to.equal('normalizeProps(createVNode(1, "div", "test", null, 1, {\n  "foo": "bar",\n  ...props\n}));');
+      expect(transform('<div foo="bar" className="test" {...props}/>')).to.equal('normalizeProps(newVNode(17, "div", "test", null, {\n  "foo": "bar",\n  ...props\n}));');
     });
 
     it('Should add call to normalizeProps when spread operator is used inside children for Component', function () {
-      expect(transform('<FooBar><BarFoo {...props}/><NoNormalize/></FooBar>')).to.equal('createComponentVNode(2, FooBar, {\n  children: [normalizeProps(createComponentVNode(2, BarFoo, {\n    ...props\n  })), createComponentVNode(2, NoNormalize)]\n});');
+      expect(transform('<FooBar><BarFoo {...props}/><NoNormalize/></FooBar>')).to.equal('newComponentVNode(0, FooBar, {\n  children: [normalizeProps(newComponentVNode(0, BarFoo, {\n    ...props\n  })), newComponentVNode(0, NoNormalize)]\n});');
     });
 
     it('Should do single normalization when multiple spread operators are used', function () {
-      expect(transform('<FooBar><BarFoo {...magics} {...foobars} {...props}/><NoNormalize/></FooBar>')).to.equal('createComponentVNode(2, FooBar, {\n  children: [normalizeProps(createComponentVNode(2, BarFoo, {\n    ...magics,\n    ...foobars,\n    ...props\n  })), createComponentVNode(2, NoNormalize)]\n});');
+      expect(transform('<FooBar><BarFoo {...magics} {...foobars} {...props}/><NoNormalize/></FooBar>')).to.equal('newComponentVNode(0, FooBar, {\n  children: [normalizeProps(newComponentVNode(0, BarFoo, {\n    ...magics,\n    ...foobars,\n    ...props\n  })), newComponentVNode(0, NoNormalize)]\n});');
     });
   });
 
   describe('Basic scenarios', function () {
     it('Should transform div', function () {
-      expect(transform('<div></div>')).to.equal('createVNode(1, "div");');
+      expect(transform('<div></div>')).to.equal('newVNode(17, "div");');
     });
 
     it('Should transform single div', function () {
-      expect(transform('<div>1</div>')).to.equal('createVNode(1, "div", null, "1", 16);');
+      expect(transform('<div>1</div>')).to.equal('newVNode(3, "div", null, "1");');
     });
 
     it('#Test to verify stripping imports work#', function () {
-      expect(transform('<div>1</div>')).to.equal('createVNode(1, "div", null, "1", 16);');
+      expect(transform('<div>1</div>')).to.equal('newVNode(3, "div", null, "1");');
     });
 
     it('className should be in third parameter as string when its element', function () {
-      expect(transform('<div className="first second">1</div>')).to.equal('createVNode(1, "div", "first second", "1", 16);');
+      expect(transform('<div className="first second">1</div>')).to.equal('newVNode(3, "div", "first second", "1");');
     });
 
     it('className should be in fifth parameter as string when its component', function () {
-      expect(transform('<UnknownClass className="first second">1</UnknownClass>')).to.equal('createComponentVNode(2, UnknownClass, {\n  "className": "first second",\n  children: "1"\n});');
+      expect(transform('<UnknownClass className="first second">1</UnknownClass>')).to.equal('newComponentVNode(0, UnknownClass, {\n  "className": "first second",\n  children: "1"\n});');
     });
 
     it('JSXMemberExpressions should work', function () {
-      expect(transform('<Components.Unknown>1</Components.Unknown>')).to.equal('createComponentVNode(2, Components.Unknown, {\n  children: "1"\n});');
+      expect(transform('<Components.Unknown>1</Components.Unknown>')).to.equal('newComponentVNode(0, Components.Unknown, {\n  children: "1"\n});');
     });
 
     it('class should be in third parameter as variable', function () {
-      expect(transform('<div class={variable}>1</div>')).to.equal('createVNode(1, "div", variable, "1", 16);');
+      expect(transform('<div class={variable}>1</div>')).to.equal('newVNode(3, "div", variable, "1");');
     });
 
     it('Should call createVNode twice and text children', function () {
       expect(transform(`<div>
           <div>single</div>
-        </div>`)).to.equal('createVNode(1, "div", null, createVNode(1, "div", null, "single", 16), 2);');
+        </div>`)).to.equal('newVNode(9, "div", null, newVNode(3, "div", null, "single"));');
     });
 
     it('Events should be in props', function () {
-      expect(transform('<div id="test" onClick={func} class={variable}>1</div>')).to.equal('createVNode(1, "div", variable, "1", 16, {\n  "id": "test",\n  "onClick": func\n});');
+      expect(transform('<div id="test" onClick={func} class={variable}>1</div>')).to.equal('newVNode(3, "div", variable, "1", {\n  "id": "test",\n  "onClick": func\n});');
     });
 
     it('Should transform input and htmlFor correctly', function () {
       var result = transform('<label htmlFor={id}><input id={id} name={name} value={value} onChange={onChange} onInput={onInput} onKeyup={onKeyup} onFocus={onFocus} onClick={onClick} type="number" pattern="[0-9]+([,\.][0-9]+)?" inputMode="numeric" min={minimum}/></label>');
-      var expected = 'createVNode(1, "label", null, createVNode(64, "input", null, null, 1, {\n  "id": id,\n  "name": name,\n  "value": value,\n  "onChange": onChange,\n  "onInput": onInput,\n  "onKeyup": onKeyup,\n  "onFocus": onFocus,\n  "onClick": onClick,\n  "type": "number",\n  "pattern": "[0-9]+([,.][0-9]+)?",\n  "inputmode": "numeric",\n  "min": minimum\n}), 2, {\n  "for": id\n});';
+      var expected = 'newVNode(9, "label", null, newVNode(528, "input", null, null, {\n  "id": id,\n  "name": name,\n  "value": value,\n  "onChange": onChange,\n  "onInput": onInput,\n  "onKeyup": onKeyup,\n  "onFocus": onFocus,\n  "onClick": onClick,\n  "type": "number",\n  "pattern": "[0-9]+([,.][0-9]+)?",\n  "inputmode": "numeric",\n  "min": minimum\n}), {\n  "for": id\n});';
       expect(result).to.equal(expected);
     });
 
     it('Should transform acceptCharset correctly', function () {
       var result = transform('<form acceptCharset="ISO-8859-1"/>');
-      var expected = 'createVNode(1, "form", null, null, 1, {\n  "accept-charset": "ISO-8859-1"\n});';
+      var expected = 'newVNode(17, "form", null, null, {\n  "accept-charset": "ISO-8859-1"\n});';
 
       expect(result).to.equal(expected);
     });
 
     it('Should lowerCase f.e. colSpan', function () {
       var result = transform('<td colSpan="5"/>');
-      var expected = 'createVNode(1, "td", null, null, 1, {\n  "colspan": "5"\n});';
+      var expected = 'newVNode(17, "td", null, null, {\n  "colspan": "5"\n});';
 
       expect(result).to.equal(expected);
     });
 
     it('Should transform onDoubleClick to native html event', function () {
-      expect(transform('<div onDoubleClick={foobar}></div>')).to.eql('createVNode(1, "div", null, null, 1, {\n  "onDblClick": foobar\n});');
+      expect(transform('<div onDoubleClick={foobar}></div>')).to.eql('newVNode(17, "div", null, null, {\n  "onDblClick": foobar\n});');
     });
   });
 
   describe('contenteditbale', function () {
     it('Should set additional byte on when contenteditbale attribute is found', function () {
-      expect(transform('<div contentEditable></div>')).to.eql('createVNode(4097, "div", null, null, 1, {\n  "contentEditable": true\n});');
-      expect(transform('<span contenteditable="false"></span>')).to.eql('createVNode(4097, "span", null, null, 1, {\n  "contenteditable": "false"\n});');
-      expect(transform('<div contenteditable></div>')).to.eql('createVNode(4097, "div", null, null, 1, {\n  "contenteditable": true\n});');
-      expect(transform('<div contentEditable={logic}></div>')).to.eql('createVNode(4097, "div", null, null, 1, {\n  "contentEditable": logic\n});');
-      expect(transform('<div contentEditable="true"></div>')).to.eql('createVNode(4097, "div", null, null, 1, {\n  "contentEditable": "true"\n});');
+      expect(transform('<div contentEditable></div>')).to.eql('newVNode(131089, "div", null, null, {\n  "contentEditable": true\n});');
+      expect(transform('<span contenteditable="false"></span>')).to.eql('newVNode(131089, "span", null, null, {\n  "contenteditable": "false"\n});');
+      expect(transform('<div contenteditable></div>')).to.eql('newVNode(131089, "div", null, null, {\n  "contenteditable": true\n});');
+      expect(transform('<div contentEditable={logic}></div>')).to.eql('newVNode(131089, "div", null, null, {\n  "contentEditable": logic\n});');
+      expect(transform('<div contentEditable="true"></div>')).to.eql('newVNode(131089, "div", null, null, {\n  "contentEditable": "true"\n});');
     });
   });
 
@@ -309,8 +311,8 @@ createComponentVNode(2, Child, {
       return babel.transformSync(input, babelSettingsPragma).code;
     }
 
-    it('Should replace createVNode to pragma option value', function () {
-      expect(pluginTransformPragma('<div></div>')).to.equal('tSome(1, "div");');
+    it('Should replace newVNode to pragma option value', function () {
+      expect(pluginTransformPragma('<div></div>')).to.equal('tSome(17, "div");');
     });
   });
 
@@ -328,7 +330,7 @@ createComponentVNode(2, Child, {
     }
 
     it('Should replace createVNode to pragma option value', function () {
-      expect(pluginTransformAllArgs('<div></div>')).to.equal('var createVNode = Inferno.createVNode;\ncreateVNode(1, "div", null, null, 1, null, null, null);');
+      expect(pluginTransformAllArgs('<div></div>')).to.equal('var newVNode = Inferno.newVNode;\nnewVNode(17, "div", null, null, null, null, null);');
     });
   });
 
@@ -339,275 +341,275 @@ createComponentVNode(2, Child, {
      */
   describe('SVG attributes React syntax support', function () {
     it('Should support native xlink:href', function () {
-      expect(transform('<svg><use xlink:href="#tester"></use></svg>')).to.equal('createVNode(32, "svg", null, createVNode(32, "use", null, null, 1, {\n  "xlink:href": "#tester"\n}), 2);');
+      expect(transform('<svg><use xlink:href="#tester"></use></svg>')).to.equal('newVNode(72, "svg", null, newVNode(80, "use", null, null, {\n  "xlink:href": "#tester"\n}));');
     });
 
     it('Should transform xlinkHref to xlink:href', function () {
-      expect(transform('<svg><use xlinkHref="#tester"></use></svg>')).to.equal('createVNode(32, "svg", null, createVNode(32, "use", null, null, 1, {\n  "xlink:href": "#tester"\n}), 2);');
+      expect(transform('<svg><use xlinkHref="#tester"></use></svg>')).to.equal('newVNode(72, "svg", null, newVNode(80, "use", null, null, {\n  "xlink:href": "#tester"\n}));');
     });
 
     it('Should transform strokeWidth to stroke-width', function () {
-      expect(transform('<svg><rect strokeWidth="1px"></rect></svg>')).to.equal('createVNode(32, "svg", null, createVNode(32, "rect", null, null, 1, {\n  "stroke-width": "1px"\n}), 2);');
+      expect(transform('<svg><rect strokeWidth="1px"></rect></svg>')).to.equal('newVNode(72, "svg", null, newVNode(80, "rect", null, null, {\n  "stroke-width": "1px"\n}));');
     });
 
     it('Should transform strokeWidth to stroke-width', function () {
-      expect(transform('<svg><rect fillOpacity="1"></rect></svg>')).to.equal('createVNode(32, "svg", null, createVNode(32, "rect", null, null, 1, {\n  "fill-opacity": "1"\n}), 2);');
+      expect(transform('<svg><rect fillOpacity="1"></rect></svg>')).to.equal('newVNode(72, "svg", null, newVNode(80, "rect", null, null, {\n  "fill-opacity": "1"\n}));');
     });
 
     it('Should not transform strokeWith or other SVG attributes if they are used in component', () => {
-      expect(transform('<Foobar strokeWidth="1px" fillOpacity="1"/>')).to.equal('createComponentVNode(2, Foobar, {\n  "strokeWidth": "1px",\n  "fillOpacity": "1"\n});');
+      expect(transform('<Foobar strokeWidth="1px" fillOpacity="1"/>')).to.equal('newComponentVNode(0, Foobar, {\n  "strokeWidth": "1px",\n  "fillOpacity": "1"\n});');
     });
   });
 
   describe('text node and elements mixed', () => {
     it('Should createTextVNode when there are siblings', () => {
-      expect(transform('<div>Okay<span>foo</span></div>')).to.eql('createVNode(1, "div", null, [createTextVNode("Okay"), createVNode(1, "span", null, "foo", 16)], 4);');
+      expect(transform('<div>Okay<span>foo</span></div>')).to.eql('newVNode(5, "div", null, [newTextVNode("Okay"), newVNode(3, "span", null, "foo")]);');
     });
 
     // SHORT SYNTAX
 
     it('Should createTextVNode when text node is under short syntax fragment', () => {
-      expect(transform('<>Okay<span>foo</span></>')).to.eql('createFragment([createTextVNode("Okay"), createVNode(1, "span", null, "foo", 16)], 4);');
+      expect(transform('<>Okay<span>foo</span></>')).to.eql('newFragment(260, [newTextVNode("Okay"), newVNode(3, "span", null, "foo")]);');
     });
 
     it('Should not wrap dynamic value', () => {
-      expect(transform('<>{magic}</>')).to.eql('createFragment(magic, 0);');
+      expect(transform('<>{magic}</>')).to.eql('newFragment(256, magic);');
     });
 
     it('Should always keep text node as children even if there is one when parent is short syntax Fragment', () => {
-      expect(transform('<><>Text</></>')).to.eql('createFragment([createFragment([createTextVNode("Text")], 4)], 4);');
+      expect(transform('<><>Text</></>')).to.eql('newFragment(260, [newFragment(260, [newTextVNode("Text")])]);');
     });
 
     it('Should always short syntax Fragment', () => {
-      expect(transform('<><><div>Text</div></></>')).to.eql('createFragment([createFragment([createVNode(1, "div", null, "Text", 16)], 4)], 4);');
+      expect(transform('<><><div>Text</div></></>')).to.eql('newFragment(260, [newFragment(260, [newVNode(3, "div", null, "Text")])]);');
     });
 
     it('Should handle many dynamic children short syntax', () => {
-      expect(transform('<><>{Frag}Text{Wohoo}</></>')).to.eql('createFragment([createFragment([Frag, createTextVNode("Text"), Wohoo], 0)], 4);');
+      expect(transform('<><>{Frag}Text{Wohoo}</></>')).to.eql('newFragment(260, [newFragment(256, [Frag, newTextVNode("Text"), Wohoo])]);');
     });
 
     it('Should handle many dynamic and non dynamic children short syntax', () => {
-      expect(transform('<><><span></span>Text{Wohoo}</></>')).to.eql('createFragment([createFragment([createVNode(1, "span"), createTextVNode("Text"), Wohoo], 0)], 4);');
+      expect(transform('<><><span></span>Text{Wohoo}</></>')).to.eql('newFragment(260, [newFragment(256, [newVNode(17, "span"), newTextVNode("Text"), Wohoo])]);');
     });
 
 
     // LONG SYNTAX
 
     it('Should always keep text node as children even if there is one when parent is long syntax Fragment', () => {
-      expect(transform('<Fragment><Fragment>Text</Fragment></Fragment>')).to.eql('createFragment([createFragment([createTextVNode("Text")], 4)], 4);');
+      expect(transform('<Fragment><Fragment>Text</Fragment></Fragment>')).to.eql('newFragment(260, [newFragment(260, [newTextVNode("Text")])]);');
     });
 
     it('Should createTextVNode when text node is under large syntax fragment', () => {
-      expect(transform('<Fragment>Okay<span>foo</span></Fragment>')).to.eql('createFragment([createTextVNode("Okay"), createVNode(1, "span", null, "foo", 16)], 4);');
+      expect(transform('<Fragment>Okay<span>foo</span></Fragment>')).to.eql('newFragment(260, [newTextVNode("Okay"), newVNode(3, "span", null, "foo")]);');
     });
 
     it('Should always keep text node as children even if there is one when parent is long syntax Fragment', () => {
-      expect(transform('<Fragment><Fragment>Text</Fragment></Fragment>')).to.eql('createFragment([createFragment([createTextVNode("Text")], 4)], 4);');
+      expect(transform('<Fragment><Fragment>Text</Fragment></Fragment>')).to.eql('newFragment(260, [newFragment(260, [newTextVNode("Text")])]);');
     });
 
     it('Should always long syntax Fragment', () => {
-      expect(transform('<Fragment><Fragment><div>Text</div></Fragment></Fragment>')).to.eql('createFragment([createFragment([createVNode(1, "div", null, "Text", 16)], 4)], 4);');
+      expect(transform('<Fragment><Fragment><div>Text</div></Fragment></Fragment>')).to.eql('newFragment(260, [newFragment(260, [newVNode(3, "div", null, "Text")])]);');
     });
 
     it('Should handle many dynamic children long syntax', () => {
-      expect(transform('<Fragment><Fragment>{Frag}Text{Wohoo}</Fragment></Fragment>')).to.eql('createFragment([createFragment([Frag, createTextVNode("Text"), Wohoo], 0)], 4);');
+      expect(transform('<Fragment><Fragment>{Frag}Text{Wohoo}</Fragment></Fragment>')).to.eql('newFragment(260, [newFragment(256, [Frag, newTextVNode("Text"), Wohoo])]);');
     });
 
     it('Should handle many dynamic and non dynamic children long syntax', () => {
-      expect(transform('<Fragment><Fragment><span></span>Text{Wohoo}</Fragment></Fragment>')).to.eql('createFragment([createFragment([createVNode(1, "span"), createTextVNode("Text"), Wohoo], 0)], 4);');
+      expect(transform('<Fragment><Fragment><span></span>Text{Wohoo}</Fragment></Fragment>')).to.eql('newFragment(260, [newFragment(256, [newVNode(17, "span"), newTextVNode("Text"), Wohoo])]);');
     });
   });
 
   // TODO: This would be neat feature, implement it if solid way to detect shape is found
   // describe('detection', function () {
   //     it('Should use Functional Component and class Component flags if type is known', function () {
-  //         var expectedResult = '\nfunction Terve() {}\n\nclass FooComponent extends Component {}\n\nvar tester = createComponentVNode(4, FooComponent);\nvar foo = createVNode(1, "div");\nvar b = createComponentVNode(8, Terve);';
+  //         var expectedResult = '\nfunction Terve() {}\n\nclass FooComponent extends Component {}\n\nvar tester = newComponentVNode(20, FooComponent);\nvar foo = newVNode(17, "div");\nvar b = newComponentVNode(24, Terve);';
   //         expect(transform('function Terve() {} class FooComponent extends Component {} var tester = <FooComponent/>; var foo = <div/>; var b = <Terve/>')).to.equal(expectedResult);
   //     });
   // });
 
   describe('Imports', function () {
     it('Should not fail if createVNode is already imported', function () {
-      expect(pluginTransform('import {createVNode} from "inferno"; var foo = <div/>;')).to.equal('import { createVNode } from "inferno";\nvar foo = createVNode(1, "div");');
+      expect(pluginTransform('import {newVNode} from "inferno"; var foo = <div/>;')).to.equal('import { newVNode } from "inferno";\nvar foo = newVNode(17, "div");');
     });
 
     it('Should add import to createVNodeComponent but not to createVNode if createVNode is already delcared', function () {
-      expect(pluginTransform('import {createVNode} from "inferno"; var foo = <FooBar/>;')).to.equal('import { createComponentVNode } from "inferno";\nimport { createVNode } from "inferno";\nvar foo = createComponentVNode(2, FooBar);');
+      expect(pluginTransform('import {newVNode} from "inferno"; var foo = <FooBar/>;')).to.equal('import { newComponentVNode } from "inferno";\nimport { newVNode } from "inferno";\nvar foo = newComponentVNode(0, FooBar);');
     });
   });
 
   describe('Children', function () {
     it('Element Should prefer child element over children props', function () {
-      expect(transform('<div children="ab">test</div>')).to.eql('createVNode(1, "div", null, "test", 16);');
+      expect(transform('<div children="ab">test</div>')).to.eql('newVNode(3, "div", null, "test");');
     });
 
     it('Element Should prefer prop over empty children', function () {
-      expect(transform('<div children="ab"></div>')).to.eql('createVNode(1, "div", null, "ab", 16);');
+      expect(transform('<div children="ab"></div>')).to.eql('newVNode(3, "div", null, "ab");');
     });
 
     it('Element Should use prop if no children exists', function () {
-      expect(transform('<div children="ab"/>')).to.eql('createVNode(1, "div", null, "ab", 16);');
+      expect(transform('<div children="ab"/>')).to.eql('newVNode(3, "div", null, "ab");');
     });
 
     it('Component Should prefer child element over children props', function () {
-      expect(transform('<Com children="ab">test</Com>')).to.eql('createComponentVNode(2, Com, {\n  children: "test"\n});');
+      expect(transform('<Com children="ab">test</Com>')).to.eql('newComponentVNode(0, Com, {\n  children: "test"\n});');
     });
 
     it('Component Should prefer prop over empty children', function () {
-      expect(transform('<Com children="ab"></Com>')).to.eql('createComponentVNode(2, Com, {\n  "children": "ab"\n});');
+      expect(transform('<Com children="ab"></Com>')).to.eql('newComponentVNode(0, Com, {\n  "children": "ab"\n});');
     });
 
     it('Component Should use prop if no children exists', function () {
-      expect(transform('<Com children="ab"/>')).to.eql('createComponentVNode(2, Com, {\n  "children": "ab"\n});');
+      expect(transform('<Com children="ab"/>')).to.eql('newComponentVNode(0, Com, {\n  "children": "ab"\n});');
     });
 
     it('Component Array empty children', function () {
-      expect(transform('<Com>{[]}</Com>')).to.eql('createComponentVNode(2, Com);');
+      expect(transform('<Com>{[]}</Com>')).to.eql('newComponentVNode(0, Com);');
     });
 
     it('Component should create vNode for children', function () {
-      expect(transform('<Com children={<div>1</div>}/>')).to.eql('createComponentVNode(2, Com, {\n  "children": createVNode(1, "div", null, "1", 16)\n});');
+      expect(transform('<Com children={<div>1</div>}/>')).to.eql('newComponentVNode(0, Com, {\n  "children": newVNode(3, "div", null, "1")\n});');
     });
 
     it('Should prefer xml children over props', function () {
-      expect(transform('<foo children={<span>b</span>}></foo>')).to.eql('createVNode(1, "foo", null, createVNode(1, "span", null, "b", 16), 2);');
+      expect(transform('<foo children={<span>b</span>}></foo>')).to.eql('newVNode(9, "foo", null, newVNode(3, "span", null, "b"));');
     });
 
     it('Should prefer xml children over props (null)', function () {
-      expect(transform('<foo children={null}></foo>')).to.eql('createVNode(1, "foo");');
+      expect(transform('<foo children={null}></foo>')).to.eql('newVNode(17, "foo");');
     });
   });
 
   describe('Fragments', function () {
     describe('Short syntax', function () {
       it('Should create empty createFragment', function () {
-        expect(transform('<></>')).to.eql('createFragment();');
+        expect(transform('<></>')).to.eql('newFragment(272);');
       });
 
       it('Should createFragment', function () {
-        expect(transform('<>Test</>')).to.eql('createFragment([createTextVNode("Test")], 4);');
+        expect(transform('<>Test</>')).to.eql('newFragment(260, [newTextVNode("Test")]);');
       });
 
       it('Should createFragment dynamic children', function () {
-        expect(transform('<>{dynamic}</>')).to.eql('createFragment(dynamic, 0);');
+        expect(transform('<>{dynamic}</>')).to.eql('newFragment(256, dynamic);');
       });
 
       it('Should createFragment keyed children', function () {
-        expect(transform('<><span key="ok">kk</span><div key="ok2">ok</div></>')).to.eql('createFragment([createVNode(1, "span", null, "kk", 16, null, "ok"), createVNode(1, "div", null, "ok", 16, null, "ok2")], 8);');
+        expect(transform('<><span key="ok">kk</span><div key="ok2">ok</div></>')).to.eql('newFragment(288, [newVNode(3, "span", null, "kk", null, "ok"), newVNode(3, "div", null, "ok", null, "ok2")]);');
       });
 
       it('Should createFragment non keyed children', function () {
-        expect(transform('<><div>1</div><span>foo</span></>')).to.eql('createFragment([createVNode(1, "div", null, "1", 16), createVNode(1, "span", null, "foo", 16)], 4);');
+        expect(transform('<><div>1</div><span>foo</span></>')).to.eql('newFragment(260, [newVNode(3, "div", null, "1"), newVNode(3, "span", null, "foo")]);');
       });
     });
 
     describe('Long syntax', function () {
       describe('Fragment', function () {
         it('Should create empty createFragment', function () {
-          expect(transform('<Fragment></Fragment>')).to.eql('createFragment();');
-          expect(transform('<Fragment/>')).to.eql('createFragment();');
+          expect(transform('<Fragment></Fragment>')).to.eql('newFragment(272);');
+          expect(transform('<Fragment/>')).to.eql('newFragment(272);');
         });
 
         it('Should createFragment', function () {
-          expect(transform('<Fragment>Test</Fragment>')).to.eql('createFragment([createTextVNode("Test")], 4);');
+          expect(transform('<Fragment>Test</Fragment>')).to.eql('newFragment(260, [newTextVNode("Test")]);');
         });
 
         it('Should createFragment dynamic children', function () {
-          expect(transform('<Fragment>{dynamic}</Fragment>')).to.eql('createFragment(dynamic, 0);');
+          expect(transform('<Fragment>{dynamic}</Fragment>')).to.eql('newFragment(256, dynamic);');
         });
 
         it('Should createFragment keyed children', function () {
-          expect(transform('<Fragment><span key="ok">kk</span><div key="ok2">ok</div></Fragment>')).to.eql('createFragment([createVNode(1, "span", null, "kk", 16, null, "ok"), createVNode(1, "div", null, "ok", 16, null, "ok2")], 8);');
+          expect(transform('<Fragment><span key="ok">kk</span><div key="ok2">ok</div></Fragment>')).to.eql('newFragment(288, [newVNode(3, "span", null, "kk", null, "ok"), newVNode(3, "div", null, "ok", null, "ok2")]);');
         });
 
         it('Should createFragment non keyed children', function () {
-          expect(transform('<Fragment><div>1</div><span>foo</span></Fragment>')).to.eql('createFragment([createVNode(1, "div", null, "1", 16), createVNode(1, "span", null, "foo", 16)], 4);');
+          expect(transform('<Fragment><div>1</div><span>foo</span></Fragment>')).to.eql('newFragment(260, [newVNode(3, "div", null, "1"), newVNode(3, "span", null, "foo")]);');
         });
 
         // Long syntax specials
         it('Should createFragment non keyed children', function () {
-          expect(transform('<Fragment key="foo"><div>1</div><span>foo</span></Fragment>')).to.eql('createFragment([createVNode(1, "div", null, "1", 16), createVNode(1, "span", null, "foo", 16)], 4, "foo");');
+          expect(transform('<Fragment key="foo"><div>1</div><span>foo</span></Fragment>')).to.eql('newFragment(260, [newVNode(3, "div", null, "1"), newVNode(3, "span", null, "foo")], "foo");');
         });
 
         // Optimization flags
         it('Should createFragment non keyed children', function () {
-          expect(transform('<Fragment key="foo" $HasKeyedChildren>{magic}</Fragment>')).to.eql('createFragment(magic, 8, "foo");');
+          expect(transform('<Fragment key="foo" $HasKeyedChildren>{magic}</Fragment>')).to.eql('newFragment(288, magic, "foo");');
         });
 
         it('Should createFragment non keyed children', function () {
-          expect(transform('<Fragment key="foo" $HasNonKeyedChildren>{magic}</Fragment>')).to.eql('createFragment(magic, 4, "foo");');
+          expect(transform('<Fragment key="foo" $HasNonKeyedChildren>{magic}</Fragment>')).to.eql('newFragment(260, magic, "foo");');
         });
       });
 
       describe('Inferno.Fragment', function () {
         it('Should createFragment', function () {
-          expect(transform('<Inferno.Fragment>Test</Inferno.Fragment>')).to.eql('createFragment([createTextVNode("Test")], 4);');
+          expect(transform('<Inferno.Fragment>Test</Inferno.Fragment>')).to.eql('newFragment(260, [newTextVNode("Test")]);');
         });
 
         it('Should createFragment dynamic children', function () {
-          expect(transform('<Inferno.Fragment>{dynamic}</Inferno.Fragment>')).to.eql('createFragment(dynamic, 0);');
+          expect(transform('<Inferno.Fragment>{dynamic}</Inferno.Fragment>')).to.eql('newFragment(256, dynamic);');
         });
 
         it('Should createFragment keyed children', function () {
-          expect(transform('<Inferno.Fragment><span key="ok">kk</span><div key="ok2">ok</div></Inferno.Fragment>')).to.eql('createFragment([createVNode(1, "span", null, "kk", 16, null, "ok"), createVNode(1, "div", null, "ok", 16, null, "ok2")], 8);');
+          expect(transform('<Inferno.Fragment><span key="ok">kk</span><div key="ok2">ok</div></Inferno.Fragment>')).to.eql('newFragment(288, [newVNode(3, "span", null, "kk", null, "ok"), newVNode(3, "div", null, "ok", null, "ok2")]);');
         });
 
         it('Should createFragment non keyed children', function () {
-          expect(transform('<Inferno.Fragment><div>1</div><span>foo</span></Inferno.Fragment>')).to.eql('createFragment([createVNode(1, "div", null, "1", 16), createVNode(1, "span", null, "foo", 16)], 4);');
+          expect(transform('<Inferno.Fragment><div>1</div><span>foo</span></Inferno.Fragment>')).to.eql('newFragment(260, [newVNode(3, "div", null, "1"), newVNode(3, "span", null, "foo")]);');
         });
 
         // Long syntax specials
         it('Should createFragment non keyed children', function () {
-          expect(transform('<Inferno.Fragment key="foo"><div>1</div><span>foo</span></Inferno.Fragment>')).to.eql('createFragment([createVNode(1, "div", null, "1", 16), createVNode(1, "span", null, "foo", 16)], 4, "foo");');
+          expect(transform('<Inferno.Fragment key="foo"><div>1</div><span>foo</span></Inferno.Fragment>')).to.eql('newFragment(260, [newVNode(3, "div", null, "1"), newVNode(3, "span", null, "foo")], "foo");');
         });
 
         it('Should ignore all other props', function () {
-          expect(transform('<Inferno.Fragment abc="foobar" id="test" key="foo"><div>1</div><span>foo</span></Inferno.Fragment>')).to.eql('createFragment([createVNode(1, "div", null, "1", 16), createVNode(1, "span", null, "foo", 16)], 4, "foo");');
+          expect(transform('<Inferno.Fragment abc="foobar" id="test" key="foo"><div>1</div><span>foo</span></Inferno.Fragment>')).to.eql('newFragment(260, [newVNode(3, "div", null, "1"), newVNode(3, "span", null, "foo")], "foo");');
         });
 
         // Optimization flags
         it('Should createFragment non keyed children', function () {
-          expect(transform('<Inferno.Fragment key="foo" $HasKeyedChildren>{magic}</Inferno.Fragment>')).to.eql('createFragment(magic, 8, "foo");');
+          expect(transform('<Inferno.Fragment key="foo" $HasKeyedChildren>{magic}</Inferno.Fragment>')).to.eql('newFragment(288, magic, "foo");');
         });
 
         it('Should createFragment non keyed children', function () {
-          expect(transform('<Inferno.Fragment key="foo" $HasNonKeyedChildren>{magic}</Inferno.Fragment>')).to.eql('createFragment(magic, 4, "foo");');
+          expect(transform('<Inferno.Fragment key="foo" $HasNonKeyedChildren>{magic}</Inferno.Fragment>')).to.eql('newFragment(260, magic, "foo");');
         });
       });
 
       describe('React.Fragment', function () {
         it('Should createFragment', function () {
-          expect(transform('<React.Fragment>Test</React.Fragment>')).to.eql('createFragment([createTextVNode("Test")], 4);');
+          expect(transform('<React.Fragment>Test</React.Fragment>')).to.eql('newFragment(260, [newTextVNode("Test")]);');
         });
 
         it('Should createFragment dynamic children', function () {
-          expect(transform('<React.Fragment>{dynamic}</React.Fragment>')).to.eql('createFragment(dynamic, 0);');
+          expect(transform('<React.Fragment>{dynamic}</React.Fragment>')).to.eql('newFragment(256, dynamic);');
         });
 
         it('Should createFragment keyed children', function () {
-          expect(transform('<React.Fragment><span key="ok">kk</span><div key="ok2">ok</div></React.Fragment>')).to.eql('createFragment([createVNode(1, "span", null, "kk", 16, null, "ok"), createVNode(1, "div", null, "ok", 16, null, "ok2")], 8);');
+          expect(transform('<React.Fragment><span key="ok">kk</span><div key="ok2">ok</div></React.Fragment>')).to.eql('newFragment(288, [newVNode(3, "span", null, "kk", null, "ok"), newVNode(3, "div", null, "ok", null, "ok2")]);');
         });
 
         it('Should createFragment non keyed children', function () {
-          expect(transform('<React.Fragment><div>1</div><span>foo</span></React.Fragment>')).to.eql('createFragment([createVNode(1, "div", null, "1", 16), createVNode(1, "span", null, "foo", 16)], 4);');
+          expect(transform('<React.Fragment><div>1</div><span>foo</span></React.Fragment>')).to.eql('newFragment(260, [newVNode(3, "div", null, "1"), newVNode(3, "span", null, "foo")]);');
         });
 
         // Long syntax specials
         it('Should createFragment non keyed children', function () {
-          expect(transform('<React.Fragment key="foo"><div>1</div><span>foo</span></React.Fragment>')).to.eql('createFragment([createVNode(1, "div", null, "1", 16), createVNode(1, "span", null, "foo", 16)], 4, "foo");');
+          expect(transform('<React.Fragment key="foo"><div>1</div><span>foo</span></React.Fragment>')).to.eql('newFragment(260, [newVNode(3, "div", null, "1"), newVNode(3, "span", null, "foo")], "foo");');
         });
 
         it('Should ignore all other props', function () {
-          expect(transform('<React.Fragment abc="foobar" id="test" key="foo"><div>1</div><span>foo</span></React.Fragment>')).to.eql('createFragment([createVNode(1, "div", null, "1", 16), createVNode(1, "span", null, "foo", 16)], 4, "foo");');
+          expect(transform('<React.Fragment abc="foobar" id="test" key="foo"><div>1</div><span>foo</span></React.Fragment>')).to.eql('newFragment(260, [newVNode(3, "div", null, "1"), newVNode(3, "span", null, "foo")], "foo");');
         });
 
         // Optimization flags
         it('Should createFragment non keyed children', function () {
-          expect(transform('<React.Fragment key="foo" $HasKeyedChildren>{magic}</React.Fragment>')).to.eql('createFragment(magic, 8, "foo");');
+          expect(transform('<React.Fragment key="foo" $HasKeyedChildren>{magic}</React.Fragment>')).to.eql('newFragment(288, magic, "foo");');
         });
 
         it('Should createFragment non keyed children', function () {
-          expect(transform('<React.Fragment key="foo" $HasNonKeyedChildren>{magic}</React.Fragment>')).to.eql('createFragment(magic, 4, "foo");');
+          expect(transform('<React.Fragment key="foo" $HasNonKeyedChildren>{magic}</React.Fragment>')).to.eql('newFragment(260, magic, "foo");');
         });
       });
     });

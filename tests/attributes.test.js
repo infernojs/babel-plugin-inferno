@@ -11,97 +11,97 @@ var stripInfernoImport = helpers.stripInfernoImport;
 describe('Attributes', function () {
   describe('verbatim attributes', function () {
     it('Should keep data- and aria- attributes', function () {
-      expect(transform('<div data-foo="1" aria-label="x" />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "data-foo": "1",\n  "aria-label": "x"\n});');
+      expect(transform('<div data-foo="1" aria-label="x" />')).to.equal('newVNode(17, "div", null, null, {\n  "data-foo": "1",\n  "aria-label": "x"\n});');
     });
 
     it('Should keep multi-hyphen data attributes', function () {
-      expect(transform('<div data-foo-bar={x} />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "data-foo-bar": x\n});');
+      expect(transform('<div data-foo-bar={x} />')).to.equal('newVNode(17, "div", null, null, {\n  "data-foo-bar": x\n});');
     });
 
     it('Should keep the casing of data attributes', function () {
-      expect(transform('<div data-fooBar="true" aria="hello" on="tap:x" oncustomevent={f} />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "data-fooBar": "true",\n  "aria": "hello",\n  "on": "tap:x",\n  "oncustomevent": f\n});');
+      expect(transform('<div data-fooBar="true" aria="hello" on="tap:x" oncustomevent={f} />')).to.equal('newVNode(17, "div", null, null, {\n  "data-fooBar": "true",\n  "aria": "hello",\n  "on": "tap:x",\n  "oncustomevent": f\n});');
     });
 
     it('Should keep namespaced attributes', function () {
-      expect(transform('<div xml:lang="en" />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "xml:lang": "en"\n});');
+      expect(transform('<div xml:lang="en" />')).to.equal('newVNode(17, "div", null, null, {\n  "xml:lang": "en"\n});');
     });
 
     it('Should keep namespaced attributes with hyphens', function () {
-      expect(transform('<div foo:bar-baz="1" />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "foo:bar-baz": "1"\n});');
+      expect(transform('<div foo:bar-baz="1" />')).to.equal('newVNode(17, "div", null, null, {\n  "foo:bar-baz": "1"\n});');
     });
 
     it('Should keep xmlns:xlink on svg', function () {
-      expect(transform('<svg viewBox="0 0 10 10" xmlns:xlink="http://www.w3.org/1999/xlink"><g><path d="M0"/></g></svg>')).to.equal('createVNode(32, "svg", null, createVNode(32, "g", null, createVNode(32, "path", null, null, 1, {\n  "d": "M0"\n}), 2), 2, {\n  "viewBox": "0 0 10 10",\n  "xmlns:xlink": "http://www.w3.org/1999/xlink"\n});');
+      expect(transform('<svg viewBox="0 0 10 10" xmlns:xlink="http://www.w3.org/1999/xlink"><g><path d="M0"/></g></svg>')).to.equal('newVNode(72, "svg", null, newVNode(72, "g", null, newVNode(80, "path", null, null, {\n  "d": "M0"\n})), {\n  "viewBox": "0 0 10 10",\n  "xmlns:xlink": "http://www.w3.org/1999/xlink"\n});');
     });
 
     it('Should keep an uppercase CHILDREN attribute as a prop', function () {
-      expect(transform('<div CHILDREN="5" />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "CHILDREN": "5"\n});');
+      expect(transform('<div CHILDREN="5" />')).to.equal('newVNode(17, "div", null, null, {\n  "CHILDREN": "5"\n});');
     });
 
     it('Should keep the is attribute next to mapped attributes', function () {
-      expect(transform('<div is="custom-element" htmlFor="x" className="y" />')).to.equal('createVNode(1, "div", "y", null, 1, {\n  "is": "custom-element",\n  "for": "x"\n});');
+      expect(transform('<div is="custom-element" htmlFor="x" className="y" />')).to.equal('newVNode(17, "div", "y", null, {\n  "is": "custom-element",\n  "for": "x"\n});');
     });
   });
 
   describe('reserved words and hyphens as names', function () {
     it('Should quote reserved words and hyphenated names on components', function () {
-      expect(transform('<F aaa new const var default foo-bar/>')).to.equal('createComponentVNode(2, F, {\n  "aaa": true,\n  "new": true,\n  "const": true,\n  "var": true,\n  "default": true,\n  "foo-bar": true\n});');
+      expect(transform('<F aaa new const var default foo-bar/>')).to.equal('newComponentVNode(0, F, {\n  "aaa": true,\n  "new": true,\n  "const": true,\n  "var": true,\n  "default": true,\n  "foo-bar": true\n});');
     });
 
     it('Should quote reserved words on elements', function () {
-      expect(transform('<div new const="1" />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "new": true,\n  "const": "1"\n});');
+      expect(transform('<div new const="1" />')).to.equal('newVNode(17, "div", null, null, {\n  "new": true,\n  "const": "1"\n});');
     });
   });
 
   describe('values', function () {
     it('Should compile valueless attributes to true', function () {
-      expect(transform('<input value={1} checked={c} defaultValue="x" defaultChecked />')).to.equal('createVNode(64, "input", null, null, 1, {\n  "value": 1,\n  "checked": c,\n  "defaultValue": "x",\n  "defaultChecked": true\n});');
+      expect(transform('<input value={1} checked={c} defaultValue="x" defaultChecked />')).to.equal('newVNode(528, "input", null, null, {\n  "value": 1,\n  "checked": c,\n  "defaultValue": "x",\n  "defaultChecked": true\n});');
     });
 
     it('Should keep a style object', function () {
-      expect(transform('<div style={{color: "red"}} />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "style": {\n    color: "red"\n  }\n});');
+      expect(transform('<div style={{color: "red"}} />')).to.equal('newVNode(17, "div", null, null, {\n  "style": {\n    color: "red"\n  }\n});');
     });
 
     it('Should keep a style string', function () {
-      expect(transform('<div style="color: red" />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "style": "color: red"\n});');
+      expect(transform('<div style="color: red" />')).to.equal('newVNode(17, "div", null, null, {\n  "style": "color: red"\n});');
     });
 
     it('Should keep custom properties in a style object', function () {
-      expect(transform('<div style={{"--foo": 5}} />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "style": {\n    "--foo": 5\n  }\n});');
+      expect(transform('<div style={{"--foo": 5}} />')).to.equal('newVNode(17, "div", null, null, {\n  "style": {\n    "--foo": 5\n  }\n});');
     });
 
     it('Should keep dangerouslySetInnerHTML', function () {
-      expect(transform('<div dangerouslySetInnerHTML={{__html: x}} />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "dangerouslySetInnerHTML": {\n    __html: x\n  }\n});');
+      expect(transform('<div dangerouslySetInnerHTML={{__html: x}} />')).to.equal('newVNode(17, "div", null, null, {\n  "dangerouslySetInnerHTML": {\n    __html: x\n  }\n});');
     });
 
     it('Should emit both dangerouslySetInnerHTML and children', function () {
-      expect(transform('<div dangerouslySetInnerHTML={{__html: "abcdef"}}>ghjkl</div>')).to.equal('createVNode(1, "div", null, "ghjkl", 16, {\n  "dangerouslySetInnerHTML": {\n    __html: "abcdef"\n  }\n});');
+      expect(transform('<div dangerouslySetInnerHTML={{__html: "abcdef"}}>ghjkl</div>')).to.equal('newVNode(3, "div", null, "ghjkl", {\n  "dangerouslySetInnerHTML": {\n    __html: "abcdef"\n  }\n});');
     });
 
     it('Should keep dangerouslySetInnerHTML on a void element', function () {
-      expect(transform('<input dangerouslySetInnerHTML={{__html: "content"}} />')).to.equal('createVNode(64, "input", null, null, 1, {\n  "dangerouslySetInnerHTML": {\n    __html: "content"\n  }\n});');
+      expect(transform('<input dangerouslySetInnerHTML={{__html: "content"}} />')).to.equal('newVNode(528, "input", null, null, {\n  "dangerouslySetInnerHTML": {\n    __html: "content"\n  }\n});');
     });
   });
 
   describe('className and class', function () {
     it('Should pass an empty className', function () {
-      expect(transform('<div className="" />')).to.equal('createVNode(1, "div", "");');
+      expect(transform('<div className="" />')).to.equal('newVNode(17, "div", "");');
     });
 
     it('Should pass an undefined className', function () {
-      expect(transform('<div className={undefined} />')).to.equal('createVNode(1, "div", undefined);');
+      expect(transform('<div className={undefined} />')).to.equal('newVNode(17, "div", undefined);');
     });
 
     it('Should omit a null className', function () {
-      expect(transform('<div className={null} />')).to.equal('createVNode(1, "div", null);');
+      expect(transform('<div className={null} />')).to.equal('newVNode(17, "div");');
     });
 
     it('Should keep className and class as props on components', function () {
-      expect(transform('<Foo className="x" class="y" />')).to.equal('createComponentVNode(2, Foo, {\n  "className": "x",\n  "class": "y"\n});');
+      expect(transform('<Foo className="x" class="y" />')).to.equal('newComponentVNode(0, Foo, {\n  "className": "x",\n  "class": "y"\n});');
     });
 
     it('Should use class on svg elements', function () {
-      expect(transform('<svg class="a"><g className="b"/></svg>')).to.equal('createVNode(32, "svg", "a", createVNode(32, "g", "b"), 2);');
+      expect(transform('<svg class="a"><g className="b"/></svg>')).to.equal('newVNode(72, "svg", "a", newVNode(80, "g", "b"));');
     });
   });
 
@@ -173,23 +173,23 @@ describe('Attributes', function () {
     });
 
     it('Should allow htmlFor together with for on components', function () {
-      expect(transform('<Foo htmlFor="a" for="b" />')).to.equal('createComponentVNode(2, Foo, {\n  "htmlFor": "a",\n  "for": "b"\n});');
+      expect(transform('<Foo htmlFor="a" for="b" />')).to.equal('newComponentVNode(0, Foo, {\n  "htmlFor": "a",\n  "for": "b"\n});');
     });
 
     it('Should allow a prop next to a spread containing the same prop', function () {
-      expect(transform('<p {...{prop}} prop />')).to.equal('normalizeProps(createVNode(1, "p", null, null, 1, {\n  ...{\n    prop\n  },\n  "prop": true\n}));');
+      expect(transform('<p {...{prop}} prop />')).to.equal('normalizeProps(newVNode(17, "p", null, null, {\n  ...{\n    prop\n  },\n  "prop": true\n}));');
     });
 
     it('Should evaluate a component children prop replaced by JSX children', function () {
-      expect(transform('<Foo children={f()}>2</Foo>')).to.equal('createComponentVNode(2, Foo, {\n  children: (f(), "2")\n});');
+      expect(transform('<Foo children={f()}>2</Foo>')).to.equal('newComponentVNode(0, Foo, {\n  children: (f(), "2")\n});');
     });
 
     it('Should evaluate an element children prop replaced by JSX children', function () {
-      expect(transform('<div children={f()}>x</div>')).to.equal('createVNode(1, "div", null, (f(), "x"), 16);');
+      expect(transform('<div children={f()}>x</div>')).to.equal('newVNode(3, "div", null, (f(), "x"));');
     });
 
     it('Should evaluate a children prop replaced by several JSX children', function () {
-      expect(transform('<div children={f()}><a/><b/></div>')).to.equal('createVNode(1, "div", null, (f(), [createVNode(1, "a"), createVNode(1, "b")]), 4);');
+      expect(transform('<div children={f()}><a/><b/></div>')).to.equal('newVNode(5, "div", null, (f(), [newVNode(17, "a"), newVNode(17, "b")]));');
     });
 
     it('Should reject duplicate children props on components', function () {
@@ -265,11 +265,11 @@ describe('Attributes', function () {
     });
 
     it('Should drop replaced values without side effects', function () {
-      expect(transform('<div a children={["a", {b: 1}, () => x, -1]}>c</div>')).to.equal('createVNode(1, "div", null, "c", 16, {\n  "a": true\n});');
+      expect(transform('<div a children={["a", {b: 1}, () => x, -1]}>c</div>')).to.equal('newVNode(3, "div", null, "c", {\n  "a": true\n});');
     });
 
     it('Should keep replaced values that may have side effects', function () {
-      expect(transform('<div children={[...a]}>c</div>')).to.equal('createVNode(1, "div", null, ([...a], "c"), 16);');
+      expect(transform('<div children={[...a]}>c</div>')).to.equal('newVNode(3, "div", null, ([...a], "c"));');
     });
 
     it('Should reject duplicate props on generic components', function () {
@@ -281,23 +281,23 @@ describe('Attributes', function () {
 
   describe('JSX as attribute values', function () {
     it('Should compile an element attribute value without braces on an element', function () {
-      expect(transform('<div attr=<span/> />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "attr": createVNode(1, "span")\n});');
+      expect(transform('<div attr=<span/> />')).to.equal('newVNode(17, "div", null, null, {\n  "attr": newVNode(17, "span")\n});');
     });
 
     it('Should compile an element attribute value without braces on a component', function () {
-      expect(transform('<Foo attr=<span/> />')).to.equal('createComponentVNode(2, Foo, {\n  "attr": createVNode(1, "span")\n});');
+      expect(transform('<Foo attr=<span/> />')).to.equal('newComponentVNode(0, Foo, {\n  "attr": newVNode(17, "span")\n});');
     });
 
     it('Should compile a fragment attribute value', function () {
-      expect(transform('<Foo value={<>{a}</>} />')).to.equal('createComponentVNode(2, Foo, {\n  "value": createFragment(a, 0)\n});');
+      expect(transform('<Foo value={<>{a}</>} />')).to.equal('newComponentVNode(0, Foo, {\n  "value": newFragment(256, a)\n});');
     });
 
     it('Should compile JSX in a conditional attribute value', function () {
-      expect(transform('<a b={x ? <c /> : <d />} />')).to.equal('createVNode(1, "a", null, null, 1, {\n  "b": x ? createVNode(1, "c") : createVNode(1, "d")\n});');
+      expect(transform('<a b={x ? <c /> : <d />} />')).to.equal('newVNode(17, "a", null, null, {\n  "b": x ? newVNode(17, "c") : newVNode(17, "d")\n});');
     });
 
     it('Should compile render props and element props', function () {
-      expect(transform('<Foo render={() => <div>{x}</div>} icon={<Icon/>} />')).to.equal('createComponentVNode(2, Foo, {\n  "render": () => createVNode(1, "div", null, x, 0),\n  "icon": createComponentVNode(2, Icon)\n});');
+      expect(transform('<Foo render={() => <div>{x}</div>} icon={<Icon/>} />')).to.equal('newComponentVNode(0, Foo, {\n  "render": () => newVNode(1, "div", null, x),\n  "icon": newComponentVNode(0, Icon)\n});');
     });
   });
 
@@ -305,90 +305,90 @@ describe('Attributes', function () {
     it('Should keep multi-line expression attributes with comments', function () {
       var code = transform('<div attr2={\n  "foo" + "bar" +\n\n  "baz" + "bug"\n  // Extra line here.\n} />');
 
-      expect(code).to.equal('createVNode(1, "div", null, null, 1, {\n  "attr2": "foo" + "bar" + "baz" + "bug"\n  // Extra line here.\n});');
+      expect(code).to.equal('newVNode(17, "div", null, null, {\n  "attr2": "foo" + "bar" + "baz" + "bug"\n  // Extra line here.\n});');
       expectValidJS(code);
     });
 
     it('Should allow spaces around =', function () {
-      expect(transform('<Trans b = "2" />')).to.equal('createComponentVNode(2, Trans, {\n  "b": "2"\n});');
+      expect(transform('<Trans b = "2" />')).to.equal('newComponentVNode(0, Trans, {\n  "b": "2"\n});');
     });
 
     it('Should allow a line break before =', function () {
-      expect(transform('<Foo y\n={2 } z />')).to.equal('createComponentVNode(2, Foo, {\n  "y": 2,\n  "z": true\n});');
+      expect(transform('<Foo y\n={2 } z />')).to.equal('newComponentVNode(0, Foo, {\n  "y": 2,\n  "z": true\n});');
     });
   });
 
   describe('mapping tables only apply to elements', function () {
     it('Should not map htmlFor, acceptCharset or colSpan on components', function () {
-      expect(transform('<Foo htmlFor="x" acceptCharset="y" colSpan={2} />')).to.equal('createComponentVNode(2, Foo, {\n  "htmlFor": "x",\n  "acceptCharset": "y",\n  "colSpan": 2\n});');
+      expect(transform('<Foo htmlFor="x" acceptCharset="y" colSpan={2} />')).to.equal('newComponentVNode(0, Foo, {\n  "htmlFor": "x",\n  "acceptCharset": "y",\n  "colSpan": 2\n});');
     });
 
     it('Should not map onDoubleClick on components', function () {
-      expect(transform('<Foo onDoubleClick={f} />')).to.equal('createComponentVNode(2, Foo, {\n  "onDoubleClick": f\n});');
+      expect(transform('<Foo onDoubleClick={f} />')).to.equal('newComponentVNode(0, Foo, {\n  "onDoubleClick": f\n});');
     });
   });
 
   describe('mapped attributes', function () {
     it('Should map httpEquiv and charSet', function () {
-      expect(transform('<meta httpEquiv="refresh" charSet="utf-8" />')).to.equal('createVNode(1, "meta", null, null, 1, {\n  "http-equiv": "refresh",\n  "charset": "utf-8"\n});');
+      expect(transform('<meta httpEquiv="refresh" charSet="utf-8" />')).to.equal('newVNode(17, "meta", null, null, {\n  "http-equiv": "refresh",\n  "charset": "utf-8"\n});');
     });
 
     it('Should map textAnchor on svg text', function () {
-      expect(transform('<svg><text textAnchor="middle" /></svg>')).to.equal('createVNode(32, "svg", null, createVNode(32, "text", null, null, 1, {\n  "text-anchor": "middle"\n}), 2);');
+      expect(transform('<svg><text textAnchor="middle" /></svg>')).to.equal('newVNode(72, "svg", null, newVNode(80, "text", null, null, {\n  "text-anchor": "middle"\n}));');
     });
 
     it('Should map transformOrigin', function () {
-      expect(transform('<div transformOrigin="0 0" />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "transform-origin": "0 0"\n});');
+      expect(transform('<div transformOrigin="0 0" />')).to.equal('newVNode(17, "div", null, null, {\n  "transform-origin": "0 0"\n});');
     });
 
     it('Should lowercase tabIndex, readOnly and maxLength', function () {
-      expect(transform('<div tabIndex="1" readOnly maxLength={3} />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "tabindex": "1",\n  "readonly": true,\n  "maxlength": 3\n});');
+      expect(transform('<div tabIndex="1" readOnly maxLength={3} />')).to.equal('newVNode(17, "div", null, null, {\n  "tabindex": "1",\n  "readonly": true,\n  "maxlength": 3\n});');
     });
 
     it('Should map onDoubleClick and keep ondblclick', function () {
-      expect(transform('<div onDoubleClick={f} ondblclick={g} />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "onDblClick": f,\n  "ondblclick": g\n});');
+      expect(transform('<div onDoubleClick={f} ondblclick={g} />')).to.equal('newVNode(17, "div", null, null, {\n  "onDblClick": f,\n  "ondblclick": g\n});');
     });
 
     it('Should map accentHeight on font-face', function () {
-      expect(transform('<font-face accentHeight={10} />')).to.equal('createVNode(32, "font-face", null, null, 1, {\n  "accent-height": 10\n});');
+      expect(transform('<font-face accentHeight={10} />')).to.equal('newVNode(80, "font-face", null, null, {\n  "accent-height": 10\n});');
     });
   });
 
   describe('event names', function () {
     it('Should keep capture event names', function () {
-      expect(transform('<div onClickCapture={f} onGotPointerCaptureCapture={g} onTouchMoveCapture={h} />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "onClickCapture": f,\n  "onGotPointerCaptureCapture": g,\n  "onTouchMoveCapture": h\n});');
+      expect(transform('<div onClickCapture={f} onGotPointerCaptureCapture={g} onTouchMoveCapture={h} />')).to.equal('newVNode(17, "div", null, null, {\n  "onClickCapture": f,\n  "onGotPointerCaptureCapture": g,\n  "onTouchMoveCapture": h\n});');
     });
 
     it('Should keep lowercase and custom event names', function () {
-      expect(transform('<div onclick={f} onanimationend={g} onOtherClick={h} />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "onclick": f,\n  "onanimationend": g,\n  "onOtherClick": h\n});');
+      expect(transform('<div onclick={f} onanimationend={g} onOtherClick={h} />')).to.equal('newVNode(17, "div", null, null, {\n  "onclick": f,\n  "onanimationend": g,\n  "onOtherClick": h\n});');
     });
 
     it('Should keep newer event names', function () {
-      expect(transform('<div onScrollEnd={a} onBeforeToggle={b} onCommand={c} onFormData={d} onAuxClick={e} />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "onScrollEnd": a,\n  "onBeforeToggle": b,\n  "onCommand": c,\n  "onFormData": d,\n  "onAuxClick": e\n});');
+      expect(transform('<div onScrollEnd={a} onBeforeToggle={b} onCommand={c} onFormData={d} onAuxClick={e} />')).to.equal('newVNode(17, "div", null, null, {\n  "onScrollEnd": a,\n  "onBeforeToggle": b,\n  "onCommand": c,\n  "onFormData": d,\n  "onAuxClick": e\n});');
     });
 
     it('Should keep onChange and onInput together', function () {
-      expect(transform('<input onChange={f} onInput={g} />')).to.equal('createVNode(64, "input", null, null, 1, {\n  "onChange": f,\n  "onInput": g\n});');
+      expect(transform('<input onChange={f} onInput={g} />')).to.equal('newVNode(528, "input", null, null, {\n  "onChange": f,\n  "onInput": g\n});');
     });
 
     it('Should keep focus events and false handlers', function () {
-      expect(transform('<div onClick={false} onFocusIn={h} onFocusOut={i} />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "onClick": false,\n  "onFocusIn": h,\n  "onFocusOut": i\n});');
+      expect(transform('<div onClick={false} onFocusIn={h} onFocusOut={i} />')).to.equal('newVNode(17, "div", null, null, {\n  "onClick": false,\n  "onFocusIn": h,\n  "onFocusOut": i\n});');
     });
 
     it('Should keep a string event handler on an element', function () {
-      expect(transform('<div onclick="a" />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "onclick": "a"\n});');
+      expect(transform('<div onclick="a" />')).to.equal('newVNode(17, "div", null, null, {\n  "onclick": "a"\n});');
     });
   });
 
   describe('__proto__ prop', function () {
     it('Should emit __proto__ as a computed key on components', function () {
-      expect(transform('<Foo __proto__={x} />')).to.equal('createComponentVNode(2, Foo, {\n  ["__proto__"]: x\n});');
+      expect(transform('<Foo __proto__={x} />')).to.equal('newComponentVNode(0, Foo, {\n  ["__proto__"]: x\n});');
     });
 
     it('Should give the component an own __proto__ prop', function () {
       var code = transform('<Foo __proto__={x} />');
       var x = {marker: true};
-      var props = new Function('createComponentVNode', 'Foo', 'x', 'return ' + code)(function (flags, type, p) {
+      var props = new Function('newComponentVNode', 'Foo', 'x', 'return ' + code)(function (flags, type, p) {
         return p;
       }, null, x);
 
@@ -397,70 +397,70 @@ describe('Attributes', function () {
     });
 
     it('Should emit __proto__ as a computed key on elements', function () {
-      expect(transform('<div __proto__={x} />')).to.equal('createVNode(1, "div", null, null, 1, {\n  ["__proto__"]: x\n});');
+      expect(transform('<div __proto__={x} />')).to.equal('newVNode(17, "div", null, null, {\n  ["__proto__"]: x\n});');
     });
 
     it('Should keep __proto__ next to other props (babel proto-in-jsx-attribute)', function () {
-      expect(transform('<p __proto__={null} class="bar" />')).to.equal('createVNode(1, "p", "bar", null, 1, {\n  ["__proto__"]: null\n});');
+      expect(transform('<p __proto__={null} class="bar" />')).to.equal('newVNode(17, "p", "bar", null, {\n  ["__proto__"]: null\n});');
     });
 
     it('Should emit __proto__ as a computed key on generic components', function () {
-      expect(stripInfernoImport(transformTSX('<Foo<Bar> __proto__={x} />'))).to.equal('createComponentVNode(2, Foo, {\n  ["__proto__"]: x\n});');
+      expect(stripInfernoImport(transformTSX('<Foo<Bar> __proto__={x} />'))).to.equal('newComponentVNode(0, Foo, {\n  ["__proto__"]: x\n});');
     });
   });
 
   describe('Object.prototype names as attributes', function () {
     it('Should pass constructor as a prop', function () {
-      expect(transform('<div constructor="foo" />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "constructor": "foo"\n});');
+      expect(transform('<div constructor="foo" />')).to.equal('newVNode(17, "div", null, null, {\n  "constructor": "foo"\n});');
     });
 
     it('Should pass toString and hasOwnProperty as props', function () {
-      expect(transform('<div toString="x" hasOwnProperty="y" />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "toString": "x",\n  "hasOwnProperty": "y"\n});');
+      expect(transform('<div toString="x" hasOwnProperty="y" />')).to.equal('newVNode(17, "div", null, null, {\n  "toString": "x",\n  "hasOwnProperty": "y"\n});');
     });
 
     it('Should pass valueOf as a prop', function () {
-      expect(transform('<div valueOf={v} />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "valueOf": v\n});');
+      expect(transform('<div valueOf={v} />')).to.equal('newVNode(17, "div", null, null, {\n  "valueOf": v\n});');
     });
 
     it('Should pass isPrototypeOf and propertyIsEnumerable as props', function () {
-      expect(transform('<div isPrototypeOf={v} propertyIsEnumerable={w} />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "isPrototypeOf": v,\n  "propertyIsEnumerable": w\n});');
+      expect(transform('<div isPrototypeOf={v} propertyIsEnumerable={w} />')).to.equal('newVNode(17, "div", null, null, {\n  "isPrototypeOf": v,\n  "propertyIsEnumerable": w\n});');
     });
 
     it('Should pass constructor as a prop on svg elements', function () {
-      expect(transform('<rect constructor="x" />')).to.equal('createVNode(32, "rect", null, null, 1, {\n  "constructor": "x"\n});');
+      expect(transform('<rect constructor="x" />')).to.equal('newVNode(80, "rect", null, null, {\n  "constructor": "x"\n});');
     });
   });
 
   describe('TSX', function () {
     it('Should strip type assertions from attribute values', function () {
-      expect(stripInfernoImport(transformTSX('<Foo value={x as number} other={y!} third={z satisfies string} />'))).to.equal('createComponentVNode(2, Foo, {\n  "value": x,\n  "other": y,\n  "third": z\n});');
+      expect(stripInfernoImport(transformTSX('<Foo value={x as number} other={y!} third={z satisfies string} />'))).to.equal('newComponentVNode(0, Foo, {\n  "value": x,\n  "other": y,\n  "third": z\n});');
     });
 
     it('Should pass a className with a type assertion', function () {
-      expect(stripInfernoImport(transformTSX('<div className={cls as string} style={{color: "red"} as const} />'))).to.equal('createVNode(1, "div", cls, null, 1, {\n  "style": {\n    color: "red"\n  }\n});');
+      expect(stripInfernoImport(transformTSX('<div className={cls as string} style={{color: "red"} as const} />'))).to.equal('newVNode(17, "div", cls, null, {\n  "style": {\n    color: "red"\n  }\n});');
     });
 
     it('Should keep className, htmlFor and onDoubleClick as props on a generic component', function () {
-      expect(stripInfernoImport(transformTSX('<Foo<string> className="x" htmlFor="y" onDoubleClick={f} />'))).to.equal('createComponentVNode(2, Foo, {\n  "className": "x",\n  "htmlFor": "y",\n  "onDoubleClick": f\n});');
+      expect(stripInfernoImport(transformTSX('<Foo<string> className="x" htmlFor="y" onDoubleClick={f} />'))).to.equal('newComponentVNode(0, Foo, {\n  "className": "x",\n  "htmlFor": "y",\n  "onDoubleClick": f\n});');
     });
   });
 
   describe('current behaviour (questionable)', function () {
     it('Should pass true as className for a valueless className', function () {
-      expect(transform('<div className />')).to.equal('createVNode(1, "div", true);');
+      expect(transform('<div className />')).to.equal('newVNode(17, "div", true);');
     });
 
     // Babel keeps them as leading comments of the props
     it('Should drop comments between attributes', function () {
-      expect(transform('<div\n  /* a multi-line\n     comment */\n  attr1="foo">\n  <span // a double-slash comment\n    attr2="bar"\n  />\n</div>')).to.equal('createVNode(1, "div", null, createVNode(1, "span", null, null, 1, {\n  "attr2": "bar"\n}), 2, {\n  "attr1": "foo"\n});');
+      expect(transform('<div\n  /* a multi-line\n     comment */\n  attr1="foo">\n  <span // a double-slash comment\n    attr2="bar"\n  />\n</div>')).to.equal('newVNode(9, "div", null, newVNode(17, "span", null, null, {\n  "attr2": "bar"\n}), {\n  "attr1": "foo"\n});');
     });
 
     // ts-plugin-inferno rejects these deprecated props, this plugin has passed them through since 2018
     it('Should pass the deprecated noNormalize, $NoNormalize, hasKeyedChildren and hasNonKeyedChildren props through', function () {
-      expect(transform('<div noNormalize />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "noNormalize": true\n});');
-      expect(transform('<div $NoNormalize />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "$NoNormalize": true\n});');
-      expect(transform('<div hasKeyedChildren />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "hasKeyedChildren": true\n});');
-      expect(transform('<div hasNonKeyedChildren />')).to.equal('createVNode(1, "div", null, null, 1, {\n  "hasNonKeyedChildren": true\n});');
+      expect(transform('<div noNormalize />')).to.equal('newVNode(17, "div", null, null, {\n  "noNormalize": true\n});');
+      expect(transform('<div $NoNormalize />')).to.equal('newVNode(17, "div", null, null, {\n  "$NoNormalize": true\n});');
+      expect(transform('<div hasKeyedChildren />')).to.equal('newVNode(17, "div", null, null, {\n  "hasKeyedChildren": true\n});');
+      expect(transform('<div hasNonKeyedChildren />')).to.equal('newVNode(17, "div", null, null, {\n  "hasNonKeyedChildren": true\n});');
     });
   });
 });

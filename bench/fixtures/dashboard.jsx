@@ -176,7 +176,7 @@ export class Dashboard extends Component {
             </button>
           </div>
         </header>
-        <section className="summary" $ReCreate>
+        <section className="summary" key={summary.updatedAt}>
           {this.renderSummary(summary)}
         </section>
         {error ? (
